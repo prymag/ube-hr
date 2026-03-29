@@ -12,3 +12,7 @@ export type {
 
 export { UsersService } from './users.service';
 export type { SafeUser } from './users.service';
+
+export { UsersController } from './users.controller';
+
+export { createUsersRouter } from './users.routes';
