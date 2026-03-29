@@ -91,10 +91,10 @@ Brief description of what was completed.
 ## Usage Example
 
 ```bash
-@feature/implementation.md based on @specs/{feature}/tasks.md 
+@prompts/IMPLEMENT.md based on @specs/{feature}/tasks.md 
 ```
 
-* `@feature/tasks.md` → dynamic tasks input
+* `@specs/{feature}/tasks.md` → dynamic tasks input
 
 **Important:**
 

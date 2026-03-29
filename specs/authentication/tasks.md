@@ -26,7 +26,7 @@ This tasks list breaks down the authentication feature plan into executable task
 
 ## Phase 2: Backend Implementation
 
-### Task 3: Auth Repository Layer
+### Task 3: Auth Repository Layer (✅ DONE)
 - **Skills Required:** modular-architecture-mastery, typescript-type-system, testing-quality-assurance
 - Subtask 3.1: Create `modules/auth/auth.repository.ts` with base class (~10 min)
 - Subtask 3.2: Implement `findByEmail(email)` method (~5 min)
@@ -37,15 +37,15 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 3.7: Implement `findAll(filters, pagination)` method (~10 min)
 - Subtask 3.8: Write repository unit tests (~15 min)
 
-### Task 4: Auth Service Layer (Password & Token Management)
+### Task 4: Auth Service Layer (Password & Token Management) (✅ DONE)
 - **Skills Required:** security-secrets-management, typescript-type-system, testing-quality-assurance
-- Subtask 4.1: Create `modules/auth/auth.service.ts` with base class (~10 min)
-- Subtask 4.2: Implement `hashPassword(password)` using bcryptjs with salt rounds ≥ 10 (~10 min)
-- Subtask 4.3: Implement `comparePassword(plain, hash)` for verification (~5 min)
-- Subtask 4.4: Implement `generateTokens(user)` creating access & refresh JWTs (~15 min)
-- Subtask 4.5: Implement `verifyAccessToken(token)` JWT validation (~10 min)
-- Subtask 4.6: Implement `verifyRefreshToken(token)` JWT validation (~10 min)
-- Subtask 4.7: Write service unit tests for all token operations (~15 min)
+- Subtask 4.1: Create `modules/auth/auth.service.ts` with base class (~10 min) ✅
+- Subtask 4.2: Implement `hashPassword(password)` using bcryptjs with salt rounds ≥ 10 (~10 min) ✅
+- Subtask 4.3: Implement `comparePassword(plain, hash)` for verification (~5 min) ✅
+- Subtask 4.4: Implement `generateTokens(user)` creating access & refresh JWTs (~15 min) ✅
+- Subtask 4.5: Implement `verifyAccessToken(token)` JWT validation (~10 min) ✅
+- Subtask 4.6: Implement `verifyRefreshToken(token)` JWT validation (~10 min) ✅
+- Subtask 4.7: Write service unit tests for all token operations (~15 min) ✅
 
 ### Task 5: Auth Service Layer (Business Logic)
 - **Skills Required:** modular-architecture-mastery, testing-quality-assurance
