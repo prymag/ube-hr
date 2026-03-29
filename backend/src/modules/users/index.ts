@@ -9,3 +9,6 @@ export type {
   UsersUpdateInput,
   UsersFilters,
 } from './users.repository';
+
+export { UsersService } from './users.service';
+export type { SafeUser } from './users.service';
