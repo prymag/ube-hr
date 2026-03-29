@@ -141,24 +141,24 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 14.6: Create `modules/users/index.ts` to export module (~5 min) ✅
 - Subtask 14.7: Write route integration tests (~15 min) ✅
 
-### Task 15: Backend Integration & API Documentation
+### Task 15: Backend Integration & API Documentation (✅ DONE)
 - **Skills Required:** @.agents/skills/api-contract-design/SKILL.md @.agents/skills/documentation-maintenance/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
-- Subtask 15.1: Register auth and users modules in main Express app (~10 min)
-- Subtask 15.2: Test all authentication flows end-to-end (~20 min)
-- Subtask 15.3: Test all user management endpoints end-to-end (~20 min)
-- Subtask 15.4: Create OpenAPI/Swagger documentation for all endpoints (~20 min)
-- Subtask 15.5: Write developer setup guide for authentication (~15 min)
-- Subtask 15.6: Create troubleshooting guide with common issues (~15 min)
-- Subtask 15.7: Document token expiration and refresh strategy (~10 min)
+- Subtask 15.1: Register auth and users modules in main Express app (~10 min) ✅
+- Subtask 15.2: Test all authentication flows end-to-end (~20 min) ✅
+- Subtask 15.3: Test all user management endpoints end-to-end (~20 min) ✅
+- Subtask 15.4: Create OpenAPI/Swagger documentation for all endpoints (~20 min) ✅
+- Subtask 15.5: Write developer setup guide for authentication (~15 min) ✅
+- Subtask 15.6: Create troubleshooting guide with common issues (~15 min) ✅
+- Subtask 15.7: Document token expiration and refresh strategy (~10 min) ✅
 
-### Task 16: Backend Security Review & Testing
+### Task 16: Backend Security Review & Testing (✅ DONE)
 - **Skills Required:** @.agents/skills/security-secrets-management/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
-- Subtask 16.1: Run full test suite for all modules (~15 min)
-- Subtask 16.2: Review password hashing implementation (salt rounds, timing attacks) (~15 min)
-- Subtask 16.3: Review JWT secret generation and storage (~15 min)
-- Subtask 16.4: Test token expiration and refresh mechanisms (~15 min)
-- Subtask 16.5: Perform security review for sensitive data handling (~15 min)
-- Subtask 16.6: Add rate limiting considerations documentation (~10 min)
+- Subtask 16.1: Run full test suite for all modules (~15 min) ✅
+- Subtask 16.2: Review password hashing implementation (salt rounds, timing attacks) (~15 min) ✅
+- Subtask 16.3: Review JWT secret generation and storage (~15 min) ✅
+- Subtask 16.4: Test token expiration and refresh mechanisms (~15 min) ✅
+- Subtask 16.5: Perform security review for sensitive data handling (~15 min) ✅
+- Subtask 16.6: Add rate limiting considerations documentation (~10 min) ✅
 
 ---
 
