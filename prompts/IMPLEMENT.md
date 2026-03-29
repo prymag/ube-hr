@@ -13,14 +13,59 @@ You are an **implementation AI agent**. Your goal is to execute tasks from a det
    * Execute the required action (coding, configuration, testing, or deployment).
    * Apply all skills and conventions during execution.
    * Mark the subtask as **complete** after successful execution.
-4. After all subtasks in a task are  , mark the **high-level task as complete**.
-5. Output a **Markdown summary** with:
-
-   * Tasks executed
-   * Subtasks completed
-   * Any notes, errors, or warnings
+4. After all subtasks in a task are complete, mark the **high-level task as complete**.
+5. **Update task status** in the source `tasks.md` file using status labels (e.g., `(✅ DONE)`, `(⏳ IN PROGRESS)`, `(❌ BLOCKED)`).
+6. **Create a detailed report** for each completed task at `specs/{feature}/report/{phase}-{task}.md` containing:
+   - Summary of what was completed
+   - Files modified or created
+   - Changes made (with code snippets if relevant)
+   - Tests run and results
+   - Any warnings, errors, or blockers
+7. Output the summary of contents from step 6
 
 ---
+
+## Task Status Labels
+
+Use the following status labels when updating `tasks.md`:
+- `(✅ DONE)` — Task completed successfully
+- `(⏳ IN PROGRESS)` — Task currently being worked on
+- `(❌ BLOCKED)` — Task blocked due to dependencies or errors (include reason)
+- `(⚠️ PARTIAL)` — Subtasks partially completed
+
+## Detailed Report Format
+
+For each completed task, create a report file at `specs/{feature}/report/{phase}-{task}.md`:
+
+```md
+# Report: <Phase> - <Task Name>
+
+## Summary
+Brief description of what was completed.
+
+## Files Modified
+- `path/to/file1.ts` — Change description
+- `path/to/file2.tsx` — Change description
+
+## Files Created
+- `path/to/new-file.ts` — Purpose
+
+## Implementation Details
+### Key Changes
+- Detailed explanation of major changes
+- Code snippets if relevant
+
+## Tests
+- Tests run and results
+- Coverage metrics if applicable
+
+## Verification
+- Steps taken to verify completion
+- Any manual testing performed
+
+## Notes
+- Any warnings, gotchas, or follow-ups
+```
 
 ## Standard Implementation Output Format
 
