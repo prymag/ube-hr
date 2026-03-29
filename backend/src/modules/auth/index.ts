@@ -18,3 +18,25 @@ export type {
   GeneratedTokens,
   LoginResult,
 } from './auth.service';
+
+export { AuthController } from './auth.controller';
+export type { AuthenticatedRequest } from './auth.controller';
+
+export {
+  loginSchema,
+  refreshTokenSchema,
+  createUserSchema,
+  updateUserSchema,
+  RoleEnum,
+} from './auth.validator';
+export type {
+  LoginInput,
+  RefreshTokenInput,
+  CreateUserInput as ValidatorCreateUserInput,
+  UpdateUserInput as ValidatorUpdateUserInput,
+  Role,
+} from './auth.validator';
+
+export { createAuthRouter } from './auth.routes';
+
+export { authenticate } from './authenticate.middleware';

@@ -11,17 +11,17 @@ You are a **task generation AI**. Your goal is to convert a **detailed plan** in
 3. For each high-level task, identify and list which **skills** (from the list below) should be used to complete the task. List these skills explicitly before breaking down subtasks.
 
    **Available Skills:**
-   - full-stack-code-generation
-   - modular-architecture-mastery
-   - api-contract-design
-   - testing-quality-assurance
-   - typescript-type-system
-   - documentation-maintenance
-   - security-secrets-management
-   - state-management-data-flow
-   - dependency-import-management
-   - tech-stack-reference
-   - feature-planning-coordination
+   - @.agents/skills/full-stack-code-generation/SKILL.md
+   - @.agents/skills/modular-architecture-mastery/SKILL.md
+   - @.agents/skills/api-contract-design/SKILL.md
+   - @.agents/skills/testing-quality-assurance/SKILL.md
+   - @.agents/skills/typescript-type-system/SKILL.md
+   - @.agents/skills/documentation-maintenance/SKILL.md
+   - @.agents/skills/security-secrets-management/SKILL.md
+   - @.agents/skills/state-management-data-flow/SKILL.md
+   - @.agents/skills/dependency-import-management/SKILL.md
+   - @.agents/skills/tech-stack-reference/SKILL.md
+   - @.agents/skills/feature-planning-coordination/SKILL.md
 4. Ask clarifying questions if any task or subtask is ambiguous.
 5. Ensure that **all subtasks are broken down into digestible steps (~5–15 minutes each)**.
 6. Output a **Markdown task list** in the format below, including the required skills for each high-level task.
@@ -36,11 +36,11 @@ You are a **task generation AI**. Your goal is to convert a **detailed plan** in
 ### Task List
 
 1. <High-Level Task 1>
-   - **Skills Required:** skill-1, skill-2, ...
+   - **Skills Required:** @.agents/skills/skill-1/SKILL.md @.agents/skills/skill-2/SKILL.md
    - Subtask 1.1 (~5-15 min)
    - Subtask 1.2 (~5-15 min)
 2. <High-Level Task 2>
-   - **Skills Required:** skill-3, skill-4, ...
+   - **Skills Required:** @.agents/skills/skill-3/SKILL.md @.agents/skills/skill-4/SKILL.md
    - Subtask 2.1 (~5-15 min)
    - Subtask 2.2 (~5-15 min)
 ...

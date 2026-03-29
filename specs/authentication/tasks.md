@@ -8,7 +8,7 @@ This tasks list breaks down the authentication feature plan into executable task
 ## Phase 1: Setup & Planning
 
 ### Task 1: Database Schema Design & Setup
-- **Skills Required:** typescript-type-system, modular-architecture-mastery, security-secrets-management
+- **Skills Required:** @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/modular-architecture-mastery/SKILL.md @.agents/skills/security-secrets-management/SKILL.md
 - Subtask 1.1: Create User model in Prisma schema (email, password hash, firstName, lastName, role, createdAt, updatedAt) (~10 min)
 - Subtask 1.2: Define Role enum (SYSTEM_ADMIN, ADMIN, USER) (~5 min)
 - Subtask 1.3: Create database migration file (~10 min)
@@ -16,7 +16,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 1.5: Write schema validation tests using Jest (~15 min)
 
 ### Task 2: Project Setup & Dependencies
-- **Skills Required:** tech-stack-reference, dependency-import-management
+- **Skills Required:** @.agents/skills/tech-stack-reference/SKILL.md @.agents/skills/dependency-import-management/SKILL.md
 - Subtask 2.1: Install npm packages (jsonwebtoken, bcryptjs, zod) (~5 min)
 - Subtask 2.2: Create `.env.example` template with JWT secrets placeholder (~5 min)
 - Subtask 2.3: Create auth module folder structure (`modules/auth/`) with subdirectories (~5 min)
@@ -27,7 +27,7 @@ This tasks list breaks down the authentication feature plan into executable task
 ## Phase 2: Backend Implementation
 
 ### Task 3: Auth Repository Layer (✅ DONE)
-- **Skills Required:** modular-architecture-mastery, typescript-type-system, testing-quality-assurance
+- **Skills Required:** @.agents/skills/modular-architecture-mastery/SKILL.md @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 3.1: Create `modules/auth/auth.repository.ts` with base class (~10 min)
 - Subtask 3.2: Implement `findByEmail(email)` method (~5 min)
 - Subtask 3.3: Implement `findById(id)` method (~5 min)
@@ -38,7 +38,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 3.8: Write repository unit tests (~15 min)
 
 ### Task 4: Auth Service Layer (Password & Token Management) (✅ DONE)
-- **Skills Required:** security-secrets-management, typescript-type-system, testing-quality-assurance
+- **Skills Required:** @.agents/skills/security-secrets-management/SKILL.md @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 4.1: Create `modules/auth/auth.service.ts` with base class (~10 min) ✅
 - Subtask 4.2: Implement `hashPassword(password)` using bcryptjs with salt rounds ≥ 10 (~10 min) ✅
 - Subtask 4.3: Implement `comparePassword(plain, hash)` for verification (~5 min) ✅
@@ -48,7 +48,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 4.7: Write service unit tests for all token operations (~15 min) ✅
 
 ### Task 5: Auth Service Layer (Business Logic) (✅ DONE)
-- **Skills Required:** modular-architecture-mastery, testing-quality-assurance
+- **Skills Required:** @.agents/skills/modular-architecture-mastery/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 5.1: Implement `login(email, password)` authentication flow (~15 min) ✅
 - Subtask 5.2: Implement `refreshTokens(refreshToken)` to issue new tokens (~10 min) ✅
 - Subtask 5.3: Implement `logout(refreshToken)` token invalidation logic (~10 min) ✅
@@ -56,7 +56,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 5.5: Write integration tests for login/refresh/logout flows (~15 min) ✅
 
 ### Task 6: Auth Validator Layer (✅ DONE)
-- **Skills Required:** typescript-type-system, full-stack-code-generation
+- **Skills Required:** @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/full-stack-code-generation/SKILL.md
 - Subtask 6.1: Create `modules/auth/auth.validator.ts` with Zod schemas (~5 min) ✅
 - Subtask 6.2: Define `loginSchema` with email and password validation (~5 min) ✅
 - Subtask 6.3: Define `refreshTokenSchema` for token refresh validation (~5 min) ✅
@@ -64,37 +64,37 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 6.5: Define `updateUserSchema` for user update validation (~5 min) ✅
 - Subtask 6.6: Test all validators with valid/invalid inputs (~10 min) ✅
 
-### Task 7: Auth Controller Layer
-- **Skills Required:** full-stack-code-generation, typescript-type-system, testing-quality-assurance
-- Subtask 7.1: Create `modules/auth/auth.controller.ts` with base class (~10 min)
-- Subtask 7.2: Implement `login(req, res)` endpoint handler with error handling (~15 min)
-- Subtask 7.3: Implement `refresh(req, res)` token refresh handler (~10 min)
-- Subtask 7.4: Implement `logout(req, res)` logout handler (~10 min)
-- Subtask 7.5: Implement `getCurrentUser(req, res)` user profile handler (~10 min)
-- Subtask 7.6: Add comprehensive error handling for all endpoints (~15 min)
-- Subtask 7.7: Write controller unit tests (~15 min)
+### Task 7: Auth Controller Layer (✅ DONE)
+- **Skills Required:** @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
+- Subtask 7.1: Create `modules/auth/auth.controller.ts` with base class (~10 min) ✅
+- Subtask 7.2: Implement `login(req, res)` endpoint handler with error handling (~15 min) ✅
+- Subtask 7.3: Implement `refresh(req, res)` token refresh handler (~10 min) ✅
+- Subtask 7.4: Implement `logout(req, res)` logout handler (~10 min) ✅
+- Subtask 7.5: Implement `getCurrentUser(req, res)` user profile handler (~10 min) ✅
+- Subtask 7.6: Add comprehensive error handling for all endpoints (~15 min) ✅
+- Subtask 7.7: Write controller unit tests (~15 min) ✅
 
-### Task 8: Auth Routes Layer
-- **Skills Required:** full-stack-code-generation, api-contract-design, testing-quality-assurance
-- Subtask 8.1: Create `modules/auth/auth.routes.ts` with Express router (~10 min)
-- Subtask 8.2: Define `POST /api/v1/auth/login` route with validation middleware (~10 min)
-- Subtask 8.3: Define `POST /api/v1/auth/refresh` route with validation middleware (~10 min)
-- Subtask 8.4: Define `POST /api/v1/auth/logout` route with authentication middleware (~10 min)
-- Subtask 8.5: Define `GET /api/v1/auth/me` route with authentication middleware (~10 min)
-- Subtask 8.6: Add route-level error handling middleware (~10 min)
-- Subtask 8.7: Create `modules/auth/index.ts` to export module (~5 min)
-- Subtask 8.8: Write route integration tests (~15 min)
+### Task 8: Auth Routes Layer (✅ DONE)
+- **Skills Required:** @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/api-contract-design/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
+- Subtask 8.1: Create `modules/auth/auth.routes.ts` with Express router (~10 min) ✅
+- Subtask 8.2: Define `POST /api/v1/auth/login` route with validation middleware (~10 min) ✅
+- Subtask 8.3: Define `POST /api/v1/auth/refresh` route with validation middleware (~10 min) ✅
+- Subtask 8.4: Define `POST /api/v1/auth/logout` route with authentication middleware (~10 min) ✅
+- Subtask 8.5: Define `GET /api/v1/auth/me` route with authentication middleware (~10 min) ✅
+- Subtask 8.6: Add route-level error handling middleware (~10 min) ✅
+- Subtask 8.7: Create `modules/auth/index.ts` to export module (~5 min) ✅
+- Subtask 8.8: Write route integration tests (~15 min) ✅
 
-### Task 9: Authentication Middleware
-- **Skills Required:** security-secrets-management, full-stack-code-generation, testing-quality-assurance
-- Subtask 9.1: Create `modules/auth/authenticate.middleware.ts` JWT verification middleware (~15 min)
-- Subtask 9.2: Implement token extraction from Authorization header (~10 min)
-- Subtask 9.3: Implement token verification and user payload extraction (~10 min)
-- Subtask 9.4: Create error handling for invalid/expired tokens (~10 min)
-- Subtask 9.5: Test middleware with valid/invalid/expired tokens (~15 min)
+### Task 9: Authentication Middleware (✅ DONE)
+- **Skills Required:** @.agents/skills/security-secrets-management/SKILL.md @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
+- Subtask 9.1: Create `modules/auth/authenticate.middleware.ts` JWT verification middleware (~15 min) ✅
+- Subtask 9.2: Implement token extraction from Authorization header (~10 min) ✅
+- Subtask 9.3: Implement token verification and user payload extraction (~10 min) ✅
+- Subtask 9.4: Create error handling for invalid/expired tokens (~10 min) ✅
+- Subtask 9.5: Test middleware with valid/invalid/expired tokens (~15 min) ✅
 
 ### Task 10: Authorization Middleware (Role-Based Access)
-- **Skills Required:** modular-architecture-mastery, full-stack-code-generation, testing-quality-assurance
+- **Skills Required:** @.agents/skills/modular-architecture-mastery/SKILL.md @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 10.1: Create `modules/auth/authorize.middleware.ts` role-checking middleware (~15 min)
 - Subtask 10.2: Implement role requirement parameter (single or array of roles) (~10 min)
 - Subtask 10.3: Implement role validation and error responses (~10 min)
@@ -102,7 +102,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 10.5: Document middleware usage patterns (~10 min)
 
 ### Task 11: User Management Repository Layer
-- **Skills Required:** modular-architecture-mastery, typescript-type-system, testing-quality-assurance
+- **Skills Required:** @.agents/skills/modular-architecture-mastery/SKILL.md @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 11.1: Create `modules/users/users.repository.ts` extending auth repository (~10 min)
 - Subtask 11.2: Implement `findAll(filters, pagination)` with role filtering (~15 min)
 - Subtask 11.3: Implement `findById(id)` user retrieval (~5 min)
@@ -112,7 +112,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 11.7: Write repository unit tests (~15 min)
 
 ### Task 12: User Management Service Layer
-- **Skills Required:** modular-architecture-mastery, security-secrets-management, testing-quality-assurance
+- **Skills Required:** @.agents/skills/modular-architecture-mastery/SKILL.md @.agents/skills/security-secrets-management/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 12.1: Create `modules/users/users.service.ts` user business logic (~10 min)
 - Subtask 12.2: Implement `createUser(userData)` with permission checks (~15 min)
 - Subtask 12.3: Implement `updateUser(userId, data)` with permission checks (~15 min)
@@ -122,7 +122,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 12.7: Write service integration tests (~15 min)
 
 ### Task 13: User Management Controller Layer
-- **Skills Required:** full-stack-code-generation, typescript-type-system, testing-quality-assurance
+- **Skills Required:** @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 13.1: Create `modules/users/users.controller.ts` endpoint handlers (~10 min)
 - Subtask 13.2: Implement `createUser(req, res)` POST handler (~15 min)
 - Subtask 13.3: Implement `listUsers(req, res)` GET handler with pagination (~15 min)
@@ -132,7 +132,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 13.7: Write controller unit tests (~15 min)
 
 ### Task 14: User Management Routes Layer
-- **Skills Required:** full-stack-code-generation, api-contract-design, testing-quality-assurance
+- **Skills Required:** @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/api-contract-design/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 14.1: Create `modules/users/users.routes.ts` Express router (~10 min)
 - Subtask 14.2: Define `POST /api/v1/users` route with admin authorization (~10 min)
 - Subtask 14.3: Define `GET /api/v1/users` route with admin authorization and pagination (~15 min)
@@ -142,7 +142,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 14.7: Write route integration tests (~15 min)
 
 ### Task 15: Backend Integration & API Documentation
-- **Skills Required:** api-contract-design, documentation-maintenance, testing-quality-assurance
+- **Skills Required:** @.agents/skills/api-contract-design/SKILL.md @.agents/skills/documentation-maintenance/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 15.1: Register auth and users modules in main Express app (~10 min)
 - Subtask 15.2: Test all authentication flows end-to-end (~20 min)
 - Subtask 15.3: Test all user management endpoints end-to-end (~20 min)
@@ -152,7 +152,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 15.7: Document token expiration and refresh strategy (~10 min)
 
 ### Task 16: Backend Security Review & Testing
-- **Skills Required:** security-secrets-management, testing-quality-assurance
+- **Skills Required:** @.agents/skills/security-secrets-management/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 16.1: Run full test suite for all modules (~15 min)
 - Subtask 16.2: Review password hashing implementation (salt rounds, timing attacks) (~15 min)
 - Subtask 16.3: Review JWT secret generation and storage (~15 min)
@@ -165,7 +165,7 @@ This tasks list breaks down the authentication feature plan into executable task
 ## Phase 3: Frontend Implementation (Parallel with Phase 2)
 
 ### Task 17: Frontend Feature Setup & Types
-- **Skills Required:** typescript-type-system, modular-architecture-mastery, full-stack-code-generation
+- **Skills Required:** @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/modular-architecture-mastery/SKILL.md @.agents/skills/full-stack-code-generation/SKILL.md
 - Subtask 17.1: Create `/frontend/src/features/auth` folder structure (~5 min)
 - Subtask 17.2: Create subdirectories: `views/`, `hooks/`, `services/`, `store/`, `types/` (~5 min)
 - Subtask 17.3: Create `modules/auth/types/auth.types.ts` with User, LoginRequest, AuthState interfaces (~15 min)
@@ -174,7 +174,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 17.6: Write type tests (~10 min)
 
 ### Task 18: Auth Repository (API Integration)
-- **Skills Required:** full-stack-code-generation, typescript-type-system, testing-quality-assurance
+- **Skills Required:** @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 18.1: Create `modules/auth/services/AuthRepository.ts` API client class (~10 min)
 - Subtask 18.2: Implement `login(email, password)` API call with error handling (~15 min)
 - Subtask 18.3: Implement `refresh(refreshToken)` API call (~10 min)
@@ -184,7 +184,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 18.7: Write repository tests with mocked API calls (~15 min)
 
 ### Task 19: Auth Manager (Token Storage & Expiration)
-- **Skills Required:** typescript-type-system, security-secrets-management, testing-quality-assurance
+- **Skills Required:** @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/security-secrets-management/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 19.1: Create `modules/auth/services/AuthManager.ts` token management class (~10 min)
 - Subtask 19.2: Implement `storeTokens(tokens)` in localStorage (~10 min)
 - Subtask 19.3: Implement `getAccessToken()` retrieval method (~5 min)
@@ -195,7 +195,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 19.8: Write manager tests (~15 min)
 
 ### Task 20: Auth State Management (Zustand Store)
-- **Skills Required:** state-management-data-flow, typescript-type-system, testing-quality-assurance
+- **Skills Required:** @.agents/skills/state-management-data-flow/SKILL.md @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 20.1: Create `modules/auth/store/authStore.ts` with Zustand (~15 min)
 - Subtask 20.2: Define store state shape (user, isLoading, error, isAuthenticated, expiryTime) (~10 min)
 - Subtask 20.3: Implement `setUser(user)` action (~5 min)
@@ -206,7 +206,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 20.8: Write store tests for all actions (~15 min)
 
 ### Task 21: Custom Auth Hook
-- **Skills Required:** full-stack-code-generation, state-management-data-flow, testing-quality-assurance
+- **Skills Required:** @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/state-management-data-flow/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 21.1: Create `modules/auth/hooks/useAuth.ts` custom hook (~10 min)
 - Subtask 21.2: Implement `login(email, password)` hook logic with loading/error states (~20 min)
 - Subtask 21.3: Implement `logout()` hook logic clearing state and tokens (~15 min)
@@ -216,7 +216,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 21.7: Write hook tests (~15 min)
 
 ### Task 22: Login View & Form Components
-- **Skills Required:** full-stack-code-generation, typescript-type-system, testing-quality-assurance
+- **Skills Required:** @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/typescript-type-system/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 22.1: Create `modules/auth/views/LoginView.tsx` page component (~10 min)
 - Subtask 22.2: Create `modules/auth/views/LoginForm.tsx` form component (~15 min)
 - Subtask 22.3: Implement form validation with Zod schema (~15 min)
@@ -227,7 +227,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 22.8: Write component tests (~15 min)
 
 ### Task 23: Protected Route Component
-- **Skills Required:** full-stack-code-generation, state-management-data-flow, testing-quality-assurance
+- **Skills Required:** @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/state-management-data-flow/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 23.1: Create `modules/auth/views/ProtectedRoute.tsx` route guard component (~15 min)
 - Subtask 23.2: Implement authentication check and redirect to login if not authenticated (~15 min)
 - Subtask 23.3: Implement loading state while checking authentication status (~10 min)
@@ -236,7 +236,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 23.6: Write guard tests with different auth states (~15 min)
 
 ### Task 24: Frontend Integration with Backend
-- **Skills Required:** full-stack-code-generation, state-management-data-flow, testing-quality-assurance
+- **Skills Required:** @.agents/skills/full-stack-code-generation/SKILL.md @.agents/skills/state-management-data-flow/SKILL.md @.agents/skills/testing-quality-assurance/SKILL.md
 - Subtask 24.1: Connect LoginForm to useAuth hook for real login flow (~15 min)
 - Subtask 24.2: Test login flow with backend API endpoint (~15 min)
 - Subtask 24.3: Implement automatic token refresh on API 401 responses (~20 min)
@@ -251,7 +251,7 @@ This tasks list breaks down the authentication feature plan into executable task
 ## Phase 4: Integration & Testing
 
 ### Task 25: Backend Full Integration Testing
-- **Skills Required:** testing-quality-assurance, full-stack-code-generation
+- **Skills Required:** @.agents/skills/testing-quality-assurance/SKILL.md @.agents/skills/full-stack-code-generation/SKILL.md
 - Subtask 25.1: Run complete Jest test suite for all modules (~15 min)
 - Subtask 25.2: Test login flow with valid credentials (~10 min)
 - Subtask 25.3: Test login flow with invalid credentials (~10 min)
@@ -264,7 +264,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 25.10: Performance test token generation and verification (~15 min)
 
 ### Task 26: Frontend Full Integration Testing
-- **Skills Required:** testing-quality-assurance, full-stack-code-generation
+- **Skills Required:** @.agents/skills/testing-quality-assurance/SKILL.md @.agents/skills/full-stack-code-generation/SKILL.md
 - Subtask 26.1: Run complete Vitest suite for all frontend modules (~15 min)
 - Subtask 26.2: Test login form validation with valid/invalid inputs (~15 min)
 - Subtask 26.3: Test login flow with real backend API (~20 min)
@@ -276,7 +276,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 26.9: Test persistent authentication across page reloads (~15 min)
 
 ### Task 27: End-to-End User Flows
-- **Skills Required:** testing-quality-assurance, full-stack-code-generation
+- **Skills Required:** @.agents/skills/testing-quality-assurance/SKILL.md @.agents/skills/full-stack-code-generation/SKILL.md
 - Subtask 27.1: Test complete flow: login → access protected resource → logout (~20 min)
 - Subtask 27.2: Test token refresh during long session (~20 min)
 - Subtask 27.3: Test admin creating new user via API (~15 min)
@@ -287,7 +287,7 @@ This tasks list breaks down the authentication feature plan into executable task
 - Subtask 27.8: Test role-based access restrictions (~15 min)
 
 ### Task 28: Documentation Completion & Deployment Prep
-- **Skills Required:** documentation-maintenance, api-contract-design
+- **Skills Required:** @.agents/skills/documentation-maintenance/SKILL.md @.agents/skills/api-contract-design/SKILL.md
 - Subtask 28.1: Create comprehensive API documentation with examples (~20 min)
 - Subtask 28.2: Create authentication flow architecture diagram (~15 min)
 - Subtask 28.3: Write developer setup guide with step-by-step instructions (~20 min)
