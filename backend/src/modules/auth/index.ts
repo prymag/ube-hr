@@ -11,3 +11,10 @@ export type {
   PaginationInput,
   PaginationResponse,
 } from './auth.repository';
+
+export { AuthService } from './auth.service';
+export type {
+  TokenPayload,
+  GeneratedTokens,
+  LoginResult,
+} from './auth.service';

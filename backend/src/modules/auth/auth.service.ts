@@ -1,6 +1,7 @@
 import * as bcrypt from 'bcryptjs';
 import jwt, { SignOptions, TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 import type { StringValue } from 'ms';
+import type { AuthRepository } from './auth.repository';
 
 /**
  * Token payload interface
@@ -8,6 +9,21 @@ import type { StringValue } from 'ms';
 export interface TokenPayload {
   userId: string;
   email: string;
+  role?: string;
+}
+
+/**
+ * Login result interface
+ */
+export interface LoginResult {
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+  };
+  tokens: GeneratedTokens;
 }
 
 /**
@@ -27,17 +43,21 @@ export class AuthService {
   private readonly refreshSecret: string;
   private readonly accessExpiry: StringValue;
   private readonly refreshExpiry: StringValue;
+  private readonly invalidatedTokens: Set<string> = new Set();
+  private readonly repository?: AuthRepository;
 
   constructor(
     accessSecret: string = process.env.JWT_ACCESS_SECRET || 'dev-access-secret',
     refreshSecret: string = process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret',
     accessExpiry: StringValue = (process.env.JWT_ACCESS_EXPIRY || '15m') as StringValue,
     refreshExpiry: StringValue = (process.env.JWT_REFRESH_EXPIRY || '7d') as StringValue,
+    repository?: AuthRepository,
   ) {
     this.accessSecret = accessSecret;
     this.refreshSecret = refreshSecret;
     this.accessExpiry = accessExpiry;
     this.refreshExpiry = refreshExpiry;
+    this.repository = repository;
   }
 
   /**
@@ -125,5 +145,85 @@ export class AuthService {
       }
       throw error;
     }
+  }
+
+  /**
+   * Authenticate a user with email and password
+   * @param email - User email address
+   * @param password - Plain text password
+   * @returns Promise<LoginResult> - User data and token pair
+   * @throws Error if credentials are invalid or repository is not configured
+   */
+  async login(email: string, password: string): Promise<LoginResult> {
+    if (!this.repository) {
+      throw new Error('Repository is required for login');
+    }
+
+    const user = await this.repository.findByEmail(email);
+    if (!user) {
+      throw new Error('Invalid email or password');
+    }
+
+    const isPasswordValid = await this.comparePassword(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error('Invalid email or password');
+    }
+
+    const tokens = await this.generateTokens({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
+      tokens,
+    };
+  }
+
+  /**
+   * Issue new access and refresh tokens using a valid refresh token
+   * @param refreshToken - The current refresh token
+   * @returns Promise<GeneratedTokens> - New access and refresh token pair
+   * @throws Error if refresh token is invalid, expired, or has been invalidated
+   */
+  async refreshTokens(refreshToken: string): Promise<GeneratedTokens> {
+    if (!this.repository) {
+      throw new Error('Repository is required for token refresh');
+    }
+
+    if (this.invalidatedTokens.has(refreshToken)) {
+      throw new Error('Refresh token has been invalidated');
+    }
+
+    const payload = await this.verifyRefreshToken(refreshToken);
+
+    const user = await this.repository.findById(payload.userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Rotate: invalidate old refresh token
+    this.invalidatedTokens.add(refreshToken);
+
+    return this.generateTokens({
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    });
+  }
+
+  /**
+   * Invalidate a user's refresh token to log them out
+   * @param refreshToken - The refresh token to invalidate
+   */
+  async logout(refreshToken: string): Promise<void> {
+    this.invalidatedTokens.add(refreshToken);
   }
 }
