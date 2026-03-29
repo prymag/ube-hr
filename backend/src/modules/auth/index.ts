@@ -40,3 +40,4 @@ export type {
 export { createAuthRouter } from './auth.routes';
 
 export { authenticate } from './authenticate.middleware';
+export { authorize } from './authorize.middleware';
