@@ -1,11 +1,16 @@
 import React from 'react'
+import { BrowserRouter } from 'react-router-dom'
+import { AuthProvider } from './providers/AuthProvider'
+import { AppRoutes } from './routes/index'
 import './styles/global.css'
 
 function App() {
   return (
-    <div className="app-container">
-      <h1>Hello World</h1>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 
