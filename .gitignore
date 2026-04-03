@@ -5,3 +5,4 @@
 .claude/worktrees
 .claude/settings.local.json
 vite.config.*.timestamp*
+node_modules
