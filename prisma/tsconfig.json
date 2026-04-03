@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@ube-hr/feature": ["../libs/feature/src/index.ts"],
+      "@ube-hr/shared": ["../libs/shared/src/index.ts"],
+      "@ube-hr/ui": ["../libs/ui/src/index.ts"]
+    }
+  }
+}
