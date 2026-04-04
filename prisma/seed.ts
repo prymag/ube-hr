@@ -1,8 +1,8 @@
 import 'dotenv/config';
-import { PrismaClient } from '../generated/prisma/client';
+import { PrismaClient, Role } from '../generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
-import { secrets } from '@ube-hr/shared';
+import { secrets, DEFAULT_ROLE_PERMISSIONS } from '@ube-hr/shared';
 
 const adapter = new PrismaMariaDb({
   host: process.env.MYSQL_HOST || 'localhost',
@@ -15,28 +15,36 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+  // Seed one user per role
+  const users = await Promise.all(
+    Object.values(Role).map(async (role) => {
+      const email = `${role.toLowerCase().replace('_', '.')}@example.com`;
+      const name = role.charAt(0) + role.slice(1).toLowerCase().replace('_', ' ');
+      return prisma.user.upsert({
+        where: { email },
+        update: {},
+        create: {
+          email,
+          name,
+          role,
+          password: await secrets.hash('password123'),
+        },
+      });
+    }),
+  );
 
-  const alice = await prisma.user.upsert({
-    where: { email: 'alice@example.com' },
-    update: {},
-    create: {
-      email: 'alice@example.com',
-      password: await secrets.hash('password123'),
-      name: 'Alice',
-    },
-  });
+  // Seed role permissions
+  for (const [role, permissions] of Object.entries(DEFAULT_ROLE_PERMISSIONS) as [Role, string[]][]) {
+    for (const permission of permissions) {
+      await prisma.rolePermission.upsert({
+        where: { role_permission: { role, permission } },
+        update: {},
+        create: { role, permission },
+      });
+    }
+  }
 
-  const bob = await prisma.user.upsert({
-    where: { email: 'bob@example.com' },
-    update: {},
-    create: {
-      email: 'bob@example.com',
-      password: await secrets.hash('password123'),
-      name: 'Bob',
-    },
-  });
-
-  console.log('Seeded:', { alice, bob });
+  console.log('Seeded users:', users.map((u) => `${u.email} (${u.role})`));
 }
 
 main()

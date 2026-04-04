@@ -2,10 +2,28 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import axios from 'axios';
 import { setAccessToken } from '../lib/axios';
 
+export interface AuthUser {
+  id: number;
+  email: string;
+  role: string;
+  impersonatedBy?: number;
+}
+
 interface AuthContextType {
   accessToken: string | null;
+  user: AuthUser | null;
   setToken: (token: string | null) => void;
   isLoading: boolean;
+}
+
+function decodeJwt(token: string): AuthUser | null {
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    return { id: decoded.sub, email: decoded.email, role: decoded.role, impersonatedBy: decoded.impersonatedBy };
+  } catch {
+    return null;
+  }
 }
 
 type ChannelMessage =
@@ -18,11 +36,13 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   function setToken(token: string | null) {
     setAccessToken(token);
     setAccessTokenState(token);
+    setUser(token ? decodeJwt(token) : null);
   }
 
   useEffect(() => {
@@ -83,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [accessToken]);
 
   return (
-    <AuthContext.Provider value={{ accessToken, setToken, isLoading }}>
+    <AuthContext.Provider value={{ accessToken, user, setToken, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

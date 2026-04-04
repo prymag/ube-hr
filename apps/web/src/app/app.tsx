@@ -2,6 +2,10 @@ import { Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { UsersPage } from './pages/UsersPage';
+import { TeamsPage } from './pages/TeamsPage';
+import { TeamDetailPage } from './pages/TeamDetailPage';
+import { AuthLayout } from './layouts/AuthLayout';
 
 function GuestOnly() {
   const { accessToken, isLoading } = useAuth();
@@ -23,7 +27,12 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
         </Route>
         <Route element={<RequireAuth />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route element={<AuthLayout />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/teams" element={<TeamsPage />} />
+            <Route path="/teams/:id" element={<TeamDetailPage />} />
+          </Route>
         </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

@@ -7,6 +7,13 @@ datasource db {
   provider = "mysql"
 }
 
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+// Role hierarchy is derived from declaration order (lowest to highest).
+// Insert new roles at the correct position — order determines rank.
 enum Role {
   USER
   MANAGER
@@ -15,12 +22,46 @@ enum Role {
 }
 
 model User {
-  id                  Int      @id @default(autoincrement())
-  email               String   @unique
+  id                  Int          @id @default(autoincrement())
+  email               String       @unique
   password            String
   name                String?
-  role                Role     @default(USER)
-  refreshTokenVersion Int      @default(0)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  role                Role         @default(USER)
+  status              UserStatus   @default(ACTIVE)
+  deletedAt           DateTime?
+  refreshTokenVersion Int          @default(0)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  memberships         Membership[]
+  ownedTeams          Team[]       @relation("OwnedTeams")
+}
+
+model Team {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  ownerId     Int
+  owner       User         @relation("OwnedTeams", fields: [ownerId], references: [id])
+  deletedAt   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  memberships Membership[]
+}
+
+model RolePermission {
+  role       Role
+  permission String
+  createdAt  DateTime @default(now())
+
+  @@id([role, permission])
+}
+
+model Membership {
+  userId    Int
+  teamId    Int
+  joinedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@id([userId, teamId])
 }

@@ -1,0 +1,50 @@
+export const PERMISSIONS = {
+  USERS_READ: 'users:read',
+  USERS_CREATE: 'users:create',
+  USERS_UPDATE: 'users:update',
+  USERS_DELETE: 'users:delete',
+  TEAMS_READ: 'teams:read',
+  TEAMS_CREATE: 'teams:create',
+  TEAMS_UPDATE: 'teams:update',
+  TEAMS_DELETE: 'teams:delete',
+  ADMINS_MANAGE: 'admins:manage',
+  AUTH_IMPERSONATE: 'auth:impersonate',
+} as const;
+
+export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+
+/** All valid permission strings — used for validation and seeding. */
+export const ALL_PERMISSIONS: Permission[] = Object.values(PERMISSIONS);
+
+export const DEFAULT_ROLE_PERMISSIONS: Record<string, Permission[]> = {
+  USER: [],
+
+  MANAGER: [
+    PERMISSIONS.USERS_READ,
+    PERMISSIONS.TEAMS_READ,
+  ],
+
+  ADMIN: [
+    PERMISSIONS.USERS_READ,
+    PERMISSIONS.USERS_CREATE,
+    PERMISSIONS.USERS_UPDATE,
+    PERMISSIONS.TEAMS_READ,
+    PERMISSIONS.TEAMS_CREATE,
+    PERMISSIONS.TEAMS_UPDATE,
+    PERMISSIONS.TEAMS_DELETE,
+    PERMISSIONS.AUTH_IMPERSONATE,
+  ],
+
+  SUPER_ADMIN: [
+    PERMISSIONS.USERS_READ,
+    PERMISSIONS.USERS_CREATE,
+    PERMISSIONS.USERS_UPDATE,
+    PERMISSIONS.USERS_DELETE,
+    PERMISSIONS.TEAMS_READ,
+    PERMISSIONS.TEAMS_CREATE,
+    PERMISSIONS.TEAMS_UPDATE,
+    PERMISSIONS.TEAMS_DELETE,
+    PERMISSIONS.ADMINS_MANAGE,
+    PERMISSIONS.AUTH_IMPERSONATE,
+  ],
+};

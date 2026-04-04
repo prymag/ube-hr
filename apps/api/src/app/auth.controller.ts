@@ -23,6 +23,7 @@ import {
   TokenResponseDto,
   UserResponseDto,
   AuthenticatedRequest,
+  PERMISSIONS,
 } from '@ube-hr/feature';
 
 const REFRESH_COOKIE = 'refresh_token';
@@ -89,7 +90,7 @@ export class AuthController {
   @Post('impersonate/:userId')
   @HttpCode(HttpStatus.OK)
   @UseGuards(PermissionGuard)
-  @RequirePermission('impersonate')
+  @RequirePermission(PERMISSIONS.AUTH_IMPERSONATE)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Issue a 30-minute impersonation token for a target user (admin only)' })
   @ApiOkResponse({ type: TokenResponseDto })
