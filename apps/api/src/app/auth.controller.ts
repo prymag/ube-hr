@@ -5,6 +5,8 @@ import {
   Body,
   Req,
   Res,
+  Param,
+  ParseIntPipe,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -15,6 +17,8 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiOkResponse } from '@n
 import {
   AuthService,
   LocalAuthGuard,
+  PermissionGuard,
+  RequirePermission,
   LoginDto,
   TokenResponseDto,
   UserResponseDto,
@@ -80,6 +84,20 @@ export class AuthController {
     await this.authService.logout(req.user!.id);
     res.clearCookie(REFRESH_COOKIE, { path: '/api/auth' });
     return { message: 'Logged out successfully' };
+  }
+
+  @Post('impersonate/:userId')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(PermissionGuard)
+  @RequirePermission('impersonate')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Issue a 30-minute impersonation token for a target user (admin only)' })
+  @ApiOkResponse({ type: TokenResponseDto })
+  impersonate(
+    @Req() req: AuthenticatedRequest,
+    @Param('userId', ParseIntPipe) userId: number,
+  ) {
+    return this.authService.impersonate(req.user!.id, userId);
   }
 
   @Get('me')

@@ -7,12 +7,20 @@ datasource db {
   provider = "mysql"
 }
 
+enum Role {
+  USER
+  MANAGER
+  ADMIN
+  SUPER_ADMIN
+}
+
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  password     String
-  name         String?
-  refreshTokenVersion Int @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  email               String   @unique
+  password            String
+  name                String?
+  role                Role     @default(USER)
+  refreshTokenVersion Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }

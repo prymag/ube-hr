@@ -7,6 +7,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { PermissionGuard } from './guards/permission.guard';
 import { AuthMiddleware } from './middleware/auth.middleware';
 import { UsersModule } from '../users/users.module';
 
@@ -30,9 +31,9 @@ import { UsersModule } from '../users/users.module';
     JwtStrategy,
     LocalAuthGuard,
     JwtAuthGuard,
+    PermissionGuard,
     AuthMiddleware,
   ],
-  exports: [AuthService, JwtModule, LocalAuthGuard, JwtAuthGuard, AuthMiddleware],
+  exports: [AuthService, JwtModule, LocalAuthGuard, JwtAuthGuard, PermissionGuard, AuthMiddleware],
 })
 export class AuthModule {}
-

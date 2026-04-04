@@ -6,10 +6,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
+import { Role } from '@ube-hr/backend';
 import { JwtPayload } from '../strategies/jwt.strategy';
 
 export interface AuthenticatedRequest extends Request {
-  user?: { id: number; email: string };
+  user?: { id: number; email: string; role: Role; impersonatedBy?: number };
 }
 
 @Injectable()
@@ -30,7 +31,12 @@ export class AuthMiddleware implements NestMiddleware {
       const payload = this.jwtService.verify<JwtPayload>(token, {
         secret: this.config.getOrThrow<string>('JWT_SECRET'),
       });
-      req.user = { id: payload.sub, email: payload.email };
+      req.user = {
+        id: payload.sub,
+        email: payload.email,
+        role: payload.role,
+        impersonatedBy: payload.impersonatedBy,
+      };
       next();
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
