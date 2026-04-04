@@ -13,6 +13,7 @@ export interface Team {
   id: number;
   name: string;
   description: string | null;
+  ownerId: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -37,6 +38,7 @@ export const getUser = (id: number) => api.get<User>(`/api/users/${id}`).then((r
 export const getUserTeams = (id: number) => api.get<UserTeam[]>(`/api/users/${id}/teams`).then((r) => r.data);
 export const createUser = (data: { email: string; password: string; name?: string; role?: string }) =>
   api.post<User>('/api/users', data).then((r) => r.data);
+export const deleteUser = (id: number) => api.delete(`/api/users/${id}`);
 
 // Teams
 export const getTeams = () => api.get<Team[]>('/api/teams').then((r) => r.data);
