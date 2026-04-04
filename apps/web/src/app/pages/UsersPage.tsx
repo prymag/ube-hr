@@ -4,6 +4,7 @@ import {
   getUserTeams,
   getTeams,
   createUser,
+  deleteUser,
   addTeamMember,
   removeTeamMember,
   User,
@@ -58,6 +59,10 @@ export function UsersPage() {
   const [form, setForm] = useState<CreateForm>(EMPTY_FORM);
   const [formError, setFormError] = useState('');
   const [creating, setCreating] = useState(false);
+
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   const callerRank = ROLE_RANK[authUser?.role ?? 'USER'] ?? 0;
   const assignableRoles = ALL_ROLES.filter((r) => ROLE_RANK[r] <= callerRank);
@@ -141,8 +146,25 @@ export function UsersPage() {
     setShowCreate(true);
   }
 
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await deleteUser(deleteTarget.id);
+      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+      if (selectedUser?.id === deleteTarget.id) setSelectedUser(null);
+      setDeleteTarget(null);
+    } catch (err: any) {
+      setDeleteError(err?.response?.data?.message ?? 'Failed to delete user.');
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   const memberTeamIds = new Set(userTeams.map((t) => t.id));
   const availableTeams = allTeams.filter((t) => !memberTeamIds.has(t.id));
+  const ownedTeams = selectedUser ? allTeams.filter((t) => t.ownerId === selectedUser.id) : [];
 
   if (loading) {
     return <div className="text-sm text-gray-500">Loading users…</div>;
@@ -173,6 +195,7 @@ export function UsersPage() {
                 <th className="px-4 py-3 font-medium text-gray-500">Role</th>
                 <th className="px-4 py-3 font-medium text-gray-500">Status</th>
                 <th className="px-4 py-3 font-medium text-gray-500">Joined</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -209,6 +232,16 @@ export function UsersPage() {
                   <td className="px-4 py-3 text-gray-400 text-xs">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    {(callerRank >= ROLE_RANK['SUPER_ADMIN'] || callerRank > ROLE_RANK[user.role]) && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setDeleteError(''); setDeleteTarget(user); }}
+                        className="text-xs text-red-500 hover:text-red-700"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -232,6 +265,19 @@ export function UsersPage() {
                 ×
               </button>
             </div>
+
+            {ownedTeams.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Owned Teams</h3>
+                <ul className="space-y-1">
+                  {ownedTeams.map((team) => (
+                    <li key={team.id} className="px-3 py-2 rounded-lg bg-gray-50 text-sm text-gray-700">
+                      {team.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Teams</h3>
 
@@ -284,6 +330,7 @@ export function UsersPage() {
                 </button>
               </div>
             )}
+
           </div>
         </div>
       )}
@@ -373,6 +420,36 @@ export function UsersPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">Delete User</h2>
+            <p className="text-sm text-gray-600 mb-1">
+              Are you sure you want to delete <span className="font-medium">{deleteTarget.name ?? deleteTarget.email}</span>?
+            </p>
+            <p className="text-xs text-gray-400 mb-5">This action cannot be undone.</p>
+            {deleteError && <p className="text-sm text-red-600 mb-4">{deleteError}</p>}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+              >
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}

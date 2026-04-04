@@ -162,6 +162,14 @@ export function TeamDetailPage() {
               {team.description && (
                 <p className="text-sm text-gray-500 mt-1">{team.description}</p>
               )}
+              {(() => {
+                const owner = allUsers.find((u) => u.id === team.ownerId);
+                return owner ? (
+                  <p className="text-xs text-gray-400 mt-1.5">
+                    Owner: <span className="text-gray-600">{owner.name ?? owner.email}</span>
+                  </p>
+                ) : null;
+              })()}
             </div>
             <button
               onClick={startEdit}

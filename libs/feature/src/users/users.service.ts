@@ -55,9 +55,12 @@ export class UsersService {
     return memberships.map((m) => ({ ...m.team, joinedAt: m.joinedAt }));
   }
 
-  async remove(id: number) {
+  async remove(id: number, callerRole: Role) {
     const user = await this.prisma.user.findUnique({ where: { id, deletedAt: null } });
     if (!user) throw new NotFoundException('User not found');
+    if (callerRole !== Role.SUPER_ADMIN && roleRank(user.role) >= roleRank(callerRole)) {
+      throw new ForbiddenException('Cannot delete a user with an equal or higher role');
+    }
     const ownedTeams = await this.prisma.team.count({ where: { ownerId: id, deletedAt: null } });
     if (ownedTeams > 0) throw new BadRequestException('User owns one or more teams and cannot be deleted');
     const timestamp = Date.now();
