@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { secrets } from '@ube-hr/shared';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '@ube-hr/backend';
 
 @Injectable()
 export class UsersService {
@@ -14,5 +14,17 @@ export class UsersService {
     if (!valid) return null;
 
     return user;
+  }
+
+  async findById(id: number) {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async incrementTokenVersion(id: number) {
+    const user = await this.prisma.user.update({
+      where: { id },
+      data: { refreshTokenVersion: { increment: 1 } },
+    });
+    return user.refreshTokenVersion;
   }
 }
