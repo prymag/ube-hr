@@ -1,6 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Role } from '@ube-hr/backend';
 import { UsersService } from '../users/users.service';
 
 interface RefreshPayload {
@@ -20,7 +21,7 @@ export class AuthService {
     return this.usersService.findByEmailAndPassword(email, password);
   }
 
-  async login(user: { id: number; email: string }) {
+  async login(user: { id: number; email: string; role: Role }) {
     const newVersion = await this.usersService.incrementTokenVersion(user.id);
     const [accessToken, refreshToken] = await Promise.all([
       this.signAccessToken(user),
@@ -60,9 +61,23 @@ export class AuthService {
     await this.usersService.incrementTokenVersion(userId);
   }
 
-  private signAccessToken(user: { id: number; email: string }) {
+  async impersonate(adminId: number, targetUserId: number) {
+    const target = await this.usersService.findById(targetUserId);
+    if (!target) throw new NotFoundException('User not found');
+
+    const access_token = await this.jwtService.signAsync(
+      { sub: target.id, email: target.email, role: target.role, impersonatedBy: adminId },
+      {
+        secret: this.config.getOrThrow<string>('JWT_SECRET'),
+        expiresIn: '30m',
+      },
+    );
+    return { access_token };
+  }
+
+  private signAccessToken(user: { id: number; email: string; role: Role }) {
     return this.jwtService.signAsync(
-      { sub: user.id, email: user.email },
+      { sub: user.id, email: user.email, role: user.role },
       {
         secret: this.config.getOrThrow<string>('JWT_SECRET'),
         expiresIn: '15m',
