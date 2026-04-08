@@ -18,8 +18,7 @@
       "@ube-hr/feature": ["libs/feature/src/index.ts"],
       "@ube-hr/shared": ["libs/shared/src/index.ts"],
       "@ube-hr/ui": ["libs/ui/src/index.ts"],
-      "@ube-hr/backend": ["libs/backend/src/index.ts"],
-      "@/*": ["apps/web/src/*"]
+      "@ube-hr/backend": ["libs/backend/src/index.ts"]
     },
     "types": ["node", "jest", "@testing-library/jest-dom"]
   },

@@ -11,6 +11,33 @@ import type { User } from '../features/users';
 import { useTeams } from '../features/teams';
 import { useAuth } from '../store/AuthContext';
 import { ROLE_RANK, ALL_ROLES, ROLE_BADGE, STATUS_BADGE } from '../config/roles';
+import { Button } from '@ube-hr/ui';
+import { Input } from '@ube-hr/ui';
+import { Label } from '@ube-hr/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@ube-hr/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@ube-hr/ui';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@ube-hr/ui';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@ube-hr/ui';
+import { cn } from '@ube-hr/ui';
 
 interface CreateForm {
   email: string;
@@ -72,7 +99,7 @@ export function UsersPage() {
   }
 
   if (isLoading) {
-    return <div className="text-sm text-gray-500">Loading users…</div>;
+    return <div className="text-sm text-muted-foreground">Loading users…</div>;
   }
 
   return (
@@ -81,290 +108,300 @@ export function UsersPage() {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Users</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{users.length} total</p>
+            <h1 className="text-2xl font-bold">Users</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">{users.length} total</p>
           </div>
-          <button
-            onClick={openCreate}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            New User
-          </button>
+          <Button onClick={openCreate}>New User</Button>
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 text-left">
-                <th className="px-4 py-3 font-medium text-gray-500">Name / Email</th>
-                <th className="px-4 py-3 font-medium text-gray-500">Role</th>
-                <th className="px-4 py-3 font-medium text-gray-500">Status</th>
-                <th className="px-4 py-3 font-medium text-gray-500">Joined</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name / Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Joined</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {users.map((user) => (
-                <tr
+                <TableRow
                   key={user.id}
                   onClick={() => { setSelectedUser(user); setAddTeamId(''); }}
-                  className={`border-b border-gray-50 cursor-pointer transition-colors last:border-0 ${
-                    selectedUser?.id === user.id ? 'bg-blue-50' : 'hover:bg-gray-50'
-                  }`}
+                  className={cn(
+                    'cursor-pointer',
+                    selectedUser?.id === user.id && 'bg-muted'
+                  )}
                 >
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-gray-800">{user.name ?? '—'}</div>
-                    <div className="text-gray-400 text-xs">{user.email}</div>
-                  </td>
-                  <td className="px-4 py-3">
+                  <TableCell>
+                    <div className="font-medium">{user.name ?? '—'}</div>
+                    <div className="text-muted-foreground text-xs">{user.email}</div>
+                  </TableCell>
+                  <TableCell>
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ROLE_BADGE[user.role] ?? ROLE_BADGE.USER}`}>
                       {user.role.replace('_', ' ')}
                     </span>
-                  </td>
-                  <td className="px-4 py-3">
+                  </TableCell>
+                  <TableCell>
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGE[user.status] ?? STATUS_BADGE.ACTIVE}`}>
                       {user.status}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-400 text-xs">
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-xs">
                     {new Date(user.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 text-right">
+                  </TableCell>
+                  <TableCell className="text-right">
                     {(callerRank >= ROLE_RANK['SUPER_ADMIN'] || callerRank > ROLE_RANK[user.role]) && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={(e) => { e.stopPropagation(); setDeleteTarget(user); }}
-                        className="text-xs text-red-500 hover:text-red-700"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         Delete
-                      </button>
+                      </Button>
                     )}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       </div>
 
       {/* Side panel */}
       {selectedUser && (
         <div className="w-80 shrink-0">
-          <div className="bg-white rounded-xl border border-gray-200 p-5">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h2 className="font-semibold text-gray-800">{selectedUser.name ?? selectedUser.email}</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{selectedUser.email}</p>
-              </div>
-              <button
-                onClick={() => setSelectedUser(null)}
-                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
-              >
-                ×
-              </button>
-            </div>
-
-            {ownedTeams.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Owned Teams</h3>
-                <ul className="space-y-1">
-                  {ownedTeams.map((team) => (
-                    <li key={team.id} className="px-3 py-2 rounded-lg bg-gray-50 text-sm text-gray-700">
-                      {team.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Teams</h3>
-
-            {addToTeam.isError && (
-              <p className="text-xs text-red-600 mb-2">Failed to add user to team. They may already be a member.</p>
-            )}
-            {removeFromTeam.isError && (
-              <p className="text-xs text-red-600 mb-2">Failed to remove user from team.</p>
-            )}
-
-            {panelLoading ? (
-              <p className="text-sm text-gray-400">Loading…</p>
-            ) : userTeams.length === 0 ? (
-              <p className="text-sm text-gray-400 mb-3">Not in any team.</p>
-            ) : (
-              <ul className="space-y-1 mb-3">
-                {userTeams.map((team) => (
-                  <li key={team.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
-                    <span className="text-sm text-gray-700">{team.name}</span>
-                    <button
-                      onClick={() => removeFromTeam.mutate(team.id)}
-                      disabled={removeFromTeam.isPending}
-                      className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {availableTeams.length > 0 && (
-              <div className="flex gap-2 mt-3">
-                <select
-                  value={addTeamId}
-                  onChange={(e) => setAddTeamId(e.target.value)}
-                  className="flex-1 text-sm border border-gray-300 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div className="min-w-0">
+                  <CardTitle className="text-base truncate">
+                    {selectedUser.name ?? selectedUser.email}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">{selectedUser.email}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedUser(null)}
+                  className="shrink-0 h-6 w-6 text-muted-foreground"
                 >
-                  <option value="">Add to team…</option>
-                  {availableTeams.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
-                <button
-                  onClick={handleAddToTeam}
-                  disabled={!addTeamId || addToTeam.isPending}
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
-                >
-                  Add
-                </button>
+                  ×
+                </Button>
               </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Create user modal */}
-      {showCreate && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-gray-800">New User</h2>
-              <button
-                onClick={() => setShowCreate(false)}
-                className="text-gray-400 hover:text-gray-600 text-xl leading-none"
-              >
-                ×
-              </button>
-            </div>
-
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  required
-                  value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="user@example.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                <input
-                  type="password"
-                  required
-                  minLength={8}
-                  value={form.password}
-                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Min. 8 characters"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name <span className="text-gray-400 font-normal">(optional)</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Jane Doe"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select
-                  value={form.role}
-                  onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {assignableRoles.map((r) => (
-                    <option key={r} value={r}>{r.replace('_', ' ')}</option>
-                  ))}
-                </select>
-              </div>
-
-              {createUser.isError && (
-                <p className="text-sm text-red-600">
-                  {(createUser.error as any)?.response?.data?.message ?? 'Failed to create user.'}
-                </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {ownedTeams.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    Owned Teams
+                  </h3>
+                  <ul className="space-y-1">
+                    {ownedTeams.map((team) => (
+                      <li key={team.id} className="px-3 py-2 rounded-md bg-muted text-sm">
+                        {team.name}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
-              <div className="flex gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setShowCreate(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={createUser.isPending}
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  {createUser.isPending ? 'Creating…' : 'Create User'}
-                </button>
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                  Teams
+                </h3>
+
+                {addToTeam.isError && (
+                  <p className="text-xs text-destructive mb-2">
+                    Failed to add user to team. They may already be a member.
+                  </p>
+                )}
+                {removeFromTeam.isError && (
+                  <p className="text-xs text-destructive mb-2">Failed to remove user from team.</p>
+                )}
+
+                {panelLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading…</p>
+                ) : userTeams.length === 0 ? (
+                  <p className="text-sm text-muted-foreground mb-3">Not in any team.</p>
+                ) : (
+                  <ul className="space-y-1 mb-3">
+                    {userTeams.map((team) => (
+                      <li
+                        key={team.id}
+                        className="flex items-center justify-between px-3 py-2 rounded-md bg-muted"
+                      >
+                        <span className="text-sm">{team.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFromTeam.mutate(team.id)}
+                          disabled={removeFromTeam.isPending}
+                          className="h-auto py-0.5 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          Remove
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {availableTeams.length > 0 && (
+                  <div className="flex gap-2 mt-3">
+                    <Select value={addTeamId} onValueChange={setAddTeamId}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Add to team…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableTeams.map((t) => (
+                          <SelectItem key={t.id} value={String(t.id)}>
+                            {t.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      onClick={handleAddToTeam}
+                      disabled={!addTeamId || addToTeam.isPending}
+                      size="sm"
+                    >
+                      Add
+                    </Button>
+                  </div>
+                )}
               </div>
-            </form>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
-      {/* Delete confirmation modal */}
-      {deleteTarget && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Delete User</h2>
-            <p className="text-sm text-gray-600 mb-1">
-              Are you sure you want to delete{' '}
-              <span className="font-medium">{deleteTarget.name ?? deleteTarget.email}</span>?
-            </p>
-            <p className="text-xs text-gray-400 mb-5">This action cannot be undone.</p>
-            {deleteUser.isError && (
-              <p className="text-sm text-red-600 mb-4">
-                {(deleteUser.error as any)?.response?.data?.message ?? 'Failed to delete user.'}
+      {/* Create user dialog */}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>New User</DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                required
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="user@example.com"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Password</Label>
+              <Input
+                type="password"
+                required
+                minLength={8}
+                value={form.password}
+                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                placeholder="Min. 8 characters"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>
+                Name <span className="text-muted-foreground font-normal">(optional)</span>
+              </Label>
+              <Input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                placeholder="Jane Doe"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Role</Label>
+              <Select
+                value={form.role}
+                onValueChange={(value) => setForm((f) => ({ ...f, role: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {assignableRoles.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {r.replace('_', ' ')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {createUser.isError && (
+              <p className="text-sm text-destructive">
+                {(createUser.error as any)?.response?.data?.message ?? 'Failed to create user.'}
               </p>
             )}
-            <div className="flex gap-3">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                disabled={deleteUser.isPending}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
                 Cancel
-              </button>
-              <button
-                onClick={() =>
-                  deleteUser.mutate(deleteTarget.id, {
-                    onSuccess: () => {
-                      if (selectedUser?.id === deleteTarget.id) setSelectedUser(null);
-                      setDeleteTarget(null);
-                    },
-                  })
-                }
-                disabled={deleteUser.isPending}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                {deleteUser.isPending ? 'Deleting…' : 'Delete'}
-              </button>
-            </div>
+              </Button>
+              <Button type="submit" disabled={createUser.isPending}>
+                {createUser.isPending ? 'Creating…' : 'Create User'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Delete User</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1">
+            <p className="text-sm text-foreground">
+              Are you sure you want to delete{' '}
+              <span className="font-medium">{deleteTarget?.name ?? deleteTarget?.email}</span>?
+            </p>
+            <p className="text-xs text-muted-foreground">This action cannot be undone.</p>
           </div>
-        </div>
-      )}
+          {deleteUser.isError && (
+            <p className="text-sm text-destructive">
+              {(deleteUser.error as any)?.response?.data?.message ?? 'Failed to delete user.'}
+            </p>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleteUser.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteUser.isPending}
+              onClick={() =>
+                deleteTarget &&
+                deleteUser.mutate(deleteTarget.id, {
+                  onSuccess: () => {
+                    if (selectedUser?.id === deleteTarget.id) setSelectedUser(null);
+                    setDeleteTarget(null);
+                  },
+                })
+              }
+            >
+              {deleteUser.isPending ? 'Deleting…' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
