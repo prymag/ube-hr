@@ -26,6 +26,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         await this.$connect();
+        await this.$queryRaw`SELECT 1`;
         return;
       } catch (err) {
         if (attempt === maxRetries) throw err;
