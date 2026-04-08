@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import api from '../lib/axios';
-import { useAuth } from '../context/AuthContext';
+import api from '../services/axios';
+import { useAuth } from '../store/AuthContext';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard' },

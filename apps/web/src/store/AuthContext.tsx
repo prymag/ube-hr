@@ -1,20 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
-import { setAccessToken } from '../lib/axios';
+import { setAccessToken } from '../services/axios';
+import type { AuthUser, AuthContextType } from '../features/authentication/auth.types';
 
-export interface AuthUser {
-  id: number;
-  email: string;
-  role: string;
-  impersonatedBy?: number;
-}
-
-interface AuthContextType {
-  accessToken: string | null;
-  user: AuthUser | null;
-  setToken: (token: string | null) => void;
-  isLoading: boolean;
-}
+export type { AuthUser, AuthContextType };
 
 function decodeJwt(token: string): AuthUser | null {
   try {

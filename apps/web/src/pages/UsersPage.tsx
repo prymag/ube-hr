@@ -1,38 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
-  getUsers,
-  getUserTeams,
-  getTeams,
-  createUser,
-  deleteUser,
-  addTeamMember,
-  removeTeamMember,
-  User,
-  UserTeam,
-  Team,
-} from '../lib/api';
-import { useAuth } from '../context/AuthContext';
-
-const ROLE_RANK: Record<string, number> = {
-  USER: 0,
-  MANAGER: 1,
-  ADMIN: 2,
-  SUPER_ADMIN: 3,
-};
-
-const ALL_ROLES = ['USER', 'MANAGER', 'ADMIN', 'SUPER_ADMIN'];
-
-const ROLE_BADGE: Record<string, string> = {
-  SUPER_ADMIN: 'bg-purple-100 text-purple-700',
-  ADMIN: 'bg-blue-100 text-blue-700',
-  MANAGER: 'bg-green-100 text-green-700',
-  USER: 'bg-gray-100 text-gray-600',
-};
-
-const STATUS_BADGE: Record<string, string> = {
-  ACTIVE: 'bg-green-100 text-green-700',
-  BLOCKED: 'bg-red-100 text-red-700',
-};
+  useUsers,
+  useUserTeams,
+  useCreateUser,
+  useDeleteUser,
+  useAddUserToTeam,
+  useRemoveUserFromTeam,
+} from '../features/users';
+import type { User } from '../features/users';
+import { useTeams } from '../features/teams';
+import { useAuth } from '../store/AuthContext';
+import { ROLE_RANK, ALL_ROLES, ROLE_BADGE, STATUS_BADGE } from '../config/roles';
 
 interface CreateForm {
   email: string;
@@ -45,128 +23,55 @@ const EMPTY_FORM: CreateForm = { email: '', password: '', name: '', role: 'USER'
 
 export function UsersPage() {
   const { user: authUser } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const { data: users = [], isLoading } = useUsers();
+  const { data: allTeams = [] } = useTeams();
+
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [userTeams, setUserTeams] = useState<UserTeam[]>([]);
-  const [allTeams, setAllTeams] = useState<Team[]>([]);
-  const [panelLoading, setPanelLoading] = useState(false);
   const [addTeamId, setAddTeamId] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState<CreateForm>(EMPTY_FORM);
-  const [formError, setFormError] = useState('');
-  const [creating, setCreating] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
+
+  const { data: userTeams = [], isFetching: panelLoading } = useUserTeams(selectedUser?.id);
+
+  const createUser = useCreateUser();
+  const deleteUser = useDeleteUser();
+  const addToTeam = useAddUserToTeam(selectedUser?.id ?? null);
+  const removeFromTeam = useRemoveUserFromTeam(selectedUser?.id ?? null);
 
   const callerRank = ROLE_RANK[authUser?.role ?? 'USER'] ?? 0;
   const assignableRoles = ALL_ROLES.filter((r) => ROLE_RANK[r] <= callerRank);
-
-  useEffect(() => {
-    Promise.all([getUsers(), getTeams()])
-      .then(([u, t]) => {
-        setUsers(u);
-        setAllTeams(t);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  async function selectUser(user: User) {
-    setSelectedUser(user);
-    setAddTeamId('');
-    setError('');
-    setPanelLoading(true);
-    try {
-      const teams = await getUserTeams(user.id);
-      setUserTeams(teams);
-    } finally {
-      setPanelLoading(false);
-    }
-  }
-
-  async function handleAddToTeam() {
-    if (!selectedUser || !addTeamId) return;
-    setSaving(true);
-    setError('');
-    try {
-      await addTeamMember(Number(addTeamId), selectedUser.id);
-      const teams = await getUserTeams(selectedUser.id);
-      setUserTeams(teams);
-      setAddTeamId('');
-    } catch {
-      setError('Failed to add user to team. They may already be a member.');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleRemoveFromTeam(teamId: number) {
-    if (!selectedUser) return;
-    setSaving(true);
-    setError('');
-    try {
-      await removeTeamMember(teamId, selectedUser.id);
-      setUserTeams((prev) => prev.filter((t) => t.id !== teamId));
-    } catch {
-      setError('Failed to remove user from team.');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setFormError('');
-    setCreating(true);
-    try {
-      const created = await createUser({
-        email: form.email,
-        password: form.password,
-        name: form.name || undefined,
-        role: form.role,
-      });
-      setUsers((prev) => [created, ...prev]);
-      setShowCreate(false);
-      setForm(EMPTY_FORM);
-    } catch (err: any) {
-      setFormError(err?.response?.data?.message ?? 'Failed to create user.');
-    } finally {
-      setCreating(false);
-    }
-  }
-
-  function openCreate() {
-    setForm({ ...EMPTY_FORM, role: assignableRoles[0] ?? 'USER' });
-    setFormError('');
-    setShowCreate(true);
-  }
-
-  async function handleDelete() {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    setDeleteError('');
-    try {
-      await deleteUser(deleteTarget.id);
-      setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-      if (selectedUser?.id === deleteTarget.id) setSelectedUser(null);
-      setDeleteTarget(null);
-    } catch (err: any) {
-      setDeleteError(err?.response?.data?.message ?? 'Failed to delete user.');
-    } finally {
-      setDeleting(false);
-    }
-  }
 
   const memberTeamIds = new Set(userTeams.map((t) => t.id));
   const availableTeams = allTeams.filter((t) => !memberTeamIds.has(t.id));
   const ownedTeams = selectedUser ? allTeams.filter((t) => t.ownerId === selectedUser.id) : [];
 
-  if (loading) {
+  function openCreate() {
+    setForm({ ...EMPTY_FORM, role: assignableRoles[0] ?? 'USER' });
+    setShowCreate(true);
+  }
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    createUser.mutate(
+      { email: form.email, password: form.password, name: form.name || undefined, role: form.role },
+      {
+        onSuccess: () => { setShowCreate(false); setForm(EMPTY_FORM); },
+      },
+    );
+  }
+
+  async function handleAddToTeam() {
+    if (!addTeamId) return;
+    addToTeam.mutate(Number(addTeamId), {
+      onSuccess: () => setAddTeamId(''),
+    });
+  }
+
+  if (isLoading) {
     return <div className="text-sm text-gray-500">Loading users…</div>;
   }
 
@@ -202,7 +107,7 @@ export function UsersPage() {
               {users.map((user) => (
                 <tr
                   key={user.id}
-                  onClick={() => selectUser(user)}
+                  onClick={() => { setSelectedUser(user); setAddTeamId(''); }}
                   className={`border-b border-gray-50 cursor-pointer transition-colors last:border-0 ${
                     selectedUser?.id === user.id ? 'bg-blue-50' : 'hover:bg-gray-50'
                   }`}
@@ -212,20 +117,12 @@ export function UsersPage() {
                     <div className="text-gray-400 text-xs">{user.email}</div>
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                        ROLE_BADGE[user.role] ?? ROLE_BADGE.USER
-                      }`}
-                    >
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ROLE_BADGE[user.role] ?? ROLE_BADGE.USER}`}>
                       {user.role.replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                        STATUS_BADGE[user.status] ?? STATUS_BADGE.ACTIVE
-                      }`}
-                    >
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGE[user.status] ?? STATUS_BADGE.ACTIVE}`}>
                       {user.status}
                     </span>
                   </td>
@@ -235,7 +132,7 @@ export function UsersPage() {
                   <td className="px-4 py-3 text-right">
                     {(callerRank >= ROLE_RANK['SUPER_ADMIN'] || callerRank > ROLE_RANK[user.role]) && (
                       <button
-                        onClick={(e) => { e.stopPropagation(); setDeleteError(''); setDeleteTarget(user); }}
+                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(user); }}
                         className="text-xs text-red-500 hover:text-red-700"
                       >
                         Delete
@@ -281,7 +178,12 @@ export function UsersPage() {
 
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Teams</h3>
 
-            {error && <p className="text-xs text-red-600 mb-2">{error}</p>}
+            {addToTeam.isError && (
+              <p className="text-xs text-red-600 mb-2">Failed to add user to team. They may already be a member.</p>
+            )}
+            {removeFromTeam.isError && (
+              <p className="text-xs text-red-600 mb-2">Failed to remove user from team.</p>
+            )}
 
             {panelLoading ? (
               <p className="text-sm text-gray-400">Loading…</p>
@@ -290,14 +192,11 @@ export function UsersPage() {
             ) : (
               <ul className="space-y-1 mb-3">
                 {userTeams.map((team) => (
-                  <li
-                    key={team.id}
-                    className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50"
-                  >
+                  <li key={team.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
                     <span className="text-sm text-gray-700">{team.name}</span>
                     <button
-                      onClick={() => handleRemoveFromTeam(team.id)}
-                      disabled={saving}
+                      onClick={() => removeFromTeam.mutate(team.id)}
+                      disabled={removeFromTeam.isPending}
                       className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
                     >
                       Remove
@@ -316,21 +215,18 @@ export function UsersPage() {
                 >
                   <option value="">Add to team…</option>
                   {availableTeams.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
+                    <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
                 </select>
                 <button
                   onClick={handleAddToTeam}
-                  disabled={!addTeamId || saving}
+                  disabled={!addTeamId || addToTeam.isPending}
                   className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm rounded-lg transition-colors"
                 >
                   Add
                 </button>
               </div>
             )}
-
           </div>
         </div>
       )}
@@ -376,7 +272,9 @@ export function UsersPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Name <span className="text-gray-400 font-normal">(optional)</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
                 <input
                   type="text"
                   value={form.name}
@@ -394,14 +292,16 @@ export function UsersPage() {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {assignableRoles.map((r) => (
-                    <option key={r} value={r}>
-                      {r.replace('_', ' ')}
-                    </option>
+                    <option key={r} value={r}>{r.replace('_', ' ')}</option>
                   ))}
                 </select>
               </div>
 
-              {formError && <p className="text-sm text-red-600">{formError}</p>}
+              {createUser.isError && (
+                <p className="text-sm text-red-600">
+                  {(createUser.error as any)?.response?.data?.message ?? 'Failed to create user.'}
+                </p>
+              )}
 
               <div className="flex gap-3 pt-1">
                 <button
@@ -413,10 +313,10 @@ export function UsersPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={creating}
+                  disabled={createUser.isPending}
                   className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
                 >
-                  {creating ? 'Creating…' : 'Create User'}
+                  {createUser.isPending ? 'Creating…' : 'Create User'}
                 </button>
               </div>
             </form>
@@ -430,24 +330,36 @@ export function UsersPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
             <h2 className="text-lg font-semibold text-gray-800 mb-2">Delete User</h2>
             <p className="text-sm text-gray-600 mb-1">
-              Are you sure you want to delete <span className="font-medium">{deleteTarget.name ?? deleteTarget.email}</span>?
+              Are you sure you want to delete{' '}
+              <span className="font-medium">{deleteTarget.name ?? deleteTarget.email}</span>?
             </p>
             <p className="text-xs text-gray-400 mb-5">This action cannot be undone.</p>
-            {deleteError && <p className="text-sm text-red-600 mb-4">{deleteError}</p>}
+            {deleteUser.isError && (
+              <p className="text-sm text-red-600 mb-4">
+                {(deleteUser.error as any)?.response?.data?.message ?? 'Failed to delete user.'}
+              </p>
+            )}
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                disabled={deleting}
+                disabled={deleteUser.isPending}
                 className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
-                onClick={handleDelete}
-                disabled={deleting}
+                onClick={() =>
+                  deleteUser.mutate(deleteTarget.id, {
+                    onSuccess: () => {
+                      if (selectedUser?.id === deleteTarget.id) setSelectedUser(null);
+                      setDeleteTarget(null);
+                    },
+                  })
+                }
+                disabled={deleteUser.isPending}
                 className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
               >
-                {deleting ? 'Deleting…' : 'Delete'}
+                {deleteUser.isPending ? 'Deleting…' : 'Delete'}
               </button>
             </div>
           </div>

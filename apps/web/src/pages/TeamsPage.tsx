@@ -1,52 +1,44 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTeams, createTeam, deleteTeam, Team } from '../lib/api';
+import { useTeams, useCreateTeam, useDeleteTeam } from '../features/teams';
+import type { Team } from '../features/teams';
 
 export function TeamsPage() {
   const navigate = useNavigate();
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: teams = [], isLoading } = useTeams();
+  const createTeam = useCreateTeam();
+  const deleteTeam = useDeleteTeam();
+
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    getTeams()
-      .then(setTeams)
-      .finally(() => setLoading(false));
-  }, []);
-
-  async function handleCreate(e: React.FormEvent) {
+  function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-    setSaving(true);
     setError('');
-    try {
-      const team = await createTeam({ name: name.trim(), description: description.trim() || undefined });
-      setTeams((prev) => [...prev, team].sort((a, b) => a.name.localeCompare(b.name)));
-      setName('');
-      setDescription('');
-      setShowCreate(false);
-    } catch {
-      setError('Failed to create team. Name may already be taken.');
-    } finally {
-      setSaving(false);
-    }
+    createTeam.mutate(
+      { name: name.trim(), description: description.trim() || undefined },
+      {
+        onSuccess: () => {
+          setName('');
+          setDescription('');
+          setShowCreate(false);
+        },
+        onError: () => setError('Failed to create team. Name may already be taken.'),
+      }
+    );
   }
 
-  async function handleDelete(team: Team) {
-    if (!confirm(`Delete team "${team.name}"? This cannot be undone.`)) return;
-    try {
-      await deleteTeam(team.id);
-      setTeams((prev) => prev.filter((t) => t.id !== team.id));
-    } catch {
-      setError('Failed to delete team.');
-    }
+  function handleDelete(team: Team) {
+    if (!window.confirm(`Delete team "${team.name}"? This cannot be undone.`)) return;
+    deleteTeam.mutate(team.id, {
+      onError: () => setError('Failed to delete team.'),
+    });
   }
 
-  if (loading) {
+  if (isLoading) {
     return <div className="text-sm text-gray-500">Loading teams…</div>;
   }
 
@@ -97,10 +89,10 @@ export function TeamsPage() {
             <div className="flex gap-2 pt-1">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={createTeam.isPending}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
               >
-                {saving ? 'Creating…' : 'Create'}
+                {createTeam.isPending ? 'Creating…' : 'Create'}
               </button>
               <button
                 type="button"

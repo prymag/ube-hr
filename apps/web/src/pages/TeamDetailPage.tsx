@@ -1,49 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  getTeam,
-  updateTeam,
-  getTeamMembers,
-  getUsers,
-  addTeamMember,
-  removeTeamMember,
-  Team,
-  TeamMember,
-  User,
-} from '../lib/api';
+  useTeam,
+  useTeamMembers,
+  useUpdateTeam,
+  useAddTeamMember,
+  useRemoveTeamMember,
+} from '../features/teams';
+import { useUsers } from '../features/users';
 
 export function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const teamId = Number(id);
 
-  const [team, setTeam] = useState<Team | null>(null);
-  const [members, setMembers] = useState<TeamMember[]>([]);
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const teamQuery = useTeam(teamId);
+  const membersQuery = useTeamMembers(teamId);
+  const usersQuery = useUsers();
+  const updateTeam = useUpdateTeam(teamId);
+  const addMember = useAddTeamMember(teamId);
+  const removeMember = useRemoveTeamMember(teamId);
 
-  // Inline edit state
+  const team = teamQuery.data;
+  const members = membersQuery.data ?? [];
+  const allUsers = usersQuery.data ?? [];
+
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
-  const [saving, setSaving] = useState(false);
-
-  // Add member state
   const [addUserId, setAddUserId] = useState('');
-  const [addingMember, setAddingMember] = useState(false);
+  const [error, setError] = useState('');
   const [addError, setAddError] = useState('');
-
-  useEffect(() => {
-    Promise.all([getTeam(teamId), getTeamMembers(teamId), getUsers()])
-      .then(([t, m, u]) => {
-        setTeam(t);
-        setMembers(m);
-        setAllUsers(u);
-      })
-      .catch(() => setError('Team not found.'))
-      .finally(() => setLoading(false));
-  }, [teamId]);
 
   function startEdit() {
     if (!team) return;
@@ -52,55 +39,40 @@ export function TeamDetailPage() {
     setEditing(true);
   }
 
-  async function handleSaveEdit(e: React.FormEvent) {
+  function handleSaveEdit(e: React.FormEvent) {
     e.preventDefault();
-    if (!team) return;
-    setSaving(true);
     setError('');
-    try {
-      const updated = await updateTeam(team.id, {
-        name: editName.trim(),
-        description: editDesc.trim() || undefined,
-      });
-      setTeam(updated);
-      setEditing(false);
-    } catch {
-      setError('Failed to update team.');
-    } finally {
-      setSaving(false);
-    }
+    updateTeam.mutate(
+      { name: editName.trim(), description: editDesc.trim() || undefined },
+      {
+        onSuccess: () => setEditing(false),
+        onError: () => setError('Failed to update team.'),
+      }
+    );
   }
 
-  async function handleAddMember() {
+  function handleAddMember() {
     if (!addUserId) return;
-    setAddingMember(true);
     setAddError('');
-    try {
-      await addTeamMember(teamId, Number(addUserId));
-      const updated = await getTeamMembers(teamId);
-      setMembers(updated);
-      setAddUserId('');
-    } catch {
-      setAddError('Failed to add member. They may already be in this team.');
-    } finally {
-      setAddingMember(false);
-    }
+    addMember.mutate(Number(addUserId), {
+      onSuccess: () => setAddUserId(''),
+      onError: () => setAddError('Failed to add member. They may already be in this team.'),
+    });
   }
 
-  async function handleRemoveMember(userId: number) {
-    try {
-      await removeTeamMember(teamId, userId);
-      setMembers((prev) => prev.filter((m) => m.id !== userId));
-    } catch {
-      setError('Failed to remove member.');
-    }
+  function handleRemoveMember(userId: number) {
+    removeMember.mutate(userId, {
+      onError: () => setError('Failed to remove member.'),
+    });
   }
 
   const memberIds = new Set(members.map((m) => m.id));
   const availableUsers = allUsers.filter((u) => !memberIds.has(u.id));
 
-  if (loading) return <div className="text-sm text-gray-500">Loading…</div>;
-  if (error && !team) return <div className="text-sm text-red-500">{error}</div>;
+  const isLoading = teamQuery.isLoading || membersQuery.isLoading || usersQuery.isLoading;
+
+  if (isLoading) return <div className="text-sm text-gray-500">Loading…</div>;
+  if (teamQuery.isError) return <div className="text-sm text-red-500">Team not found.</div>;
   if (!team) return null;
 
   return (
@@ -141,10 +113,10 @@ export function TeamDetailPage() {
             <div className="flex gap-2 pt-1">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={updateTeam.isPending}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
               >
-                {saving ? 'Saving…' : 'Save'}
+                {updateTeam.isPending ? 'Saving…' : 'Save'}
               </button>
               <button
                 type="button"
@@ -204,15 +176,16 @@ export function TeamDetailPage() {
             </select>
             <button
               onClick={handleAddMember}
-              disabled={!addUserId || addingMember}
+              disabled={!addUserId || addMember.isPending}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
             >
-              {addingMember ? 'Adding…' : 'Add'}
+              {addMember.isPending ? 'Adding…' : 'Add'}
             </button>
           </div>
         )}
 
         {addError && <p className="text-sm text-red-600 mb-3">{addError}</p>}
+        {error && !editing && <p className="text-sm text-red-600 mb-3">{error}</p>}
 
         {members.length === 0 ? (
           <p className="text-sm text-gray-400 py-4 text-center">No members yet.</p>

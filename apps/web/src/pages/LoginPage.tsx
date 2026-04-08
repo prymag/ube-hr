@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, useLogin } from '../features/authentication';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -9,25 +9,28 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: FormEvent) {
+  const login = useLogin();
+
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError('');
-    setLoading(true);
-    try {
-      const { data } = await axios.post('/api/auth/login', { email, password }, { withCredentials: true });
-      setToken(data.access_token);
-      navigate('/dashboard');
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        setError('Invalid email or password.');
-      } else {
-        setError('Something went wrong. Please try again.');
+    login.mutate(
+      { email, password },
+      {
+        onSuccess: (data) => {
+          setToken(data.access_token);
+          navigate('/dashboard');
+        },
+        onError: (err) => {
+          if (axios.isAxiosError(err) && err.response?.status === 401) {
+            setError('Invalid email or password.');
+          } else {
+            setError('Something went wrong. Please try again.');
+          }
+        },
       }
-    } finally {
-      setLoading(false);
-    }
+    );
   }
 
   return (
@@ -81,10 +84,10 @@ export function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={login.isPending}
             className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
           >
-            {loading ? 'Signing in…' : 'Sign in'}
+            {login.isPending ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
       </div>

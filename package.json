@@ -97,6 +97,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/swagger": "^11.2.6",
+    "@tanstack/react-query": "^5.96.2",
     "argon2": "^0.44.0",
     "axios": "^1.6.0",
     "class-validator": "^0.14.4",
