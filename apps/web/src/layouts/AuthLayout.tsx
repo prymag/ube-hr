@@ -66,7 +66,7 @@ export function AuthLayout() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto p-8">
+      <main className="flex-1 overflow-auto p-8 min-w-0">
         <Outlet />
       </main>
     </div>

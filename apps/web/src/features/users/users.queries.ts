@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient, skipToken } from '@tanstack/react-query';
-import { getUsers, getUserTeams, createUser, deleteUser } from './users.api';
+import { getUsers, getUserTeams, createUser, updateUser, deleteUser } from './users.api';
 import { addTeamMember, removeTeamMember } from '../teams/teams.api';
 
 export const userKeys = {
@@ -24,6 +24,14 @@ export function useCreateUser() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: createUser,
+    onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.lists() }),
+  });
+}
+
+export function useUpdateUser(userId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { name?: string; role?: string }) => updateUser(userId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.lists() }),
   });
 }

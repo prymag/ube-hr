@@ -5,6 +5,7 @@ import { DashboardPage } from '../pages/DashboardPage';
 import { UsersPage } from '../pages/UsersPage';
 import { TeamsPage } from '../pages/TeamsPage';
 import { TeamDetailPage } from '../pages/TeamDetailPage';
+import { UserDetailPage } from '../pages/UserDetailPage';
 import { AuthLayout } from '../layouts/AuthLayout';
 
 function GuestOnly() {
@@ -30,6 +31,7 @@ export function App() {
           <Route element={<AuthLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/users" element={<UsersPage />} />
+            <Route path="/users/:id" element={<UserDetailPage />} />
             <Route path="/teams" element={<TeamsPage />} />
             <Route path="/teams/:id" element={<TeamDetailPage />} />
           </Route>
