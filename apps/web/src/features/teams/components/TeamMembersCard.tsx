@@ -17,14 +17,14 @@ interface TeamMembersCardProps {
 
 export function TeamMembersCard({ teamId }: TeamMembersCardProps) {
   const membersQuery = useTeamMembers(teamId);
-  const usersQuery = useUsers();
+  const usersQuery = useUsers({ pageSize: 1000 });
   const addMember = useAddTeamMember(teamId);
   const removeMember = useRemoveTeamMember(teamId);
 
   const [addUserId, setAddUserId] = useState('');
 
   const members = membersQuery.data ?? [];
-  const allUsers = usersQuery.data ?? [];
+  const allUsers = usersQuery.data?.data ?? [];
 
   const memberIds = new Set(members.map((m) => m.id));
   const availableUsers = allUsers.filter((u) => !memberIds.has(u.id));

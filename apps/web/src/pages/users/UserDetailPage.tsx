@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  useUsers,
+  useUser,
   useUpdateUser,
   EditUserForm,
   OwnedTeamsCard,
@@ -17,14 +17,14 @@ export function UserDetailPage() {
   const userId = Number(id);
   const { user: authUser } = useAuth();
 
-  const usersQuery = useUsers();
-  const user = usersQuery.data?.find((u) => u.id === userId);
+  const userQuery = useUser(userId);
+  const user = userQuery.data;
   const updateUser = useUpdateUser(userId);
 
   const callerRank = ROLE_RANK[authUser?.role ?? 'USER'] ?? 0;
   const assignableRoles = ALL_ROLES.filter((r) => ROLE_RANK[r] <= callerRank);
 
-  if (usersQuery.isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
+  if (userQuery.isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
   if (!user) return <div className="text-sm text-destructive">User not found.</div>;
 
   function handleSubmit(values: EditUserFormValues) {

@@ -1,5 +1,7 @@
+import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Team } from '../team.types';
+import type { TeamSortField, SortDir } from '../useTeamsTable';
 import { Button } from '@ube-hr/ui';
 import { Card } from '@ube-hr/ui';
 import {
@@ -14,27 +16,39 @@ import {
 interface TeamsTableProps {
   teams: Team[];
   onDeleteRequest: (team: Team) => void;
+  sortField: TeamSortField;
+  sortDir: SortDir;
+  onSort: (field: TeamSortField) => void;
 }
 
-export function TeamsTable({ teams, onDeleteRequest }: TeamsTableProps) {
+function SortIcon({ field, sortField, sortDir }: { field: TeamSortField; sortField: TeamSortField; sortDir: SortDir }) {
+  if (sortField !== field) return <ChevronsUpDown className="ml-1 inline h-3.5 w-3.5 opacity-40" />;
+  return sortDir === 'asc'
+    ? <ChevronUp className="ml-1 inline h-3.5 w-3.5" />
+    : <ChevronDown className="ml-1 inline h-3.5 w-3.5" />;
+}
+
+export function TeamsTable({ teams, onDeleteRequest, sortField, sortDir, onSort }: TeamsTableProps) {
   const navigate = useNavigate();
 
-  if (teams.length === 0) {
-    return (
-      <div className="text-center py-16 text-muted-foreground text-sm">
-        No teams yet. Create one to get started.
-      </div>
-    );
-  }
+  const th = (field: TeamSortField, label: string) => (
+    <TableHead
+      className="cursor-pointer select-none whitespace-nowrap"
+      onClick={() => onSort(field)}
+    >
+      {label}
+      <SortIcon field={field} sortField={sortField} sortDir={sortDir} />
+    </TableHead>
+  );
 
   return (
     <Card>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            {th('name', 'Name')}
             <TableHead>Description</TableHead>
-            <TableHead>Created</TableHead>
+            {th('createdAt', 'Created')}
             <TableHead />
           </TableRow>
         </TableHeader>

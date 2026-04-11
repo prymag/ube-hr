@@ -1,8 +1,8 @@
 import api from '../../services/axios';
-import type { User, UserTeam } from './user.types';
+import type { User, UserTeam, UsersListParams, PaginatedResponse } from './user.types';
 
-export const getUsers = async () => {
-  const r = await api.get<User[]>('/api/users');
+export const getUsers = async (params?: UsersListParams) => {
+  const r = await api.get<PaginatedResponse<User>>('/api/users', { params });
   return r.data;
 };
 

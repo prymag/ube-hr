@@ -1,4 +1,6 @@
 export { getUsers, getUser, getUserTeams, createUser, updateUser, deleteUser } from './users.api';
+export { useUsersTable } from './useUsersTable';
+export type { UserSortField, SortDir as UserSortDir } from './useUsersTable';
 export { UsersTable } from './components/UsersTable';
 export { CreateUserForm } from './components/CreateUserForm';
 export { DeleteUserDialog } from './components/DeleteUserDialog';
@@ -11,6 +13,7 @@ export type { User, UserTeam } from './user.types';
 export {
   userKeys,
   useUsers,
+  useUser,
   useUserTeams,
   useCreateUser,
   useUpdateUser,

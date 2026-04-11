@@ -13,3 +13,11 @@ export interface TeamMember {
   name: string | null;
   joinedAt: string;
 }
+
+export interface TeamsListParams {
+  search?: string;
+  sortField?: string;
+  sortDir?: string;
+  page?: number;
+  pageSize?: number;
+}

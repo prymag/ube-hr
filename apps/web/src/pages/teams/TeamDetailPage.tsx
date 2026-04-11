@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTeam, useUpdateTeam, EditTeamForm, TeamMembersCard } from '../../features/teams';
-import { useUsers } from '../../features/users';
+import { useUser } from '../../features/users';
 import type { EditTeamFormValues } from '../../features/teams';
 import { Button, Card, CardContent } from '@ube-hr/ui';
 
@@ -10,18 +10,15 @@ export function TeamDetailPage() {
   const teamId = Number(id);
 
   const teamQuery = useTeam(teamId);
-  const usersQuery = useUsers();
   const updateTeam = useUpdateTeam(teamId);
 
   const team = teamQuery.data;
-  const allUsers = usersQuery.data ?? [];
+  const ownerQuery = useUser(team?.ownerId);
 
-  const isLoading = teamQuery.isLoading || usersQuery.isLoading;
-
-  if (isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
+  if (teamQuery.isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
   if (teamQuery.isError || !team) return <div className="text-sm text-destructive">Team not found.</div>;
 
-  const owner = allUsers.find((u) => u.id === team.ownerId);
+  const owner = ownerQuery.data;
 
   function handleSubmit(values: EditTeamFormValues) {
     updateTeam.mutate({

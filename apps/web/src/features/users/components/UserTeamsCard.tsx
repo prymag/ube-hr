@@ -16,14 +16,14 @@ interface UserTeamsCardProps {
 }
 
 export function UserTeamsCard({ userId }: UserTeamsCardProps) {
-  const teamsQuery = useTeams();
+  const teamsQuery = useTeams({ pageSize: 1000 });
   const userTeamsQuery = useUserTeams(userId);
   const addToTeam = useAddUserToTeam(userId);
   const removeFromTeam = useRemoveUserFromTeam(userId);
 
   const [addTeamId, setAddTeamId] = useState('');
 
-  const allTeams = teamsQuery.data ?? [];
+  const allTeams = teamsQuery.data?.data ?? [];
   const userTeams = userTeamsQuery.data ?? [];
 
   const memberTeamIds = new Set(userTeams.map((t) => t.id));

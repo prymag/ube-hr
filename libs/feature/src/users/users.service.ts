@@ -3,16 +3,77 @@ import { secrets, PrismaService, Role, UserStatus } from '@ube-hr/backend';
 import { roleRank, visibleRoles } from '../auth/permissions';
 import { CreateUserDto } from './dto/create-user.dto';
 
+const VALID_USER_SORT = ['name', 'email', 'role', 'status', 'createdAt'] as const;
+type UserSortField = typeof VALID_USER_SORT[number];
+
+export interface UsersQuery {
+  search?: string;
+  role?: string;
+  status?: string;
+  sortField?: string;
+  sortDir?: string;
+  page?: string | number;
+  pageSize?: string | number;
+}
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(callerRole: Role) {
-    return this.prisma.user.findMany({
-      where: { deletedAt: null, role: { in: visibleRoles(callerRole) } },
-      select: { id: true, email: true, name: true, role: true, status: true, createdAt: true },
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(callerRole: Role, query: UsersQuery = {}) {
+    const { search, role, status, sortField, sortDir, page, pageSize } = query;
+
+    const pageNum = Math.max(1, parseInt(String(page ?? 1), 10) || 1);
+    const pageSizeNum = Math.min(100, Math.max(1, parseInt(String(pageSize ?? 10), 10) || 10));
+
+    const validSort: UserSortField = (VALID_USER_SORT as readonly string[]).includes(sortField ?? '')
+      ? (sortField as UserSortField)
+      : 'createdAt';
+    const validDir = sortDir === 'asc' ? 'asc' : ('desc' as const);
+
+    const visible = visibleRoles(callerRole);
+    const validRole =
+      role && Object.values(Role).includes(role as Role) ? (role as Role) : undefined;
+    const validStatus =
+      status && Object.values(UserStatus).includes(status as UserStatus)
+        ? (status as UserStatus)
+        : undefined;
+
+    const roleFilter =
+      validRole && visible.includes(validRole) ? validRole : { in: visible };
+
+    const where = {
+      deletedAt: null as null,
+      role: roleFilter,
+      ...(validStatus ? { status: validStatus } : {}),
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' as const } },
+              { email: { contains: search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    };
+
+    const [total, data] = await Promise.all([
+      this.prisma.user.count({ where }),
+      this.prisma.user.findMany({
+        where,
+        select: { id: true, email: true, name: true, role: true, status: true, createdAt: true },
+        orderBy: { [validSort]: validDir },
+        skip: (pageNum - 1) * pageSizeNum,
+        take: pageSizeNum,
+      }),
+    ]);
+
+    return {
+      data,
+      total,
+      page: pageNum,
+      pageSize: pageSizeNum,
+      pageCount: Math.max(1, Math.ceil(total / pageSizeNum)),
+    };
   }
 
   async create(dto: CreateUserDto, callerRole: Role) {
