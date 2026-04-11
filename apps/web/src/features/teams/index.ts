@@ -21,7 +21,9 @@ export {
   useRemoveTeamMember,
 } from './teams.queries';
 export { TeamsTable } from './components/TeamsTable';
-export { CreateTeamDialog } from './components/CreateTeamDialog';
+export { CreateTeamForm } from './components/CreateTeamForm';
+export type { CreateTeamFormValues } from './components/CreateTeamForm';
+export { EditTeamForm } from './components/EditTeamForm';
+export type { EditTeamFormValues } from './components/EditTeamForm';
 export { DeleteTeamDialog } from './components/DeleteTeamDialog';
-export { TeamHeaderCard } from './components/TeamHeaderCard';
 export { TeamMembersCard } from './components/TeamMembersCard';

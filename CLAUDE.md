@@ -17,10 +17,17 @@ Each feature folder (e.g. `features/users/`) should contain:
 - **`index.ts`** — re-exports everything
 - **`components/`** — all UI components for the feature:
   - **`<Entity>Table.tsx`** — table/list component for the entity
-  - **`Create<Entity>Dialog.tsx`** — create dialog; owns its form state and create mutation
   - **`Delete<Entity>Dialog.tsx`** — delete confirmation dialog; owns its delete mutation
 
-Pages import from the feature index and handle only open/close state. Mutations and form state live inside the dialog components, not in the page.
+## Frontend CRUD navigation pattern
+
+**Never use modals for create, read, or update operations.** Use dedicated pages instead:
+
+- **Create** — navigates to a `/new` route (e.g. `/users/new`) with a `Create<Entity>Page` component that owns form state and the create mutation.
+- **Read/Update** — navigates to a detail route (e.g. `/users/:id`) with a `<Entity>DetailPage` component. The page loads the entity, presents an editable form pre-filled with current values, and has a Save button that calls the update mutation. Read and update share the same page.
+- **Delete** — the only operation that may use a dialog/modal for confirmation.
+
+Pages own the form state and mutation. They pass values, change handlers, `onSubmit`, `isPending`, and `error` down to the form component.
 
 ## Form design
 
