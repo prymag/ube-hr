@@ -2,13 +2,30 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPip
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import {
   UsersService,
-  UserResponseDto,
-  CreateUserDto,
   PermissionGuard,
   RequirePermission,
   AuthenticatedRequest,
   PERMISSIONS,
+  type UserRecord,
 } from '@ube-hr/feature';
+import { type UserResponse, type UserTeam, type PaginatedResponse } from '@ube-hr/shared';
+import { CreateUserDto } from './users/dto/create-user.dto';
+import { UserResponseDto } from './users/dto/user-response.dto';
+
+function toUserResponse(user: UserRecord): UserResponse {
+  return {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role as UserResponse['role'],
+    status: user.status as UserResponse['status'],
+    createdAt: user.createdAt.toISOString(),
+  };
+}
+
+function toUserTeam(t: { id: number; name: string; description: string | null; joinedAt: Date }): UserTeam {
+  return { id: t.id, name: t.name, description: t.description, joinedAt: t.joinedAt.toISOString() };
+}
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -21,8 +38,9 @@ export class UsersController {
   @RequirePermission(PERMISSIONS.USERS_CREATE)
   @ApiOperation({ summary: 'Create a user' })
   @ApiCreatedResponse({ type: UserResponseDto })
-  create(@Body() dto: CreateUserDto, @Req() req: AuthenticatedRequest) {
-    return this.usersService.create(dto, req.user!.role);
+  async create(@Body() dto: CreateUserDto, @Req() req: AuthenticatedRequest): Promise<UserResponse> {
+    const user = await this.usersService.create(dto, req.user!.role);
+    return toUserResponse(user);
   }
 
   @Get()
@@ -35,7 +53,7 @@ export class UsersController {
   @ApiQuery({ name: 'sortDir', required: false, enum: ['asc', 'desc'] })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
-  findAll(
+  async findAll(
     @Req() req: AuthenticatedRequest,
     @Query('search') search?: string,
     @Query('role') role?: string,
@@ -44,23 +62,26 @@ export class UsersController {
     @Query('sortDir') sortDir?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
-  ) {
-    return this.usersService.findAll(req.user!.role, { search, role, status, sortField, sortDir, page, pageSize });
+  ): Promise<PaginatedResponse<UserResponse>> {
+    const result = await this.usersService.findAll(req.user!.role, { search, role, status, sortField, sortDir, page, pageSize });
+    return { ...result, data: result.data.map(toUserResponse) };
   }
 
   @Get(':id')
   @RequirePermission(PERMISSIONS.USERS_READ)
   @ApiOperation({ summary: 'Get user details' })
   @ApiOkResponse({ type: UserResponseDto })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findById(id);
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<UserResponse | null> {
+    const user = await this.usersService.findById(id);
+    return user ? toUserResponse(user) : null;
   }
 
   @Get(':id/teams')
   @RequirePermission(PERMISSIONS.USERS_READ)
   @ApiOperation({ summary: 'List teams for a user' })
-  findTeams(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findTeams(id);
+  async findTeams(@Param('id', ParseIntPipe) id: number): Promise<UserTeam[]> {
+    const teams = await this.usersService.findTeams(id);
+    return teams.map(toUserTeam);
   }
 
   @Delete(':id')
@@ -68,7 +89,7 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a user' })
   @ApiNoContentResponse()
-  remove(@Param('id', ParseIntPipe) id: number, @Req() req: AuthenticatedRequest) {
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req: AuthenticatedRequest): Promise<void> {
     return this.usersService.remove(id, req.user!.role);
   }
 }

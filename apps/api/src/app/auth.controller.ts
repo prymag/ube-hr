@@ -19,13 +19,13 @@ import {
   LocalAuthGuard,
   PermissionGuard,
   RequirePermission,
-  LoginDto,
-  TokenResponseDto,
-  UserResponseDto,
   AuthenticatedRequest,
   PERMISSIONS,
   PermissionsService,
 } from '@ube-hr/feature';
+import { type MeResponse } from '@ube-hr/shared';
+import { LoginDto } from './auth/dto/login.dto';
+import { TokenResponseDto } from './auth/dto/token-response.dto';
 
 const REFRESH_COOKIE = 'refresh_token';
 
@@ -108,9 +108,14 @@ export class AuthController {
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current authenticated user' })
-  @ApiOkResponse({ type: UserResponseDto })
-  me(@Req() req: AuthenticatedRequest) {
+  me(@Req() req: AuthenticatedRequest): MeResponse {
     const permissions = this.permissionsService.getForRole(req.user!.role);
-    return { ...req.user, permissions };
+    return {
+      id: req.user!.id,
+      email: req.user!.email,
+      role: req.user!.role as MeResponse['role'],
+      impersonatedBy: req.user!.impersonatedBy,
+      permissions,
+    };
   }
 }

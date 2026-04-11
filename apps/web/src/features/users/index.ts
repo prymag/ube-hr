@@ -9,7 +9,7 @@ export { UserTeamsCard } from './components/UserTeamsCard';
 export { OwnedTeamsCard } from './components/OwnedTeamsCard';
 export type { CreateUserFormValues } from './components/CreateUserForm';
 export type { EditUserFormValues } from './components/EditUserForm';
-export type { User, UserTeam } from './user.types';
+export type { UserResponse, UserTeam } from '@ube-hr/shared';
 export {
   userKeys,
   useUsers,

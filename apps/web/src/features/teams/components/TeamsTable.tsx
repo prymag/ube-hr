@@ -1,6 +1,6 @@
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { Team } from '../team.types';
+import type { TeamResponse } from '@ube-hr/shared';
 import type { TeamSortField, SortDir } from '../useTeamsTable';
 import { Button } from '@ube-hr/ui';
 import { Card } from '@ube-hr/ui';
@@ -14,8 +14,8 @@ import {
 } from '@ube-hr/ui';
 
 interface TeamsTableProps {
-  teams: Team[];
-  onDeleteRequest: (team: Team) => void;
+  teams: TeamResponse[];
+  onDeleteRequest: (team: TeamResponse) => void;
   sortField: TeamSortField;
   sortDir: SortDir;
   onSort: (field: TeamSortField) => void;

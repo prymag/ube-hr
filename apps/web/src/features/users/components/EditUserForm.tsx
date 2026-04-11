@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ube-hr/ui';
-import type { User } from '../user.types';
+import type { UserResponse } from '@ube-hr/shared';
 
 export interface EditUserFormValues {
   name: string;
@@ -18,7 +18,7 @@ export interface EditUserFormValues {
 }
 
 interface EditUserFormProps {
-  user: User;
+  user: UserResponse;
   assignableRoles: string[];
   isPending: boolean;
   isError: boolean;

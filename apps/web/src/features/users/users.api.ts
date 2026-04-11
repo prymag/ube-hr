@@ -1,13 +1,13 @@
 import api from '../../services/axios';
-import type { User, UserTeam, UsersListParams, PaginatedResponse } from './user.types';
+import type { UserResponse, UserTeam, UsersListParams, PaginatedResponse } from '@ube-hr/shared';
 
 export const getUsers = async (params?: UsersListParams) => {
-  const r = await api.get<PaginatedResponse<User>>('/api/users', { params });
+  const r = await api.get<PaginatedResponse<UserResponse>>('/api/users', { params });
   return r.data;
 };
 
 export const getUser = async (id: number) => {
-  const r = await api.get<User>(`/api/users/${id}`);
+  const r = await api.get<UserResponse>(`/api/users/${id}`);
   return r.data;
 };
 
@@ -17,12 +17,12 @@ export const getUserTeams = async (id: number) => {
 };
 
 export const createUser = async (data: { email: string; password: string; name?: string; role?: string }) => {
-  const r = await api.post<User>('/api/users', data);
+  const r = await api.post<UserResponse>('/api/users', data);
   return r.data;
 };
 
 export const updateUser = async (id: number, data: { name?: string; role?: string }) => {
-  const r = await api.patch<User>(`/api/users/${id}`, data);
+  const r = await api.patch<UserResponse>(`/api/users/${id}`, data);
   return r.data;
 };
 
