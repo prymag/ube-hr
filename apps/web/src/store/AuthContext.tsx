@@ -1,20 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
-import { setAccessToken } from '../lib/axios';
+import { setAccessToken } from '../services/axios';
+import type { AuthUser, AuthContextType } from '../features/authentication/auth.types';
 
-export interface AuthUser {
-  id: number;
-  email: string;
-  role: string;
-  impersonatedBy?: number;
-}
-
-interface AuthContextType {
-  accessToken: string | null;
-  user: AuthUser | null;
-  setToken: (token: string | null) => void;
-  isLoading: boolean;
-}
+export type { AuthUser, AuthContextType };
 
 function decodeJwt(token: string): AuthUser | null {
   try {
@@ -60,11 +49,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     channel.onmessage = (e: MessageEvent<ChannelMessage>) => {
       if (e.data.type === 'TOKEN_READY') {
         resolve(e.data.token);
-      }
-
-      // Another tab is asking for the token — share it if we have one
-      if (e.data.type === 'REQUEST_TOKEN' && accessToken) {
-        channel.postMessage({ type: 'TOKEN_READY', token: accessToken } satisfies ChannelMessage);
       }
     };
 

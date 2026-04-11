@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import api from '../lib/axios';
-import { useAuth } from '../context/AuthContext';
+import api from '../services/axios';
+import { useAuth } from '../store/AuthContext';
+import { Button } from '@ube-hr/ui';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard' },
@@ -19,18 +20,18 @@ export function AuthLayout() {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-muted/40">
       {/* Sidebar */}
-      <aside className="w-64 flex flex-col bg-white border-r border-gray-200">
+      <aside className="w-64 flex flex-col bg-background border-r">
         {/* App title */}
-        <div className="px-6 py-5 border-b border-gray-200">
-          <span className="text-lg font-bold text-gray-800">UBE HR</span>
+        <div className="px-6 py-5 border-b">
+          <span className="text-lg font-bold">UBE HR</span>
         </div>
 
         {/* User info */}
-        <div className="px-6 py-4 border-b border-gray-200">
-          <p className="text-sm font-medium text-gray-800 truncate">{user?.email}</p>
-          <p className="text-xs text-gray-500 mt-0.5 capitalize">{user?.role}</p>
+        <div className="px-6 py-4 border-b">
+          <p className="text-sm font-medium truncate">{user?.email}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 capitalize">{user?.role}</p>
         </div>
 
         {/* Navigation */}
@@ -40,10 +41,10 @@ export function AuthLayout() {
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 }`
               }
             >
@@ -53,18 +54,19 @@ export function AuthLayout() {
         </nav>
 
         {/* Logout */}
-        <div className="px-3 py-4 border-t border-gray-200">
-          <button
+        <div className="px-3 py-4 border-t">
+          <Button
+            variant="ghost"
             onClick={handleLogout}
-            className="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
           >
             Logout
-          </button>
+          </Button>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto p-8">
+      <main className="flex-1 overflow-auto p-8 min-w-0">
         <Outlet />
       </main>
     </div>
