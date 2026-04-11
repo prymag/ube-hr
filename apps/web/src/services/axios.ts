@@ -20,7 +20,7 @@ let isRefreshing = false;
 let queue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = [];
 
 function processQueue(error: unknown, token: string | null = null) {
-  queue.forEach((p) => (error ? p.reject(error) : p.resolve(token!)));
+  queue.forEach((p) => (error ? p.reject(error) : p.resolve(token ?? '')));
   queue = [];
 }
 

@@ -50,11 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (e.data.type === 'TOKEN_READY') {
         resolve(e.data.token);
       }
-
-      // Another tab is asking for the token — share it if we have one
-      if (e.data.type === 'REQUEST_TOKEN' && accessToken) {
-        channel.postMessage({ type: 'TOKEN_READY', token: accessToken } satisfies ChannelMessage);
-      }
     };
 
     // Ask other tabs if they already have a token

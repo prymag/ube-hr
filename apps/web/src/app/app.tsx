@@ -1,11 +1,11 @@
 import { Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from '../store/AuthContext';
-import { LoginPage } from '../pages/LoginPage';
+import { LoginPage } from '../pages/auth/LoginPage';
 import { DashboardPage } from '../pages/DashboardPage';
-import { UsersPage } from '../pages/UsersPage';
-import { TeamsPage } from '../pages/TeamsPage';
-import { TeamDetailPage } from '../pages/TeamDetailPage';
-import { UserDetailPage } from '../pages/UserDetailPage';
+import { UsersPage } from '../pages/users/UsersPage';
+import { UserDetailPage } from '../pages/users/UserDetailPage';
+import { TeamsPage } from '../pages/teams/TeamsPage';
+import { TeamDetailPage } from '../pages/teams/TeamDetailPage';
 import { AuthLayout } from '../layouts/AuthLayout';
 
 function GuestOnly() {

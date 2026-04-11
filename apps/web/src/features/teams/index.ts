@@ -20,3 +20,8 @@ export {
   useAddTeamMember,
   useRemoveTeamMember,
 } from './teams.queries';
+export { TeamsTable } from './components/TeamsTable';
+export { CreateTeamDialog } from './components/CreateTeamDialog';
+export { DeleteTeamDialog } from './components/DeleteTeamDialog';
+export { TeamHeaderCard } from './components/TeamHeaderCard';
+export { TeamMembersCard } from './components/TeamMembersCard';

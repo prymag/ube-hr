@@ -47,7 +47,10 @@ export function useDeleteUser() {
 export function useAddUserToTeam(userId: number | null) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (teamId: number) => addTeamMember(teamId, userId!),
+    mutationFn: (teamId: number) => {
+      if (userId === null) return Promise.reject(new Error('No userId'));
+      return addTeamMember(teamId, userId);
+    },
     onSuccess: () => {
       if (userId !== null) qc.invalidateQueries({ queryKey: userKeys.teams(userId) });
     },
@@ -57,7 +60,10 @@ export function useAddUserToTeam(userId: number | null) {
 export function useRemoveUserFromTeam(userId: number | null) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (teamId: number) => removeTeamMember(teamId, userId!),
+    mutationFn: (teamId: number) => {
+      if (userId === null) return Promise.reject(new Error('No userId'));
+      return removeTeamMember(teamId, userId);
+    },
     onSuccess: () => {
       if (userId !== null) qc.invalidateQueries({ queryKey: userKeys.teams(userId) });
     },
