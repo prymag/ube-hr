@@ -1,5 +1,5 @@
 import type { AxiosError } from 'axios';
-import type { User } from '../user.types';
+import type { UserResponse } from '@ube-hr/shared';
 import { useDeleteUser } from '../users.queries';
 import { Button } from '@ube-hr/ui';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@ube-hr/ui';
 
 interface DeleteUserDialogProps {
-  target: User | null;
+  target: UserResponse | null;
   onClose: () => void;
 }
 

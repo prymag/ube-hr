@@ -9,7 +9,7 @@ import {
   addTeamMember,
   removeTeamMember,
 } from './teams.api';
-import type { TeamsListParams } from './team.types';
+import type { TeamsListParams } from '@ube-hr/shared';
 
 export const teamKeys = {
   all: ['teams'] as const,

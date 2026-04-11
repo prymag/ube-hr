@@ -1,8 +1,17 @@
 import { Injectable, BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { PrismaService, Role } from '@ube-hr/backend';
+import { PrismaService, Role, type TeamModel, type MembershipModel } from '@ube-hr/backend';
+import { type PaginatedResponse } from '@ube-hr/shared';
 import { roleRank, visibleRoles } from '../auth/permissions';
-import { CreateTeamDto } from './dto/create-team.dto';
-import { UpdateTeamDto } from './dto/update-team.dto';
+
+export interface CreateTeamInput {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateTeamInput {
+  name?: string;
+  description?: string;
+}
 
 const VALID_TEAM_SORT = ['name', 'createdAt'] as const;
 type TeamSortField = typeof VALID_TEAM_SORT[number];
@@ -15,17 +24,26 @@ export interface TeamsQuery {
   pageSize?: string | number;
 }
 
+export interface TeamMemberRecord {
+  id: number;
+  email: string;
+  name: string | null;
+  joinedAt: Date;
+}
+
+export type PaginatedTeams = PaginatedResponse<TeamModel>;
+
 @Injectable()
 export class TeamsService {
   constructor(private readonly prisma: PrismaService) {}
 
   // --- Teams CRUD ---
 
-  async create(dto: CreateTeamDto, ownerId: number) {
+  async create(dto: CreateTeamInput, ownerId: number): Promise<TeamModel> {
     return this.prisma.team.create({ data: { ...dto, ownerId } });
   }
 
-  async findAll(query: TeamsQuery = {}) {
+  async findAll(query: TeamsQuery = {}): Promise<PaginatedTeams> {
     const { search, sortField, sortDir, page, pageSize } = query;
 
     const pageNum = Math.max(1, parseInt(String(page ?? 1), 10) || 1);
@@ -67,25 +85,25 @@ export class TeamsService {
     };
   }
 
-  async findById(id: number) {
+  async findById(id: number): Promise<TeamModel> {
     const team = await this.prisma.team.findUnique({ where: { id, deletedAt: null } });
     if (!team) throw new NotFoundException('Team not found');
     return team;
   }
 
-  async update(id: number, dto: UpdateTeamDto) {
+  async update(id: number, dto: UpdateTeamInput): Promise<TeamModel> {
     await this.findById(id);
     return this.prisma.team.update({ where: { id }, data: dto });
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<void> {
     await this.findById(id);
     await this.prisma.team.update({ where: { id }, data: { deletedAt: new Date() } });
   }
 
   // --- Membership ---
 
-  async getMembers(teamId: number, callerRole: Role) {
+  async getMembers(teamId: number, callerRole: Role): Promise<TeamMemberRecord[]> {
     await this.findById(teamId);
     const memberships = await this.prisma.membership.findMany({
       where: { teamId, user: { role: { in: visibleRoles(callerRole) } } },
@@ -95,7 +113,7 @@ export class TeamsService {
     return memberships.map((m) => ({ ...m.user, joinedAt: m.joinedAt }));
   }
 
-  async addMember(teamId: number, userId: number, callerRole: Role) {
+  async addMember(teamId: number, userId: number, callerRole: Role): Promise<MembershipModel> {
     await this.findById(teamId);
     const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
     if (!user) throw new NotFoundException('User not found');
@@ -108,7 +126,7 @@ export class TeamsService {
     return this.prisma.membership.create({ data: { userId, teamId } });
   }
 
-  async removeMember(teamId: number, userId: number) {
+  async removeMember(teamId: number, userId: number): Promise<void> {
     await this.findById(teamId);
     await this.prisma.membership.delete({
       where: { userId_teamId: { userId, teamId } },

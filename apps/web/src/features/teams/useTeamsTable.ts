@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { TeamsListParams } from './team.types';
+import type { TeamsListParams } from '@ube-hr/shared';
 
 export type TeamSortField = 'name' | 'createdAt';
 export type SortDir = 'asc' | 'desc';

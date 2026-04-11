@@ -1,10 +1,8 @@
 import axios from 'axios';
 import api from '../../services/axios';
-import type { AuthUser } from './auth.types';
+import type { MeResponse } from '@ube-hr/shared';
 
-export interface MeResponse extends AuthUser {
-  permissions: string[];
-}
+export type { MeResponse };
 
 export const loginUser = async (email: string, password: string) => {
   const r = await axios.post<{ access_token: string }>('/api/auth/login', { email, password }, { withCredentials: true });

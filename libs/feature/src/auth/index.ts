@@ -7,5 +7,3 @@ export * from './middleware/auth.middleware';
 export * from './strategies/jwt.strategy';
 export * from './decorators/require-permission.decorator';
 export * from './permissions';
-export * from './dto/login.dto';
-export * from './dto/token-response.dto';

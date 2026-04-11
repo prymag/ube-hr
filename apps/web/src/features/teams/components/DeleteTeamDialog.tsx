@@ -1,5 +1,5 @@
 import type { AxiosError } from 'axios';
-import type { Team } from '../team.types';
+import type { TeamResponse } from '@ube-hr/shared';
 import { useDeleteTeam } from '../teams.queries';
 import { Button } from '@ube-hr/ui';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@ube-hr/ui';
 
 interface DeleteTeamDialogProps {
-  target: Team | null;
+  target: TeamResponse | null;
   onClose: () => void;
 }
 

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@ube-hr/ui';
 import { Input } from '@ube-hr/ui';
 import { Label } from '@ube-hr/ui';
-import type { Team } from '../team.types';
+import type { TeamResponse } from '@ube-hr/shared';
 
 export interface EditTeamFormValues {
   name: string;
@@ -11,7 +11,7 @@ export interface EditTeamFormValues {
 }
 
 interface EditTeamFormProps {
-  team: Team;
+  team: TeamResponse;
   isPending: boolean;
   isError: boolean;
   onSubmit: (values: EditTeamFormValues) => void;

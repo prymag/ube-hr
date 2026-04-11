@@ -16,16 +16,33 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse, ApiQuery } from '@nestjs/swagger';
 import {
   TeamsService,
-  CreateTeamDto,
-  UpdateTeamDto,
-  TeamResponseDto,
-  TeamMemberDto,
-  AddMemberDto,
   PermissionGuard,
   RequirePermission,
   AuthenticatedRequest,
   PERMISSIONS,
+  type TeamMemberRecord,
 } from '@ube-hr/feature';
+import { type TeamModel } from '@ube-hr/backend';
+import { type TeamResponse, type TeamMember, type PaginatedResponse } from '@ube-hr/shared';
+import { CreateTeamDto } from './teams/dto/create-team.dto';
+import { UpdateTeamDto } from './teams/dto/update-team.dto';
+import { TeamResponseDto, TeamMemberDto } from './teams/dto/team-response.dto';
+import { AddMemberDto } from './teams/dto/add-member.dto';
+
+function toTeamResponse(team: TeamModel): TeamResponse {
+  return {
+    id: team.id,
+    name: team.name,
+    description: team.description,
+    ownerId: team.ownerId,
+    createdAt: team.createdAt.toISOString(),
+    updatedAt: team.updatedAt.toISOString(),
+  };
+}
+
+function toTeamMember(m: TeamMemberRecord): TeamMember {
+  return { id: m.id, email: m.email, name: m.name, joinedAt: m.joinedAt.toISOString() };
+}
 
 @ApiTags('teams')
 @ApiBearerAuth()
@@ -40,8 +57,9 @@ export class TeamsController {
   @RequirePermission(PERMISSIONS.TEAMS_CREATE)
   @ApiOperation({ summary: 'Create a team' })
   @ApiCreatedResponse({ type: TeamResponseDto })
-  create(@Body() dto: CreateTeamDto, @Req() req: AuthenticatedRequest) {
-    return this.teamsService.create(dto, req.user!.id);
+  async create(@Body() dto: CreateTeamDto, @Req() req: AuthenticatedRequest): Promise<TeamResponse> {
+    const team = await this.teamsService.create(dto, req.user!.id);
+    return toTeamResponse(team);
   }
 
   @Get()
@@ -52,30 +70,33 @@ export class TeamsController {
   @ApiQuery({ name: 'sortDir', required: false, enum: ['asc', 'desc'] })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
-  findAll(
+  async findAll(
     @Query('search') search?: string,
     @Query('sortField') sortField?: string,
     @Query('sortDir') sortDir?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
-  ) {
-    return this.teamsService.findAll({ search, sortField, sortDir, page, pageSize });
+  ): Promise<PaginatedResponse<TeamResponse>> {
+    const result = await this.teamsService.findAll({ search, sortField, sortDir, page, pageSize });
+    return { ...result, data: result.data.map(toTeamResponse) };
   }
 
   @Get(':id')
   @RequirePermission(PERMISSIONS.TEAMS_READ)
   @ApiOperation({ summary: 'Get team details' })
   @ApiOkResponse({ type: TeamResponseDto })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.teamsService.findById(id);
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<TeamResponse> {
+    const team = await this.teamsService.findById(id);
+    return toTeamResponse(team);
   }
 
   @Patch(':id')
   @RequirePermission(PERMISSIONS.TEAMS_UPDATE)
   @ApiOperation({ summary: 'Update a team' })
   @ApiOkResponse({ type: TeamResponseDto })
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateTeamDto) {
-    return this.teamsService.update(id, dto);
+  async update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateTeamDto): Promise<TeamResponse> {
+    const team = await this.teamsService.update(id, dto);
+    return toTeamResponse(team);
   }
 
   @Delete(':id')
@@ -83,7 +104,7 @@ export class TeamsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a team' })
   @ApiNoContentResponse()
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.teamsService.remove(id);
   }
 
@@ -93,8 +114,9 @@ export class TeamsController {
   @RequirePermission(PERMISSIONS.TEAMS_READ)
   @ApiOperation({ summary: 'List users in a team' })
   @ApiOkResponse({ type: [TeamMemberDto] })
-  getMembers(@Param('teamId', ParseIntPipe) teamId: number, @Req() req: AuthenticatedRequest) {
-    return this.teamsService.getMembers(teamId, req.user!.role);
+  async getMembers(@Param('teamId', ParseIntPipe) teamId: number, @Req() req: AuthenticatedRequest): Promise<TeamMember[]> {
+    const members = await this.teamsService.getMembers(teamId, req.user!.role);
+    return members.map(toTeamMember);
   }
 
   @Post(':teamId/users')
@@ -117,7 +139,7 @@ export class TeamsController {
   removeMember(
     @Param('teamId', ParseIntPipe) teamId: number,
     @Param('userId', ParseIntPipe) userId: number,
-  ) {
+  ): Promise<void> {
     return this.teamsService.removeMember(teamId, userId);
   }
 }

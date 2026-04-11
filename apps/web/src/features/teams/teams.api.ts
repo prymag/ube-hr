@@ -1,24 +1,23 @@
 import api from '../../services/axios';
-import type { Team, TeamMember, TeamsListParams } from './team.types';
-import type { PaginatedResponse } from '../users/user.types';
+import type { TeamResponse, TeamMember, TeamsListParams, PaginatedResponse } from '@ube-hr/shared';
 
 export const getTeams = async (params?: TeamsListParams) => {
-  const r = await api.get<PaginatedResponse<Team>>('/api/teams', { params });
+  const r = await api.get<PaginatedResponse<TeamResponse>>('/api/teams', { params });
   return r.data;
 };
 
 export const getTeam = async (id: number) => {
-  const r = await api.get<Team>(`/api/teams/${id}`);
+  const r = await api.get<TeamResponse>(`/api/teams/${id}`);
   return r.data;
 };
 
 export const createTeam = async (data: { name: string; description?: string }) => {
-  const r = await api.post<Team>('/api/teams', data);
+  const r = await api.post<TeamResponse>('/api/teams', data);
   return r.data;
 };
 
 export const updateTeam = async (id: number, data: { name?: string; description?: string }) => {
-  const r = await api.patch<Team>(`/api/teams/${id}`, data);
+  const r = await api.patch<TeamResponse>(`/api/teams/${id}`, data);
   return r.data;
 };
 

@@ -1,6 +1,6 @@
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { User } from '../user.types';
+import type { UserResponse } from '@ube-hr/shared';
 import type { UserSortField, SortDir } from '../useUsersTable';
 import { ROLE_RANK, ROLE_BADGE, STATUS_BADGE } from '../../../config/roles';
 import { Button } from '@ube-hr/ui';
@@ -15,9 +15,9 @@ import {
 } from '@ube-hr/ui';
 
 interface UsersTableProps {
-  users: User[];
+  users: UserResponse[];
   callerRank: number;
-  onDeleteRequest: (user: User) => void;
+  onDeleteRequest: (user: UserResponse) => void;
   sortField: UserSortField;
   sortDir: SortDir;
   onSort: (field: UserSortField) => void;

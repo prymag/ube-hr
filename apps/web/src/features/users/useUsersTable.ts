@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import type { UsersListParams } from './user.types';
+import type { UsersListParams } from '@ube-hr/shared';
 
 export type UserSortField = 'name' | 'email' | 'role' | 'status' | 'createdAt';
 export type SortDir = 'asc' | 'desc';

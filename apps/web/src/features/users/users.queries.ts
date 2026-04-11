@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, skipToken } from '@tanstack/react-query';
 import { getUsers, getUser, getUserTeams, createUser, updateUser, deleteUser } from './users.api';
 import { addTeamMember, removeTeamMember } from '../teams/teams.api';
-import type { UsersListParams } from './user.types';
+import type { UsersListParams } from '@ube-hr/shared';
 
 export const userKeys = {
   all: ['users'] as const,

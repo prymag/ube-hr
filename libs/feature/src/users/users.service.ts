@@ -1,7 +1,25 @@
 import { Injectable, BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { secrets, PrismaService, Role, UserStatus } from '@ube-hr/backend';
+import { secrets, PrismaService, Role, UserStatus, type UserModel } from '@ube-hr/backend';
+import { type PaginatedResponse } from '@ube-hr/shared';
 import { roleRank, visibleRoles } from '../auth/permissions';
-import { CreateUserDto } from './dto/create-user.dto';
+
+export interface CreateUserInput {
+  email: string;
+  password: string;
+  name?: string;
+  role?: Role;
+}
+
+export interface UserRecord {
+  id: number;
+  email: string;
+  name: string | null;
+  role: Role;
+  status: UserStatus;
+  createdAt: Date;
+}
+
+export type PaginatedUsers = PaginatedResponse<UserRecord>;
 
 const VALID_USER_SORT = ['name', 'email', 'role', 'status', 'createdAt'] as const;
 type UserSortField = typeof VALID_USER_SORT[number];
@@ -20,7 +38,7 @@ export interface UsersQuery {
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(callerRole: Role, query: UsersQuery = {}) {
+  async findAll(callerRole: Role, query: UsersQuery = {}): Promise<PaginatedUsers> {
     const { search, role, status, sortField, sortDir, page, pageSize } = query;
 
     const pageNum = Math.max(1, parseInt(String(page ?? 1), 10) || 1);
@@ -76,7 +94,7 @@ export class UsersService {
     };
   }
 
-  async create(dto: CreateUserDto, callerRole: Role) {
+  async create(dto: CreateUserInput, callerRole: Role): Promise<UserRecord> {
     const targetRole = dto.role ?? Role.USER;
     if (roleRank(targetRole) > roleRank(callerRole)) {
       throw new ForbiddenException('Cannot create a user with a higher role');
@@ -90,7 +108,7 @@ export class UsersService {
     });
   }
 
-  async findByEmailAndPassword(email: string, password: string) {
+  async findByEmailAndPassword(email: string, password: string): Promise<UserModel | null> {
     const user = await this.prisma.user.findUnique({ where: { email, deletedAt: null } });
     if (!user) return null;
 
@@ -102,11 +120,11 @@ export class UsersService {
     return user;
   }
 
-  async findById(id: number) {
+  async findById(id: number): Promise<UserModel | null> {
     return this.prisma.user.findUnique({ where: { id, deletedAt: null } });
   }
 
-  async findTeams(userId: number) {
+  async findTeams(userId: number): Promise<{ id: number; name: string; description: string | null; joinedAt: Date }[]> {
     const memberships = await this.prisma.membership.findMany({
       where: { userId },
       include: { team: { select: { id: true, name: true, description: true } } },
@@ -115,7 +133,7 @@ export class UsersService {
     return memberships.map((m) => ({ ...m.team, joinedAt: m.joinedAt }));
   }
 
-  async remove(id: number, callerRole: Role) {
+  async remove(id: number, callerRole: Role): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id, deletedAt: null } });
     if (!user) throw new NotFoundException('User not found');
     if (callerRole !== Role.SUPER_ADMIN && roleRank(user.role) >= roleRank(callerRole)) {
@@ -130,7 +148,7 @@ export class UsersService {
     });
   }
 
-  async incrementTokenVersion(id: number) {
+  async incrementTokenVersion(id: number): Promise<number> {
     const user = await this.prisma.user.update({
       where: { id },
       data: { refreshTokenVersion: { increment: 1 } },

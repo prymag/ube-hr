@@ -17,7 +17,7 @@ Swagger docs: `http://localhost:3000/api/docs`
 |---|---|---|
 | `@ube-hr/feature` | `libs/feature/src/` | NestJS feature modules (auth, users, teams, permissions) |
 | `@ube-hr/backend` | `libs/backend/src/` | PrismaModule, AppConfigModule, secrets (Argon2) |
-| `@ube-hr/shared` | `libs/shared/src/` | Framework-agnostic: PERMISSIONS constants, Permission type |
+| `@ube-hr/shared` | `libs/shared/src/` | Framework-agnostic: PERMISSIONS constants, Permission type, wire types shared between API and frontend |
 | `@ube-hr/ui` | `libs/ui/src/` | Radix UI + Tailwind components (Button, Input, Table, Dialog, Badge, Select, Card) |
 
 ---
@@ -60,8 +60,8 @@ Swagger docs: `http://localhost:3000/api/docs`
 ### Backend checklist
 
 1. Add model to `prisma/schema.prisma`, run migration.
-2. Create `libs/feature/src/<entity>/` with: `<entity>.module.ts`, `<entity>.service.ts`, `dto/`.
-3. Add a controller at `apps/api/src/app/<entity>.controller.ts`; protect routes with `@RequirePermission()`.
+2. Create `libs/feature/src/<entity>/` with: `<entity>.module.ts`, `<entity>.service.ts`.
+3. Add a controller at `apps/api/src/app/<entity>.controller.ts` with a `dto/` subfolder; protect routes with `@RequirePermission()`.
 4. Import the new module in `apps/api/src/app/app.module.ts`.
 5. Export from `libs/feature/src/index.ts`.
 6. Add new permission strings to `libs/shared/src/permissions.ts` and update `DEFAULT_ROLE_PERMISSIONS`.
@@ -85,30 +85,62 @@ libs/feature/src/
 │   ├── strategies/            (local.strategy.ts, jwt.strategy.ts)
 │   ├── guards/                (jwt-auth, local-auth, permission)
 │   ├── middleware/            (auth.middleware.ts — applied globally in app.module)
-│   ├── decorators/            (@RequirePermission)
-│   └── dto/
+│   └── decorators/            (@RequirePermission)
 ├── users/
 │   ├── users.module.ts
-│   ├── users.service.ts       (CRUD, Argon2 hashing, soft deletes, role hierarchy)
-│   └── dto/
+│   └── users.service.ts       (CRUD, Argon2 hashing, soft deletes, role hierarchy)
 ├── teams/
 │   ├── teams.module.ts
-│   ├── teams.service.ts       (CRUD, membership, role hierarchy checks)
-│   └── dto/
+│   └── teams.service.ts       (CRUD, membership, role hierarchy checks)
 ├── permissions/
 │   ├── permissions.module.ts
 │   └── permissions.service.ts (in-memory cache, reloads after grant/revoke)
 └── index.ts
+
+apps/api/src/app/
+├── <entity>.controller.ts
+└── <entity>/dto/              (DTOs live here, not in libs/feature)
+    ├── create-<entity>.dto.ts
+    └── update-<entity>.dto.ts
 ```
 
 **Module dependency rule**: Use relative imports between modules inside `libs/feature`. Use `@ube-hr/feature` only from outside (e.g., `apps/api`).
 
 ---
 
+## DTO and type boundaries
+
+DTOs (`class-validator` + `@ApiProperty` decorators) are HTTP-layer concerns — they belong in `apps/api/src/app/<entity>/dto/`, co-located with the controller that uses them. They must **never** live in `libs/feature` or `libs/shared`.
+
+NX enforces this automatically: `libs/` cannot import from `apps/`, so placing DTOs in `apps/` makes it physically impossible for services to depend on them.
+
+Type ownership by layer:
+
+| Layer | What lives here | Example |
+|---|---|---|
+| `apps/api/.../dto/` | DTOs (class-validator, @ApiProperty) | `CreateUserDto` |
+| `libs/feature/src/` | Internal service interfaces, Prisma-adjacent types | service method params |
+| `libs/shared/src/` | Wire types shared between controller and frontend (plain strings, no Prisma enums) | `UserResponse`, `UsersListParams` |
+
+**Services never receive or return DTOs.** The controller maps DTO → plain type before calling the service, and maps service output → response shape before returning.
+
+**Shared wire types (`libs/shared`)**: Because Prisma enums are backend-only, `libs/shared` uses plain string unions (e.g. `role: 'USER' | 'MANAGER' | 'ADMIN' | 'SUPER_ADMIN'`) that match what crosses the HTTP boundary. The controller is responsible for mapping service output (which uses Prisma enums) to these shared types. The frontend imports directly from `@ube-hr/shared` instead of duplicating type definitions locally.
+
+```
+libs/feature/src/users/users.service.ts  →  UserRecord { role: Role }         (Prisma enum, backend only)
+libs/shared/src/models/user.ts           →  UserResponse { role: 'USER'|... }  (plain string, shared)
+apps/web/src/features/users/             →  import { UserResponse } from '@ube-hr/shared'
+```
+
+The trade-off: string union types in `libs/shared` must be kept in sync with the Prisma schema manually when roles or enum values change.
+
+**Import discipline**: Use type names as defined in `libs/shared` — never alias them at the import site (no `import { UserResponse as User }`). Do not create intermediate re-export files (e.g. `user.types.ts`) just to rename or re-expose shared types; that is pointless indirection. Import from `@ube-hr/shared` directly.
+
+---
+
 ## Frontend feature structure
 
 Each `features/<entity>/` folder contains:
-- **`<Entity>.types.ts`** — shared types
 - **`<entity>.api.ts`** — raw Axios calls
 - **`<entity>.queries.ts`** — React Query hooks
 - **`index.ts`** — re-exports everything
