@@ -24,6 +24,7 @@ import {
   UserResponseDto,
   AuthenticatedRequest,
   PERMISSIONS,
+  PermissionsService,
 } from '@ube-hr/feature';
 
 const REFRESH_COOKIE = 'refresh_token';
@@ -39,7 +40,10 @@ const cookieOptions = {
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly permissionsService: PermissionsService,
+  ) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -106,6 +110,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current authenticated user' })
   @ApiOkResponse({ type: UserResponseDto })
   me(@Req() req: AuthenticatedRequest) {
-    return req.user;
+    const permissions = this.permissionsService.getForRole(req.user!.role);
+    return { ...req.user, permissions };
   }
 }

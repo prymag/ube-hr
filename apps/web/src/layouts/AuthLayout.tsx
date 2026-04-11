@@ -1,17 +1,30 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import api from '../services/axios';
 import { useAuth } from '../store/AuthContext';
+import { useMe } from '../features/authentication';
 import { Button } from '@ube-hr/ui';
+import { PERMISSIONS } from '@ube-hr/shared';
 
-const navItems = [
+interface NavItem {
+  to: string;
+  label: string;
+  permission?: string;
+}
+
+const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard' },
-  { to: '/users', label: 'Users' },
-  { to: '/teams', label: 'Teams' },
+  { to: '/users', label: 'Users', permission: PERMISSIONS.USERS_READ },
+  { to: '/teams', label: 'Teams', permission: PERMISSIONS.TEAMS_READ },
 ];
 
 export function AuthLayout() {
   const { user, setToken } = useAuth();
   const navigate = useNavigate();
+  const { data: me } = useMe();
+
+  const visibleNavItems = navItems.filter(({ permission }) =>
+    !permission || (me?.permissions?.includes(permission) ?? false)
+  );
 
   async function handleLogout() {
     await api.post('/api/auth/logout');
@@ -36,7 +49,7 @@ export function AuthLayout() {
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map(({ to, label }) => (
+          {visibleNavItems.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
