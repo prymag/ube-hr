@@ -26,7 +26,8 @@ export function UsersTable({ users, callerRank, onDeleteRequest }: UsersTablePro
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name / Email</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Joined</TableHead>
@@ -42,8 +43,8 @@ export function UsersTable({ users, callerRank, onDeleteRequest }: UsersTablePro
             >
               <TableCell>
                 <div className="font-medium">{user.name ?? '—'}</div>
-                <div className="text-muted-foreground text-xs">{user.email}</div>
               </TableCell>
+              <TableCell className="text-muted-foreground text-sm">{user.email}</TableCell>
               <TableCell>
                 <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ROLE_BADGE[user.role] ?? ROLE_BADGE.USER}`}>
                   {user.role.replace('_', ' ')}
