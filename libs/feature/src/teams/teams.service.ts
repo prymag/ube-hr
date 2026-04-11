@@ -4,6 +4,17 @@ import { roleRank, visibleRoles } from '../auth/permissions';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 
+const VALID_TEAM_SORT = ['name', 'createdAt'] as const;
+type TeamSortField = typeof VALID_TEAM_SORT[number];
+
+export interface TeamsQuery {
+  search?: string;
+  sortField?: string;
+  sortDir?: string;
+  page?: string | number;
+  pageSize?: string | number;
+}
+
 @Injectable()
 export class TeamsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -14,11 +25,46 @@ export class TeamsService {
     return this.prisma.team.create({ data: { ...dto, ownerId } });
   }
 
-  async findAll() {
-    return this.prisma.team.findMany({
-      where: { deletedAt: null },
-      orderBy: { name: 'asc' },
-    });
+  async findAll(query: TeamsQuery = {}) {
+    const { search, sortField, sortDir, page, pageSize } = query;
+
+    const pageNum = Math.max(1, parseInt(String(page ?? 1), 10) || 1);
+    const pageSizeNum = Math.min(100, Math.max(1, parseInt(String(pageSize ?? 10), 10) || 10));
+
+    const validSort: TeamSortField = (VALID_TEAM_SORT as readonly string[]).includes(sortField ?? '')
+      ? (sortField as TeamSortField)
+      : 'name';
+    const validDir = sortDir === 'desc' ? 'desc' : ('asc' as const);
+
+    const where = {
+      deletedAt: null as null,
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' as const } },
+              { description: { contains: search, mode: 'insensitive' as const } },
+            ],
+          }
+        : {}),
+    };
+
+    const [total, data] = await Promise.all([
+      this.prisma.team.count({ where }),
+      this.prisma.team.findMany({
+        where,
+        orderBy: { [validSort]: validDir },
+        skip: (pageNum - 1) * pageSizeNum,
+        take: pageSizeNum,
+      }),
+    ]);
+
+    return {
+      data,
+      total,
+      page: pageNum,
+      pageSize: pageSizeNum,
+      pageCount: Math.max(1, Math.ceil(total / pageSizeNum)),
+    };
   }
 
   async findById(id: number) {

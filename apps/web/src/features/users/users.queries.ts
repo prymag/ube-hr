@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, skipToken } from '@tanstack/react-query';
-import { getUsers, getUserTeams, createUser, updateUser, deleteUser } from './users.api';
+import { getUsers, getUser, getUserTeams, createUser, updateUser, deleteUser } from './users.api';
 import { addTeamMember, removeTeamMember } from '../teams/teams.api';
+import type { UsersListParams } from './user.types';
 
 export const userKeys = {
   all: ['users'] as const,
@@ -9,8 +10,18 @@ export const userKeys = {
   teams: (id: number) => [...userKeys.all, 'teams', id] as const,
 };
 
-export function useUsers() {
-  return useQuery({ queryKey: userKeys.lists(), queryFn: getUsers });
+export function useUsers(params?: UsersListParams) {
+  return useQuery({
+    queryKey: [...userKeys.lists(), params],
+    queryFn: () => getUsers(params),
+  });
+}
+
+export function useUser(id: number | undefined) {
+  return useQuery({
+    queryKey: id !== undefined ? userKeys.detail(id) : [],
+    queryFn: id !== undefined ? () => getUser(id) : skipToken,
+  });
 }
 
 export function useUserTeams(userId: number | undefined) {

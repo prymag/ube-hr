@@ -151,6 +151,29 @@ When a page or component has multiple queries, non-trivial derived state, or com
 
 ---
 
+## Server-side list tables (search / filter / sort / pagination)
+
+List endpoints return a paginated envelope — **never a raw array**:
+```ts
+{ data: T[], total: number, page: number, pageSize: number, pageCount: number }
+```
+The `PaginatedResponse<T>` type lives in `features/users/user.types.ts` and is imported from there by other features.
+
+Each list feature has a **`use<Entity>Table` hook** (`features/<entity>/use<Entity>Table.ts`) that:
+- Owns all control state: raw search input, debounced search (300ms), filters, sort field/dir, page
+- Builds and exposes a `params` object passed directly to `useUsers(params)` / `useTeams(params)`
+- Does **no** client-side filtering or sorting — all processing is server-side
+
+React Query key for list queries includes `params` so refetches happen automatically when controls change. Existing mutation invalidations still work because they invalidate by list-key prefix.
+
+**Dropdown / internal lookups** that need all items (e.g. "add member" selects) call `useUsers({ pageSize: 1000 })` or `useTeams({ pageSize: 1000 })` and access `.data.data`. For single-entity lookups use `useUser(id)`, not the list hook.
+
+**Role filter dropdowns** must only show roles the current user can manage (`ROLE_RANK[r] <= callerRank`), matching the backend's `visibleRoles()` logic.
+
+**Backend list convention** (no `class-transformer` installed): controllers accept individual `@Query('param') param?: string` decorators and forward raw strings to the service. The service parses numbers with `parseInt`, whitelists sort fields against a `const` array, and validates enums with `Object.values(EnumType).includes(...)`. Page sizes are clamped to max 100.
+
+---
+
 ## Auth & permission system
 
 **JWT payload fields**: `sub` (user id), `email`, `role`, `impersonatedBy?`

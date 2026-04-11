@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Req, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import {
   UsersService,
   UserResponseDto,
@@ -27,10 +27,25 @@ export class UsersController {
 
   @Get()
   @RequirePermission(PERMISSIONS.USERS_READ)
-  @ApiOperation({ summary: 'List all users' })
-  @ApiOkResponse({ type: [UserResponseDto] })
-  findAll(@Req() req: AuthenticatedRequest) {
-    return this.usersService.findAll(req.user!.role);
+  @ApiOperation({ summary: 'List users with search, filter, sort and pagination' })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'role', required: false })
+  @ApiQuery({ name: 'status', required: false })
+  @ApiQuery({ name: 'sortField', required: false })
+  @ApiQuery({ name: 'sortDir', required: false, enum: ['asc', 'desc'] })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'pageSize', required: false })
+  findAll(
+    @Req() req: AuthenticatedRequest,
+    @Query('search') search?: string,
+    @Query('role') role?: string,
+    @Query('status') status?: string,
+    @Query('sortField') sortField?: string,
+    @Query('sortDir') sortDir?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
+    return this.usersService.findAll(req.user!.role, { search, role, status, sortField, sortDir, page, pageSize });
   }
 
   @Get(':id')

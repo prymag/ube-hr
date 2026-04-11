@@ -9,6 +9,7 @@ import {
   addTeamMember,
   removeTeamMember,
 } from './teams.api';
+import type { TeamsListParams } from './team.types';
 
 export const teamKeys = {
   all: ['teams'] as const,
@@ -17,8 +18,11 @@ export const teamKeys = {
   members: (id: number) => [...teamKeys.all, 'members', id] as const,
 };
 
-export function useTeams() {
-  return useQuery({ queryKey: teamKeys.lists(), queryFn: getTeams });
+export function useTeams(params?: TeamsListParams) {
+  return useQuery({
+    queryKey: [...teamKeys.lists(), params],
+    queryFn: () => getTeams(params),
+  });
 }
 
 export function useTeam(teamId: number) {

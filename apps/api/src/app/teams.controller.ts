@@ -7,12 +7,13 @@ import {
   Body,
   Param,
   ParseIntPipe,
+  Query,
   Req,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiCreatedResponse, ApiNoContentResponse, ApiQuery } from '@nestjs/swagger';
 import {
   TeamsService,
   CreateTeamDto,
@@ -45,10 +46,20 @@ export class TeamsController {
 
   @Get()
   @RequirePermission(PERMISSIONS.TEAMS_READ)
-  @ApiOperation({ summary: 'List all teams' })
-  @ApiOkResponse({ type: [TeamResponseDto] })
-  findAll() {
-    return this.teamsService.findAll();
+  @ApiOperation({ summary: 'List teams with search, sort and pagination' })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'sortField', required: false })
+  @ApiQuery({ name: 'sortDir', required: false, enum: ['asc', 'desc'] })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'pageSize', required: false })
+  findAll(
+    @Query('search') search?: string,
+    @Query('sortField') sortField?: string,
+    @Query('sortDir') sortDir?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
+    return this.teamsService.findAll({ search, sortField, sortDir, page, pageSize });
   }
 
   @Get(':id')

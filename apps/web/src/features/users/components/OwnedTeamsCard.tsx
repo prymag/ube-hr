@@ -6,8 +6,8 @@ interface OwnedTeamsCardProps {
 }
 
 export function OwnedTeamsCard({ userId }: OwnedTeamsCardProps) {
-  const teamsQuery = useTeams();
-  const ownedTeams = (teamsQuery.data ?? []).filter((t) => t.ownerId === userId);
+  const teamsQuery = useTeams({ pageSize: 1000 });
+  const ownedTeams = (teamsQuery.data?.data ?? []).filter((t) => t.ownerId === userId);
 
   if (ownedTeams.length === 0) return null;
 
