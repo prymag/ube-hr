@@ -1,6 +1,5 @@
 import { Injectable, BadRequestException, ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { secrets } from '@ube-hr/shared';
-import { PrismaService, Role, UserStatus } from '@ube-hr/backend';
+import { secrets, PrismaService, Role, UserStatus } from '@ube-hr/backend';
 import { roleRank, visibleRoles } from '../auth/permissions';
 import { CreateUserDto } from './dto/create-user.dto';
 

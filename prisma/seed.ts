@@ -2,7 +2,8 @@ import 'dotenv/config';
 import { PrismaClient, Role } from '../generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
-import { secrets, DEFAULT_ROLE_PERMISSIONS } from '@ube-hr/shared';
+import { DEFAULT_ROLE_PERMISSIONS } from '@ube-hr/shared';
+import { secrets } from '@ube-hr/backend';
 
 const adapter = new PrismaMariaDb({
   host: process.env.MYSQL_HOST || 'localhost',
