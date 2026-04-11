@@ -57,18 +57,31 @@ Swagger docs: `http://localhost:3000/api/docs`
 
 ## Adding a new feature
 
+### Shared types checklist (`libs/shared`)
+
+Do this **before** writing the controller or any frontend code — both layers import from here.
+
+1. Add wire types to `libs/shared/src/models.ts`:
+   - `<Entity>Response` — shape returned by GET endpoints (plain string unions, no Prisma enums).
+   - `<Entity>ListParams` — query-string params for the list endpoint (`search?`, `sortField?`, `sortDir?`, `page?`, `pageSize?`).
+   - Any sub-shapes the response embeds (e.g. `<Entity>Member`).
+2. `libs/shared/src/index.ts` already re-exports `./models` — no change needed unless you add a new file.
+
 ### Backend checklist
 
 1. Add model to `prisma/schema.prisma`, run migration.
 2. Create `libs/feature/src/<entity>/` with: `<entity>.module.ts`, `<entity>.service.ts`.
-3. Add a controller at `apps/api/src/app/<entity>.controller.ts` with a `dto/` subfolder; protect routes with `@RequirePermission()`.
-4. Import the new module in `apps/api/src/app/app.module.ts`.
-5. Export from `libs/feature/src/index.ts`.
-6. Add new permission strings to `libs/shared/src/permissions.ts` and update `DEFAULT_ROLE_PERMISSIONS`.
+3. Add new permission strings to `libs/shared/src/permissions.ts` and update `DEFAULT_ROLE_PERMISSIONS`.
+4. Add a controller at `apps/api/src/app/<entity>.controller.ts` with a `dto/` subfolder; protect routes with `@RequirePermission()`.
+   - Map DTO → plain type before passing to the service.
+   - Map service output → `<Entity>Response` (from `@ube-hr/shared`) before returning.
+5. Import the new module in `apps/api/src/app/app.module.ts`.
+6. Export from `libs/feature/src/index.ts`.
 
 ### Frontend checklist
 
 1. Create `apps/web/src/features/<entity>/` with the files below.
+   - Import `<Entity>Response`, `<Entity>ListParams`, etc. directly from `@ube-hr/shared` — do not redefine them locally.
 2. Add pages under `apps/web/src/pages/<entity>/`.
 3. Register routes in `apps/web/src/app/app.tsx` inside a `<RequirePermission>` wrapper.
 4. Add nav link in `apps/web/src/layouts/AuthLayout.tsx`.
@@ -189,7 +202,7 @@ List endpoints return a paginated envelope — **never a raw array**:
 ```ts
 { data: T[], total: number, page: number, pageSize: number, pageCount: number }
 ```
-The `PaginatedResponse<T>` type lives in `features/users/user.types.ts` and is imported from there by other features.
+The `PaginatedResponse<T>` type lives in `libs/shared/src/models.ts` and is imported from `@ube-hr/shared`.
 
 Each list feature has a **`use<Entity>Table` hook** (`features/<entity>/use<Entity>Table.ts`) that:
 - Owns all control state: raw search input, debounced search (300ms), filters, sort field/dir, page
