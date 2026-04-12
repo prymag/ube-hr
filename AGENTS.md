@@ -32,7 +32,67 @@ This repository is an Nx monorepo with a NestJS API (`apps/api`) and a React web
 - **Strict Dependency Rule**: `libs/` **cannot** import from `apps/`.
 - **Feature Rule**: Use relative imports between sibling modules within `libs/feature`. Use the alias only from outside.
 
+## Key Files by Concern
+
+### Backend
+
+| Concern | File |
+|---|---|
+| Server bootstrap | `apps/api/src/main.ts` |
+| Root module (middleware, imports) | `apps/api/src/app/app.module.ts` |
+| Controllers | `apps/api/src/app/<entity>.controller.ts` |
+| Auth service (login, refresh, impersonate) | `libs/feature/src/auth/auth.service.ts` |
+| Auth middleware (JWT validation, global) | `libs/feature/src/auth/middleware/auth.middleware.ts` |
+| Permission guard | `libs/feature/src/auth/guards/permission.guard.ts` |
+| `@RequirePermission()` decorator | `libs/feature/src/auth/decorators/require-permission.decorator.ts` |
+| Permission cache service | `libs/feature/src/permissions/permissions.service.ts` |
+| Users service | `libs/feature/src/users/users.service.ts` |
+| Teams service | `libs/feature/src/teams/teams.service.ts` |
+| Database schema | `prisma/schema.prisma` |
+| Prisma service | `libs/backend/src/prisma/prisma.service.ts` |
+| Permission constants + defaults | `libs/shared/src/permissions.ts` |
+
+### Frontend
+
+| Concern | File |
+|---|---|
+| React entry point | `apps/web/src/main.tsx` |
+| Routes + route guards | `apps/web/src/app/app.tsx` |
+| Auth state (token, user, cross-tab sync) | `apps/web/src/store/AuthContext.tsx` |
+| Axios instance (interceptors, auto-refresh) | `apps/web/src/services/axios.ts` |
+| Role rank / badge config | `apps/web/src/config/roles.ts` |
+| Sidebar + nav layout | `apps/web/src/layouts/AuthLayout.tsx` |
+
 ## Backend Guidelines (NestJS)
+
+### `libs/feature` Directory Structure
+
+```
+libs/feature/src/
+├── auth/
+│   ├── auth.module.ts         (Global module, imports UsersModule)
+│   ├── auth.service.ts
+│   ├── strategies/            (local.strategy.ts, jwt.strategy.ts)
+│   ├── guards/                (jwt-auth, local-auth, permission)
+│   ├── middleware/            (auth.middleware.ts — applied globally in app.module)
+│   └── decorators/            (@RequirePermission)
+├── users/
+│   ├── users.module.ts
+│   └── users.service.ts       (CRUD, Argon2 hashing, soft deletes, role hierarchy)
+├── teams/
+│   ├── teams.module.ts
+│   └── teams.service.ts       (CRUD, membership, role hierarchy checks)
+├── permissions/
+│   ├── permissions.module.ts
+│   └── permissions.service.ts (in-memory cache, reloads after grant/revoke)
+└── index.ts
+
+apps/api/src/app/
+├── <entity>.controller.ts
+└── <entity>/dto/              (DTOs live here, not in libs/feature)
+    ├── create-<entity>.dto.ts
+    └── update-<entity>.dto.ts
+```
 
 ### Layered Responsibility & Boundaries
 
@@ -61,7 +121,63 @@ This repository is an Nx monorepo with a NestJS API (`apps/api`) and a React web
 - **Anonymization**: Deleted user emails are prefixed: `deleted.{timestamp}.{email}`.
 - **Exceptions**: Use standard NestJS `HttpException` (e.g., `NotFoundException`, `ConflictException`).
 - **ORM**: Prisma with MariaDB adapter.
+
 - **Session Security**: `refreshTokenVersion` increments on each refresh; reuse throws 401 and invalidates all sessions.
+
+## Testing (`libs/feature`)
+
+Unit tests live next to the service they test: `<service>.service.spec.ts`. Run with `npx nx test feature`.
+
+### Infrastructure
+
+| File                                       | Purpose                                                                                                              |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `libs/feature/jest.config.cts`             | Jest config; includes `moduleNameMapper` to redirect `@ube-hr/backend`                                               |
+| `libs/feature/tsconfig.spec.json`          | Spec tsconfig; includes `src/testing/**/*.ts` so helpers see Jest globals                                            |
+| `libs/feature/tsconfig.lib.json`           | Excludes `src/testing/**/*.ts` so VS Code uses the spec tsconfig for those files                                     |
+| `libs/feature/src/testing/prisma.mock.ts`  | `createPrismaMock()` — returns an object of `jest.fn()` stubs matching the Prisma model API                          |
+| `libs/feature/src/testing/backend.mock.ts` | Manual mock for `@ube-hr/backend`; avoids the generated Prisma client (ESM/`import.meta` incompatible with Jest CJS) |
+
+### Why `@ube-hr/backend` is mocked at the module level
+
+The generated Prisma client (`generated/prisma/client.ts`) uses `import.meta.url` which is ESM-only and crashes Jest in CommonJS mode. `moduleNameMapper` in `jest.config.cts` redirects `@ube-hr/backend` to `backend.mock.ts`, which re-exports `Role`, `UserStatus`, a stub `PrismaService` class, and a spyable `secrets` object — everything the services need at runtime, without touching the Prisma client.
+
+### Pattern for a new service spec
+
+```ts
+import { Test } from '@nestjs/testing';
+import { PrismaService } from '@ube-hr/backend'; // resolves to backend.mock.ts
+import { createPrismaMock, PrismaMock } from '../testing/prisma.mock';
+import { MyService } from './my.service';
+
+describe('MyService', () => {
+  let service: MyService;
+  let prisma: PrismaMock;
+
+  beforeEach(async () => {
+    prisma = createPrismaMock();
+    const module = await Test.createTestingModule({
+      providers: [MyService, { provide: PrismaService, useValue: prisma }],
+    }).compile();
+    service = module.get(MyService);
+  });
+
+  afterEach(() => jest.clearAllMocks());
+});
+```
+
+Spy on `secrets` methods via `jest.spyOn(backendMock.secrets, 'hash').mockResolvedValue(...)` where `backendMock` is `import * as backendMock from '@ube-hr/backend'`.
+
+Services that depend on other services (e.g. `AuthService` → `UsersService`) use `jest.Mocked<Pick<...>>` to mock only the methods the service under test calls:
+
+```ts
+const usersService: jest.Mocked<
+  Pick<UsersService, 'findById' | 'incrementTokenVersion'>
+> = {
+  findById: jest.fn(),
+  incrementTokenVersion: jest.fn(),
+};
+```
 
 ## Frontend Guidelines (React)
 
@@ -95,7 +211,9 @@ This repository is an Nx monorepo with a NestJS API (`apps/api`) and a React web
   - Owns all control state (raw search, debounced search (300ms), filters, sort, page).
   - Builds `params` object for queries.
   - No client-side filtering/sorting; all processing is server-side.
-- **Role Filters**: Only show roles the current user can manage (`ROLE_RANK[r] <= callerRank`).
+- **Role Filters**: Only show roles the current user can manage (`ROLE_RANK[r] <= callerRank`), matching the backend's `visibleRoles()` logic.
+- **Dropdown / internal lookups** that need all items (e.g. "add member" selects) call `useUsers({ pageSize: 1000 })` or `useTeams({ pageSize: 1000 })` and access `.data.data`. For single-entity lookups use `useUser(id)`, not the list hook.
+- **Backend list convention** (`class-transformer` is NOT installed): controllers accept individual `@Query('param') param?: string` decorators and forward raw strings to the service. The service parses numbers with `parseInt`, whitelists sort fields against a `const` array, and validates enums with `Object.values(EnumType).includes(...)`. Page sizes are clamped to max 100.
 
 ### Managing Complexity
 
@@ -103,8 +221,14 @@ This repository is an Nx monorepo with a NestJS API (`apps/api`) and a React web
 
 ## Typing & Data Flow
 
-- **Wire Types**: Defined in `libs/shared/src/models.ts`.
+- **Wire Types**: Defined in `libs/shared/src/models.ts`. `libs/shared/src/index.ts` already re-exports `./models` — no change needed unless you add a new file.
 - **Enums**: Use plain string unions in `libs/shared` (e.g., `'ACTIVE' | 'BLOCKED'`) to match JSON. Prisma enums are backend-only.
+- **Type Layer Mapping**:
+  ```
+  libs/feature/src/users/users.service.ts  →  UserRecord { role: Role }         (Prisma enum, backend only)
+  libs/shared/src/models.ts                →  UserResponse { role: 'USER'|... }  (plain string, shared)
+  apps/web/src/features/users/             →  import { UserResponse } from '@ube-hr/shared'
+  ```
 - **Naming Conventions**:
   - `UserResponse`, `UsersListParams` (Wire types)
   - `create-user.dto.ts` (DTO filenames)
