@@ -6,4 +6,3 @@ export * from './guards/permission.guard';
 export * from './middleware/auth.middleware';
 export * from './strategies/jwt.strategy';
 export * from './decorators/require-permission.decorator';
-export * from './permissions';

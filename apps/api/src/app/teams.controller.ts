@@ -19,9 +19,9 @@ import {
   PermissionGuard,
   RequirePermission,
   AuthenticatedRequest,
-  PERMISSIONS,
   type TeamMemberRecord,
 } from '@ube-hr/feature';
+import { PERMISSIONS } from '@ube-hr/shared';
 import { type TeamModel } from '@ube-hr/backend';
 import { type TeamResponse, type TeamMember, type PaginatedResponse } from '@ube-hr/shared';
 import { CreateTeamDto } from './teams/dto/create-team.dto';

@@ -4,11 +4,13 @@ import { Role } from '@ube-hr/backend';
 import {
   PermissionsService,
   PermissionGuard,
-  RequirePermission,
-  Permission,
-  ALL_PERMISSIONS,
-  PERMISSIONS,
+  RequirePermission
 } from '@ube-hr/feature';
+import {
+  Permission,
+    ALL_PERMISSIONS,
+    PERMISSIONS,
+} from '@ube-hr/shared'
 
 @ApiTags('permissions')
 @ApiBearerAuth()

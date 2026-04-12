@@ -1,5 +1,3 @@
-export { PERMISSIONS, Permission, ALL_PERMISSIONS } from '@ube-hr/shared';
-
 import { Role } from '@ube-hr/backend';
 
 /** Rank is derived from enum declaration order in schema.prisma — insert new roles at the correct position. */

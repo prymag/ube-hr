@@ -20,9 +20,9 @@ import {
   PermissionGuard,
   RequirePermission,
   AuthenticatedRequest,
-  PERMISSIONS,
   PermissionsService,
 } from '@ube-hr/feature';
+import { PERMISSIONS } from '@ube-hr/shared';
 import { type MeResponse } from '@ube-hr/shared';
 import { LoginDto } from './auth/dto/login.dto';
 import { TokenResponseDto } from './auth/dto/token-response.dto';

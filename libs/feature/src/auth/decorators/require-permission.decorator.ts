@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { Permission } from '../permissions';
+import { Permission } from '@ube-hr/shared';
 
 export const PERMISSION_KEY = 'permissions';
 

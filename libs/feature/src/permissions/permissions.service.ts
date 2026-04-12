@@ -1,6 +1,11 @@
-import { Injectable, OnModuleInit, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService, Role } from '@ube-hr/backend';
-import { Permission, ALL_PERMISSIONS } from '../auth/permissions';
+import { Permission, ALL_PERMISSIONS } from '@ube-hr/shared';
 
 @Injectable()
 export class PermissionsService implements OnModuleInit {
@@ -18,6 +23,7 @@ export class PermissionsService implements OnModuleInit {
     const map = new Map<Role, Set<string>>();
     for (const row of rows) {
       if (!map.has(row.role)) map.set(row.role, new Set());
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       map.get(row.role)!.add(row.permission);
     }
     this.cache = map;
@@ -50,7 +56,9 @@ export class PermissionsService implements OnModuleInit {
       throw new NotFoundException(`Unknown permission: ${permission}`);
     }
     if (this.hasPermission(role, permission)) {
-      throw new ConflictException(`Role ${role} already has permission ${permission}`);
+      throw new ConflictException(
+        `Role ${role} already has permission ${permission}`,
+      );
     }
     await this.prisma.rolePermission.create({ data: { role, permission } });
     await this.reload();
@@ -58,7 +66,9 @@ export class PermissionsService implements OnModuleInit {
 
   async revoke(role: Role, permission: Permission): Promise<void> {
     if (!this.hasPermission(role, permission)) {
-      throw new NotFoundException(`Role ${role} does not have permission ${permission}`);
+      throw new NotFoundException(
+        `Role ${role} does not have permission ${permission}`,
+      );
     }
     await this.prisma.rolePermission.delete({
       where: { role_permission: { role, permission } },
