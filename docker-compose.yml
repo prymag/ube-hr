@@ -38,6 +38,19 @@ services:
     networks:
       - ube-hr-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: ube-hr-redis
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ube-hr-network
+
   mailhog:
     image: mailhog/mailhog:latest
     container_name: ube-hr-mailhog

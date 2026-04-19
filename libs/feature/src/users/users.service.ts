@@ -12,8 +12,10 @@ import {
   UserStatus,
   type UserModel,
 } from '@ube-hr/backend';
-import { type PaginatedResponse } from '@ube-hr/shared';
+import { type PaginatedResponse, JOB_QUEUES, EMAIL_JOBS, type WelcomeEmailPayload } from '@ube-hr/shared';
+
 import { roleRank, visibleRoles } from '../permissions';
+import { QueueService } from '../queue/queue.service';
 
 export interface CreateUserInput {
   email: string;
@@ -54,7 +56,10 @@ export interface UsersQuery {
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly queue: QueueService,
+  ) {}
 
   async findAll(
     callerRole: Role,
@@ -139,7 +144,7 @@ export class UsersService {
     });
     if (existing) throw new ConflictException('Email is already in use');
     const password = await secrets.hash(dto.password);
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: { email: dto.email, password, name: dto.name, role: targetRole },
       select: {
         id: true,
@@ -150,6 +155,11 @@ export class UsersService {
         createdAt: true,
       },
     });
+    await this.queue.dispatch<WelcomeEmailPayload>(JOB_QUEUES.EMAIL, EMAIL_JOBS.SEND_WELCOME, {
+      to: user.email,
+      name: user.name ?? user.email,
+    });
+    return user;
   }
 
   async findByEmailAndPassword(
