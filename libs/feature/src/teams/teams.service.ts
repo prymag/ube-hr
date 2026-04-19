@@ -75,10 +75,8 @@ export class TeamsService {
       ...(search
         ? {
             OR: [
-              { name: { contains: search, mode: 'insensitive' as const } },
-              {
-                description: { contains: search, mode: 'insensitive' as const },
-              },
+              { name: { contains: search } },
+              { description: { contains: search } },
             ],
           }
         : {}),

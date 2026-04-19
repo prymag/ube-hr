@@ -62,8 +62,10 @@
       }
     },
     "test": {
+      "executor": "nx:run-commands",
       "options": {
-        "passWithNoTests": true
+        "command": "NODE_OPTIONS=--experimental-vm-modules npx jest --config=apps/api/jest.integration.config.cts --forceExit --runInBand",
+        "cwd": "{workspaceRoot}"
       }
     }
   }

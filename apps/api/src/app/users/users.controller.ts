@@ -9,8 +9,8 @@ import {
 } from '@ube-hr/feature';
 import { PERMISSIONS } from '@ube-hr/shared';
 import { type UserResponse, type UserTeam, type PaginatedResponse } from '@ube-hr/shared';
-import { CreateUserDto } from './users/dto/create-user.dto';
-import { UserResponseDto } from './users/dto/user-response.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 
 function toUserResponse(user: UserRecord): UserResponse {
   return {
