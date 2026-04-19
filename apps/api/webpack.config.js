@@ -3,7 +3,7 @@ const { join } = require('path');
 
 module.exports = {
   output: {
-    path: join(__dirname, '../../dist/apps/backend'),
+    path: join(__dirname, '../../dist/apps/api'),
     clean: true,
     ...(process.env.NODE_ENV !== 'production' && {
       devtoolModuleFilenameTemplate: '[absolute-resource-path]',
@@ -15,10 +15,18 @@ module.exports = {
       compiler: 'tsc',
       main: './src/main.ts',
       tsConfig: './tsconfig.app.json',
-      assets: ['./src/assets'],
+      assets: [
+        './src/assets',
+        {
+          input: '../../generated/prisma',
+          output: 'generated/prisma',
+          glob: '**/*',
+        },
+      ],
       optimization: false,
       outputHashing: 'none',
       generatePackageJson: true,
+      runtimeDependencies: ['@prisma/client', 'prisma'],
       sourceMap: true,
     }),
   ],
