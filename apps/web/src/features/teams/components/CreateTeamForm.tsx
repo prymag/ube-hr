@@ -15,8 +15,17 @@ interface CreateTeamFormProps {
   error?: string | null;
 }
 
-export function CreateTeamForm({ values, onChange, onSubmit, isPending, error }: CreateTeamFormProps) {
-  function set<K extends keyof CreateTeamFormValues>(key: K, value: CreateTeamFormValues[K]) {
+export function CreateTeamForm({
+  values,
+  onChange,
+  onSubmit,
+  isPending,
+  error,
+}: CreateTeamFormProps) {
+  function set<K extends keyof CreateTeamFormValues>(
+    key: K,
+    value: CreateTeamFormValues[K],
+  ) {
     onChange({ ...values, [key]: value });
   }
 
@@ -35,7 +44,8 @@ export function CreateTeamForm({ values, onChange, onSubmit, isPending, error }:
       </div>
       <div className="space-y-1.5">
         <Label>
-          Description <span className="text-muted-foreground font-normal">(optional)</span>
+          Description{' '}
+          <span className="text-muted-foreground font-normal">(optional)</span>
         </Label>
         <Input
           type="text"

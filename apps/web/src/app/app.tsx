@@ -28,9 +28,11 @@ function RequireAuth() {
 function RequirePermission({ permission }: { permission: string }) {
   const { data: me, isPending } = useMe();
   if (isPending) return null;
-  return me?.permissions?.includes(permission)
-    ? <Outlet />
-    : <Navigate to="/no-permission" replace />;
+  return me?.permissions?.includes(permission) ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/no-permission" replace />
+  );
 }
 
 export function App() {
@@ -44,12 +46,20 @@ export function App() {
           <Route element={<AuthLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/no-permission" element={<NoPermissionPage />} />
-            <Route element={<RequirePermission permission={PERMISSIONS.USERS_READ} />}>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.USERS_READ} />
+              }
+            >
               <Route path="/users" element={<UsersPage />} />
               <Route path="/users/new" element={<CreateUserPage />} />
               <Route path="/users/:id" element={<UserDetailPage />} />
             </Route>
-            <Route element={<RequirePermission permission={PERMISSIONS.TEAMS_READ} />}>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.TEAMS_READ} />
+              }
+            >
               <Route path="/teams" element={<TeamsPage />} />
               <Route path="/teams/new" element={<CreateTeamPage />} />
               <Route path="/teams/:id" element={<TeamDetailPage />} />

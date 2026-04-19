@@ -1,5 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useTeam, useUpdateTeam, EditTeamForm, TeamMembersCard } from '../../features/teams';
+import {
+  useTeam,
+  useUpdateTeam,
+  EditTeamForm,
+  TeamMembersCard,
+} from '../../features/teams';
 import { useUser } from '../../features/users';
 import type { EditTeamFormValues } from '../../features/teams';
 import { Button, Card, CardContent } from '@ube-hr/ui';
@@ -15,8 +20,10 @@ export function TeamDetailPage() {
   const team = teamQuery.data;
   const ownerQuery = useUser(team?.ownerId);
 
-  if (teamQuery.isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
-  if (teamQuery.isError || !team) return <div className="text-sm text-destructive">Team not found.</div>;
+  if (teamQuery.isLoading)
+    return <div className="text-sm text-muted-foreground">Loading…</div>;
+  if (teamQuery.isError || !team)
+    return <div className="text-sm text-destructive">Team not found.</div>;
 
   const owner = ownerQuery.data;
 
@@ -43,7 +50,10 @@ export function TeamDetailPage() {
           <h2 className="text-sm font-semibold mb-1">Edit Team</h2>
           {owner && (
             <p className="text-xs text-muted-foreground mb-4">
-              Owner: <span className="text-foreground">{owner.name ?? owner.email}</span>
+              Owner:{' '}
+              <span className="text-foreground">
+                {owner.name ?? owner.email}
+              </span>
             </p>
           )}
           <EditTeamForm

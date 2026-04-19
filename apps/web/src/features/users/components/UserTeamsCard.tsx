@@ -9,7 +9,11 @@ import {
   SelectValue,
 } from '@ube-hr/ui';
 import { useTeams } from '../../teams';
-import { useUserTeams, useAddUserToTeam, useRemoveUserFromTeam } from '../users.queries';
+import {
+  useUserTeams,
+  useAddUserToTeam,
+  useRemoveUserFromTeam,
+} from '../users.queries';
 
 interface UserTeamsCardProps {
   userId: number;
@@ -33,7 +37,10 @@ export function UserTeamsCard({ userId }: UserTeamsCardProps) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          Teams <span className="text-muted-foreground font-normal">({userTeams.length})</span>
+          Teams{' '}
+          <span className="text-muted-foreground font-normal">
+            ({userTeams.length})
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -54,7 +61,9 @@ export function UserTeamsCard({ userId }: UserTeamsCardProps) {
             <Button
               onClick={() => {
                 if (!addTeamId) return;
-                addToTeam.mutate(Number(addTeamId), { onSuccess: () => setAddTeamId('') });
+                addToTeam.mutate(Number(addTeamId), {
+                  onSuccess: () => setAddTeamId(''),
+                });
               }}
               disabled={!addTeamId || addToTeam.isPending}
             >
@@ -69,11 +78,15 @@ export function UserTeamsCard({ userId }: UserTeamsCardProps) {
           </p>
         )}
         {removeFromTeam.isError && (
-          <p className="text-xs text-destructive">Failed to remove user from team.</p>
+          <p className="text-xs text-destructive">
+            Failed to remove user from team.
+          </p>
         )}
 
         {userTeams.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">Not in any team.</p>
+          <p className="text-sm text-muted-foreground py-4 text-center">
+            Not in any team.
+          </p>
         ) : (
           <ul className="space-y-1">
             {userTeams.map((team) => (

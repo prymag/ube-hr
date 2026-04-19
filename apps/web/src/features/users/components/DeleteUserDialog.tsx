@@ -27,17 +27,25 @@ export function DeleteUserDialog({ target, onClose }: DeleteUserDialogProps) {
         <div className="space-y-1">
           <p className="text-sm">
             Are you sure you want to delete{' '}
-            <span className="font-medium">{target?.name ?? target?.email}</span>?
+            <span className="font-medium">{target?.name ?? target?.email}</span>
+            ?
           </p>
-          <p className="text-xs text-muted-foreground">This action cannot be undone.</p>
+          <p className="text-xs text-muted-foreground">
+            This action cannot be undone.
+          </p>
         </div>
         {deleteUser.isError && (
           <p className="text-sm text-destructive">
-            {(deleteUser.error as AxiosError<{ message: string }>)?.response?.data?.message ?? 'Failed to delete user.'}
+            {(deleteUser.error as AxiosError<{ message: string }>)?.response
+              ?.data?.message ?? 'Failed to delete user.'}
           </p>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={deleteUser.isPending}>
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={deleteUser.isPending}
+          >
             Cancel
           </Button>
           <Button

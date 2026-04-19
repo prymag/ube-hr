@@ -16,9 +16,25 @@ export default [
           enforceBuildableLibDependency: true,
           allow: ['^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$'],
           depConstraints: [
+            // Libs cannot import from apps
             {
-              sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*'],
+              sourceTag: 'type:lib',
+              onlyDependOnLibsWithTags: ['type:lib'],
+            },
+            // Universal libs (shared) can only depend on other universal libs
+            {
+              sourceTag: 'platform:universal',
+              onlyDependOnLibsWithTags: ['platform:universal'],
+            },
+            // Server-side code can only depend on server or universal libs
+            {
+              sourceTag: 'platform:server',
+              onlyDependOnLibsWithTags: ['platform:server', 'platform:universal'],
+            },
+            // Client-side code can only depend on client or universal libs
+            {
+              sourceTag: 'platform:client',
+              onlyDependOnLibsWithTags: ['platform:client', 'platform:universal'],
             },
           ],
         },

@@ -23,12 +23,18 @@ export function useUsersTable() {
     return () => clearTimeout(timer);
   }, [rawSearch]);
 
-  const setRoleFilter = (v: string) => { setRoleFilterRaw(v); setPage(1); };
-  const setStatusFilter = (v: string) => { setStatusFilterRaw(v); setPage(1); };
+  const setRoleFilter = (v: string) => {
+    setRoleFilterRaw(v);
+    setPage(1);
+  };
+  const setStatusFilter = (v: string) => {
+    setStatusFilterRaw(v);
+    setPage(1);
+  };
 
   function toggleSort(field: UserSortField) {
     if (sortField === field) {
-      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortField(field);
       setSortDir('asc');
@@ -36,15 +42,18 @@ export function useUsersTable() {
     setPage(1);
   }
 
-  const params = useMemo<UsersListParams>(() => ({
-    ...(search ? { search } : {}),
-    ...(roleFilter ? { role: roleFilter } : {}),
-    ...(statusFilter ? { status: statusFilter } : {}),
-    sortField,
-    sortDir,
-    page,
-    pageSize,
-  }), [search, roleFilter, statusFilter, sortField, sortDir, page, pageSize]);
+  const params = useMemo<UsersListParams>(
+    () => ({
+      ...(search ? { search } : {}),
+      ...(roleFilter ? { role: roleFilter } : {}),
+      ...(statusFilter ? { status: statusFilter } : {}),
+      sortField,
+      sortDir,
+      page,
+      pageSize,
+    }),
+    [search, roleFilter, statusFilter, sortField, sortDir, page, pageSize],
+  );
 
   return {
     rawSearch,

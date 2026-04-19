@@ -26,11 +26,17 @@ export function useTeams(params?: TeamsListParams) {
 }
 
 export function useTeam(teamId: number) {
-  return useQuery({ queryKey: teamKeys.detail(teamId), queryFn: () => getTeam(teamId) });
+  return useQuery({
+    queryKey: teamKeys.detail(teamId),
+    queryFn: () => getTeam(teamId),
+  });
 }
 
 export function useTeamMembers(teamId: number) {
-  return useQuery({ queryKey: teamKeys.members(teamId), queryFn: () => getTeamMembers(teamId) });
+  return useQuery({
+    queryKey: teamKeys.members(teamId),
+    queryFn: () => getTeamMembers(teamId),
+  });
 }
 
 export function useCreateTeam() {
@@ -44,7 +50,8 @@ export function useCreateTeam() {
 export function useUpdateTeam(teamId: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name?: string; description?: string }) => updateTeam(teamId, data),
+    mutationFn: (data: { name?: string; description?: string }) =>
+      updateTeam(teamId, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: teamKeys.detail(teamId) });
       qc.invalidateQueries({ queryKey: teamKeys.lists() });
@@ -64,7 +71,8 @@ export function useAddTeamMember(teamId: number) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (userId: number) => addTeamMember(teamId, userId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: teamKeys.members(teamId) }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: teamKeys.members(teamId) }),
   });
 }
 
@@ -72,6 +80,7 @@ export function useRemoveTeamMember(teamId: number) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (userId: number) => removeTeamMember(teamId, userId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: teamKeys.members(teamId) }),
+    onSuccess: () =>
+      qc.invalidateQueries({ queryKey: teamKeys.members(teamId) }),
   });
 }

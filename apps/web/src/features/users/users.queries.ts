@@ -1,5 +1,17 @@
-import { useQuery, useMutation, useQueryClient, skipToken } from '@tanstack/react-query';
-import { getUsers, getUser, getUserTeams, createUser, updateUser, deleteUser } from './users.api';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  skipToken,
+} from '@tanstack/react-query';
+import {
+  getUsers,
+  getUser,
+  getUserTeams,
+  createUser,
+  updateUser,
+  deleteUser,
+} from './users.api';
 import { addTeamMember, removeTeamMember } from '../teams/teams.api';
 import type { UsersListParams } from '@ube-hr/shared';
 
@@ -42,7 +54,8 @@ export function useCreateUser() {
 export function useUpdateUser(userId: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name?: string; role?: string }) => updateUser(userId, data),
+    mutationFn: (data: { name?: string; role?: string }) =>
+      updateUser(userId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.lists() }),
   });
 }
@@ -63,7 +76,8 @@ export function useAddUserToTeam(userId: number | null) {
       return addTeamMember(teamId, userId);
     },
     onSuccess: () => {
-      if (userId !== null) qc.invalidateQueries({ queryKey: userKeys.teams(userId) });
+      if (userId !== null)
+        qc.invalidateQueries({ queryKey: userKeys.teams(userId) });
     },
   });
 }
@@ -76,7 +90,8 @@ export function useRemoveUserFromTeam(userId: number | null) {
       return removeTeamMember(teamId, userId);
     },
     onSuccess: () => {
-      if (userId !== null) qc.invalidateQueries({ queryKey: userKeys.teams(userId) });
+      if (userId !== null)
+        qc.invalidateQueries({ queryKey: userKeys.teams(userId) });
     },
   });
 }

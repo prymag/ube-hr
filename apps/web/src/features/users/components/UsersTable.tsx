@@ -23,14 +23,32 @@ interface UsersTableProps {
   onSort: (field: UserSortField) => void;
 }
 
-function SortIcon({ field, sortField, sortDir }: { field: UserSortField; sortField: UserSortField; sortDir: SortDir }) {
-  if (sortField !== field) return <ChevronsUpDown className="ml-1 inline h-3.5 w-3.5 opacity-40" />;
-  return sortDir === 'asc'
-    ? <ChevronUp className="ml-1 inline h-3.5 w-3.5" />
-    : <ChevronDown className="ml-1 inline h-3.5 w-3.5" />;
+function SortIcon({
+  field,
+  sortField,
+  sortDir,
+}: {
+  field: UserSortField;
+  sortField: UserSortField;
+  sortDir: SortDir;
+}) {
+  if (sortField !== field)
+    return <ChevronsUpDown className="ml-1 inline h-3.5 w-3.5 opacity-40" />;
+  return sortDir === 'asc' ? (
+    <ChevronUp className="ml-1 inline h-3.5 w-3.5" />
+  ) : (
+    <ChevronDown className="ml-1 inline h-3.5 w-3.5" />
+  );
 }
 
-export function UsersTable({ users, callerRank, onDeleteRequest, sortField, sortDir, onSort }: UsersTableProps) {
+export function UsersTable({
+  users,
+  callerRank,
+  onDeleteRequest,
+  sortField,
+  sortDir,
+  onSort,
+}: UsersTableProps) {
   const navigate = useNavigate();
 
   const th = (field: UserSortField, label: string) => (
@@ -66,14 +84,20 @@ export function UsersTable({ users, callerRank, onDeleteRequest, sortField, sort
               <TableCell>
                 <div className="font-medium">{user.name ?? '—'}</div>
               </TableCell>
-              <TableCell className="text-muted-foreground text-sm">{user.email}</TableCell>
+              <TableCell className="text-muted-foreground text-sm">
+                {user.email}
+              </TableCell>
               <TableCell>
-                <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ROLE_BADGE[user.role] ?? ROLE_BADGE.USER}`}>
+                <span
+                  className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${ROLE_BADGE[user.role] ?? ROLE_BADGE.USER}`}
+                >
                   {user.role.replace('_', ' ')}
                 </span>
               </TableCell>
               <TableCell>
-                <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGE[user.status] ?? STATUS_BADGE.ACTIVE}`}>
+                <span
+                  className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${STATUS_BADGE[user.status] ?? STATUS_BADGE.ACTIVE}`}
+                >
                   {user.status}
                 </span>
               </TableCell>
@@ -81,11 +105,15 @@ export function UsersTable({ users, callerRank, onDeleteRequest, sortField, sort
                 {new Date(user.createdAt).toLocaleDateString()}
               </TableCell>
               <TableCell className="text-right">
-                {(callerRank >= ROLE_RANK['SUPER_ADMIN'] || callerRank > ROLE_RANK[user.role]) && (
+                {(callerRank >= ROLE_RANK['SUPER_ADMIN'] ||
+                  callerRank > ROLE_RANK[user.role]) && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => { e.stopPropagation(); onDeleteRequest(user); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteRequest(user);
+                    }}
                     className="text-destructive hover:text-destructive hover:bg-destructive/10"
                   >
                     Delete

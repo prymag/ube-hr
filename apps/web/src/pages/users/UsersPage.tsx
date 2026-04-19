@@ -5,7 +5,15 @@ import { useUsersTable } from '../../features/users/useUsersTable';
 import type { User } from '../../features/users';
 import { useAuth } from '../../store/AuthContext';
 import { ROLE_RANK, ALL_ROLES } from '../../config/roles';
-import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@ube-hr/ui';
+import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@ube-hr/ui';
 
 export function UsersPage() {
   const navigate = useNavigate();
@@ -13,14 +21,22 @@ export function UsersPage() {
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
 
   const callerRank = ROLE_RANK[authUser?.role ?? 'USER'] ?? 0;
-  const filterableRoles = ALL_ROLES.filter(r => (ROLE_RANK[r] ?? 0) <= callerRank);
+  const filterableRoles = ALL_ROLES.filter(
+    (r) => (ROLE_RANK[r] ?? 0) <= callerRank,
+  );
 
   const {
-    rawSearch, setRawSearch,
-    roleFilter, setRoleFilter,
-    statusFilter, setStatusFilter,
-    sortField, sortDir, toggleSort,
-    page, setPage,
+    rawSearch,
+    setRawSearch,
+    roleFilter,
+    setRoleFilter,
+    statusFilter,
+    setStatusFilter,
+    sortField,
+    sortDir,
+    toggleSort,
+    page,
+    setPage,
     params,
   } = useUsersTable();
 
@@ -34,7 +50,9 @@ export function UsersPage() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold">Users</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">{total} result{total !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {total} result{total !== 1 ? 's' : ''}
+          </p>
         </div>
         <Button onClick={() => navigate('/users/new')}>New User</Button>
       </div>
@@ -43,21 +61,29 @@ export function UsersPage() {
         <Input
           placeholder="Search by name or email…"
           value={rawSearch}
-          onChange={e => setRawSearch(e.target.value)}
+          onChange={(e) => setRawSearch(e.target.value)}
           className="h-9 w-64"
         />
-        <Select value={roleFilter || 'all'} onValueChange={v => setRoleFilter(v === 'all' ? '' : v)}>
+        <Select
+          value={roleFilter || 'all'}
+          onValueChange={(v) => setRoleFilter(v === 'all' ? '' : v)}
+        >
           <SelectTrigger className="w-36 h-9">
             <SelectValue placeholder="All roles" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All roles</SelectItem>
-            {filterableRoles.map(r => (
-              <SelectItem key={r} value={r}>{r.replace('_', ' ')}</SelectItem>
+            {filterableRoles.map((r) => (
+              <SelectItem key={r} value={r}>
+                {r.replace('_', ' ')}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select value={statusFilter || 'all'} onValueChange={v => setStatusFilter(v === 'all' ? '' : v)}>
+        <Select
+          value={statusFilter || 'all'}
+          onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}
+        >
           <SelectTrigger className="w-32 h-9">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
@@ -88,19 +114,34 @@ export function UsersPage() {
 
       {pageCount > 1 && (
         <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
-          <span>Page {page} of {pageCount}</span>
+          <span>
+            Page {page} of {pageCount}
+          </span>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setPage(page - 1)} disabled={page <= 1}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(page - 1)}
+              disabled={page <= 1}
+            >
               Previous
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setPage(page + 1)} disabled={page >= pageCount}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(page + 1)}
+              disabled={page >= pageCount}
+            >
               Next
             </Button>
           </div>
         </div>
       )}
 
-      <DeleteUserDialog target={deleteTarget} onClose={() => setDeleteTarget(null)} />
+      <DeleteUserDialog
+        target={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

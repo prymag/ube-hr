@@ -26,7 +26,14 @@ interface EditUserFormProps {
   onCancel: () => void;
 }
 
-export function EditUserForm({ user, assignableRoles, isPending, isError, onSubmit, onCancel }: EditUserFormProps) {
+export function EditUserForm({
+  user,
+  assignableRoles,
+  isPending,
+  isError,
+  onSubmit,
+  onCancel,
+}: EditUserFormProps) {
   const {
     register,
     handleSubmit,
@@ -57,7 +64,9 @@ export function EditUserForm({ user, assignableRoles, isPending, isError, onSubm
           placeholder="Jane Doe"
           autoFocus
         />
-        {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+        {errors.name && (
+          <p className="text-sm text-destructive">{errors.name.message}</p>
+        )}
       </div>
 
       <div className="space-y-1.5">
