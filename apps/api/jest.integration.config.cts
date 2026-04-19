@@ -3,9 +3,13 @@ module.exports = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.integration.json', useESM: true }],
+    '^.+\\.[tj]s$': [
+      'ts-jest',
+      { tsconfig: '<rootDir>/tsconfig.integration.json', useESM: true },
+    ],
   },
   testMatch: ['<rootDir>/src/app/**/*.integration.spec.ts'],
+  setupFiles: ['<rootDir>/test/setup/integration-env.ts'],
   moduleFileExtensions: ['ts', 'js', 'html'],
   moduleNameMapper: {
     // Resolve workspace path aliases (from tsconfig.base.json paths).
@@ -14,6 +18,7 @@ module.exports = {
     '^@ube-hr/shared$': '<rootDir>/../../libs/shared/src/index.ts',
     '^@ube-hr/ui$': '<rootDir>/../../libs/ui/src/index.ts',
     '^@ube-hr/backend$': '<rootDir>/../../libs/backend/src/index.ts',
+    '^@ube-hr/prisma-client$': '<rootDir>/../../generated/prisma/client.ts',
     '^@ube-hr/prisma-models$': '<rootDir>/../../generated/prisma/models.ts',
     '^@ube-hr/prisma-enums$': '<rootDir>/../../generated/prisma/enums.ts',
   },

@@ -7,6 +7,4 @@
  * always replaced via `useValue` in unit tests, so this class is never
  * instantiated.
  */
-export class PrismaClient {
-  constructor(_options?: unknown) {}
-}
+export class PrismaClient {}

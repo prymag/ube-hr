@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { PrismaService, Role } from '@ube-hr/backend';
+import { PrismaService, Role, secrets } from '@ube-hr/backend';
 import supertest from 'supertest';
 
 export interface SeedUserOptions {
@@ -14,8 +14,10 @@ export interface SeedUserOptions {
  * Create a user directly in the database with an argon2-hashed password.
  * Password defaults to 'password123'.
  */
-export async function seedUser(app: INestApplication, options: SeedUserOptions = {}) {
-  const { secrets } = await import('@ube-hr/backend');
+export async function seedUser(
+  app: INestApplication,
+  options: SeedUserOptions = {},
+) {
   const prisma = app.get(PrismaService);
   const password = options.password ?? 'password123';
   return prisma.user.create({

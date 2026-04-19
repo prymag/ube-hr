@@ -11,6 +11,8 @@ module.exports = {
     // The generated Prisma client uses import.meta.url (ESM-only, incompatible with Jest CJS).
     // Redirect to a minimal stub; PrismaService is always provided via useValue in unit tests,
     // so this class is never instantiated. Everything else in @ube-hr/backend loads from source.
-    '^.+/generated/prisma/client$': '<rootDir>/src/testing/prisma-client.stub.ts',
+    '^@ube-hr/prisma-client$': '<rootDir>/src/testing/prisma-client.stub.ts',
+    '^.+/generated/prisma/client$':
+      '<rootDir>/src/testing/prisma-client.stub.ts',
   },
 };
