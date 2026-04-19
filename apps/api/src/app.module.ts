@@ -6,12 +6,13 @@ import { UsersController } from './app/users/users.controller';
 import { TeamsController } from './app/teams/teams.controller';
 import { PermissionsController } from './app/permissions/permissions.controller';
 import { AppConfigModule, PrismaModule } from '@ube-hr/backend';
-import { AuthModule, AuthMiddleware, UsersModule, TeamsModule, PermissionsModule } from '@ube-hr/feature';
+import { AuthModule, AuthMiddleware, UsersModule, TeamsModule, PermissionsModule, QueueModule } from '@ube-hr/feature';
 
 @Module({
   imports: [
     AppConfigModule,
     PrismaModule,
+    QueueModule,
     PermissionsModule,
     AuthModule,
     UsersModule,

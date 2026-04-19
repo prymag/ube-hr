@@ -20,6 +20,52 @@ This repository is an Nx monorepo with a NestJS API (`apps/api`) and a React web
 - **Type Check**: `npx nx run-many -t typecheck` (web) or `npx nx lint`
 - **Swagger Docs**: `http://localhost:3000/api/docs`
 
+### Nx Generators
+
+When creating new files, prefer Nx generators over writing files by hand. Always pass `--dry-run` first to preview output, then re-run without it.
+
+**NestJS (`@nx/nest`) — use for `libs/feature` and `apps/api`**
+
+```bash
+# Module + Service (new feature in libs/feature)
+npx nx g @nx/nest:module  <entity> --project=feature --directory=libs/feature/src/<entity>
+npx nx g @nx/nest:service <entity> --project=feature --directory=libs/feature/src/<entity>
+
+# Controller (in apps/api)
+npx nx g @nx/nest:controller <entity> --project=api --directory=apps/api/src/app/<entity>
+
+# Other building blocks
+npx nx g @nx/nest:guard      <name> --project=feature --directory=libs/feature/src/<entity>/guards
+npx nx g @nx/nest:middleware <name> --project=feature --directory=libs/feature/src/<entity>/middleware
+npx nx g @nx/nest:decorator  <name> --project=feature --directory=libs/feature/src/<entity>/decorators
+npx nx g @nx/nest:interceptor <name> --project=feature --directory=libs/feature/src/<entity>
+```
+
+**React (`@nx/react`) — use for `apps/web`**
+
+```bash
+# Component
+npx nx g @nx/react:component <ComponentName> --project=web --directory=apps/web/src/features/<entity>/components
+
+# Hook
+npx nx g @nx/react:hook use<Entity> --project=web --directory=apps/web/src/features/<entity>
+```
+
+**Libraries (`@nx/js` / `@nx/react` / `@nx/nest`) — use when adding a new lib**
+
+```bash
+# TypeScript lib (e.g. shared, backend)
+npx nx g @nx/js:library <lib-name> --directory=libs/<lib-name>
+
+# React component lib (e.g. ui)
+npx nx g @nx/react:library <lib-name> --directory=libs/<lib-name>
+
+# NestJS feature lib
+npx nx g @nx/nest:library <lib-name> --directory=libs/<lib-name>
+```
+
+> After running a generator, review generated files and remove any boilerplate that conflicts with project conventions (e.g. unwanted spec files, default exports, auto-wired module imports that don't match the existing structure).
+
 ## Library Architecture
 
 | Import Alias      | Path                | Purpose                                                  |
