@@ -29,16 +29,22 @@ export function DeleteTeamDialog({ target, onClose }: DeleteTeamDialogProps) {
             Are you sure you want to delete{' '}
             <span className="font-medium">{target?.name}</span>?
           </p>
-          <p className="text-xs text-muted-foreground">This action cannot be undone.</p>
+          <p className="text-xs text-muted-foreground">
+            This action cannot be undone.
+          </p>
         </div>
         {deleteTeam.isError && (
           <p className="text-sm text-destructive">
-            {(deleteTeam.error as AxiosError<{ message: string }>)?.response?.data?.message ??
-              'Failed to delete team.'}
+            {(deleteTeam.error as AxiosError<{ message: string }>)?.response
+              ?.data?.message ?? 'Failed to delete team.'}
           </p>
         )}
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={deleteTeam.isPending}>
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={deleteTeam.isPending}
+          >
             Cancel
           </Button>
           <Button

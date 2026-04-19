@@ -40,7 +40,7 @@ This repository is an Nx monorepo with a NestJS API (`apps/api`) and a React web
 |---|---|
 | Server bootstrap | `apps/api/src/main.ts` |
 | Root module (middleware, imports) | `apps/api/src/app/app.module.ts` |
-| Controllers | `apps/api/src/app/<entity>.controller.ts` |
+| Controllers | `apps/api/src/app/<entity>/<entity>.controller.ts` |
 | Auth service (login, refresh, impersonate) | `libs/feature/src/auth/auth.service.ts` |
 | Auth middleware (JWT validation, global) | `libs/feature/src/auth/middleware/auth.middleware.ts` |
 | Permission guard | `libs/feature/src/auth/guards/permission.guard.ts` |
@@ -88,15 +88,22 @@ libs/feature/src/
 └── index.ts
 
 apps/api/src/app/
-├── <entity>.controller.ts
-└── <entity>/dto/              (DTOs live here, not in libs/feature)
-    ├── create-<entity>.dto.ts
-    └── update-<entity>.dto.ts
+└── <entity>/
+    ├── <entity>.controller.ts
+    ├── <entity>.integration.spec.ts
+    └── dto/                   (DTOs live here, not in libs/feature)
+        ├── create-<entity>.dto.ts
+        └── update-<entity>.dto.ts
+
+apps/api/test/helpers/         (shared test infrastructure — not a test location)
+├── app.ts                     (createTestApp())
+├── db.ts                      (truncateAll(), seedDefaultPermissions())
+└── seed.ts                    (seedUser(), seedAndLogin())
 ```
 
 ### Layered Responsibility & Boundaries
 
-- **Controllers**: `apps/api/src/app/`. Map DTOs $\rightarrow$ Service Inputs and Service Outputs $\rightarrow$ Shared Wire Types.
+- **Controllers**: `apps/api/src/app/<entity>/`. Map DTOs $\rightarrow$ Service Inputs and Service Outputs $\rightarrow$ Shared Wire Types.
 - **DTOs**: `apps/api/src/app/<entity>/dto/`. Use `class-validator` and `@nestjs/swagger`. DTOs **never** leave the API app.
 - **Services**: `libs/feature/src/<entity>/`. Handle business logic and Prisma calls.
 - **The Golden Rule**: Services **never** receive or return DTOs. The controller is the only place where DTO $\leftrightarrow$ Internal Type mapping occurs.
@@ -124,29 +131,33 @@ apps/api/src/app/
 
 - **Session Security**: `refreshTokenVersion` increments on each refresh; reuse throws 401 and invalidates all sessions.
 
-## Testing (`libs/feature`)
+## Testing
+
+### Unit Tests (`libs/feature`)
 
 Unit tests live next to the service they test: `<service>.service.spec.ts`. Run with `npx nx test feature`.
 
-### Infrastructure
+#### Infrastructure
 
-| File                                       | Purpose                                                                                                              |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `libs/feature/jest.config.cts`             | Jest config; includes `moduleNameMapper` to redirect `@ube-hr/backend`                                               |
-| `libs/feature/tsconfig.spec.json`          | Spec tsconfig; includes `src/testing/**/*.ts` so helpers see Jest globals                                            |
-| `libs/feature/tsconfig.lib.json`           | Excludes `src/testing/**/*.ts` so VS Code uses the spec tsconfig for those files                                     |
-| `libs/feature/src/testing/prisma.mock.ts`  | `createPrismaMock()` — returns an object of `jest.fn()` stubs matching the Prisma model API                          |
-| `libs/feature/src/testing/backend.mock.ts` | Manual mock for `@ube-hr/backend`; avoids the generated Prisma client (ESM/`import.meta` incompatible with Jest CJS) |
+| File                                           | Purpose                                                                             |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `libs/feature/jest.config.cts`                 | Jest config (CJS mode); stubs only the generated Prisma client                      |
+| `libs/feature/tsconfig.spec.json`              | Spec tsconfig; includes `src/testing/**/*.ts` so helpers see Jest globals           |
+| `libs/feature/tsconfig.lib.json`               | Excludes `src/testing/**/*.ts` so VS Code uses the spec tsconfig for those files    |
+| `libs/feature/src/testing/prisma.mock.ts`      | `createPrismaMock()` — returns an object of `jest.fn()` stubs matching the Prisma model API |
+| `libs/feature/src/testing/prisma-client.stub.ts` | Minimal CJS `PrismaClient` stub; satisfies `extends PrismaClient` in `PrismaService` without loading the generated ESM client |
 
-### Why `@ube-hr/backend` is mocked at the module level
+#### Why only the generated Prisma client is stubbed
 
-The generated Prisma client (`generated/prisma/client.ts`) uses `import.meta.url` which is ESM-only and crashes Jest in CommonJS mode. `moduleNameMapper` in `jest.config.cts` redirects `@ube-hr/backend` to `backend.mock.ts`, which re-exports `Role`, `UserStatus`, a stub `PrismaService` class, and a spyable `secrets` object — everything the services need at runtime, without touching the Prisma client.
+`generated/prisma/client.ts` uses `import.meta.url` (ESM-only), which crashes Jest in CommonJS mode. `moduleNameMapper` in both `libs/feature/jest.config.cts` and `apps/api/jest.config.cts` redirects only that file to `prisma-client.stub.ts`. Everything else in `@ube-hr/backend` — `Role`, `UserStatus`, `PrismaService` class, `secrets` — is imported from the real source.
 
-### Pattern for a new service spec
+`PrismaService` is always replaced via `useValue` in unit tests, so the stub class is never instantiated.
+
+#### Pattern for a new service spec
 
 ```ts
 import { Test } from '@nestjs/testing';
-import { PrismaService } from '@ube-hr/backend'; // resolves to backend.mock.ts
+import { PrismaService } from '@ube-hr/backend'; // real class; stub PrismaClient base
 import { createPrismaMock, PrismaMock } from '../testing/prisma.mock';
 import { MyService } from './my.service';
 
@@ -166,9 +177,9 @@ describe('MyService', () => {
 });
 ```
 
-Spy on `secrets` methods via `jest.spyOn(backendMock.secrets, 'hash').mockResolvedValue(...)` where `backendMock` is `import * as backendMock from '@ube-hr/backend'`.
+Spy on `secrets` via `jest.spyOn(backendSecrets.secrets, 'hash').mockResolvedValue(...)` where `backendSecrets` is `import * as backendSecrets from '@ube-hr/backend'`.
 
-Services that depend on other services (e.g. `AuthService` → `UsersService`) use `jest.Mocked<Pick<...>>` to mock only the methods the service under test calls:
+Services that depend on other services use `jest.Mocked<Pick<...>>` to mock only the methods called:
 
 ```ts
 const usersService: jest.Mocked<
@@ -178,6 +189,57 @@ const usersService: jest.Mocked<
   incrementTokenVersion: jest.fn(),
 };
 ```
+
+### Integration Tests (`apps/api`)
+
+Every test in `apps/api` is an integration test. There are no controller unit tests. Run with `npx nx test api`.
+
+Tests live co-located with the controller they cover: `apps/api/src/app/<entity>/<entity>.integration.spec.ts`. They bootstrap the full NestJS application, make real HTTP requests via `supertest`, and interact with a live database. Each test group calls `truncateAll()` in `beforeEach` to restore a clean state (equivalent to Laravel's `RefreshDatabase`).
+
+#### Infrastructure
+
+| File                                       | Purpose                                                                     |
+| ------------------------------------------ | --------------------------------------------------------------------------- |
+| `apps/api/jest.integration.config.cts`     | Jest config (ESM mode via `--experimental-vm-modules`); no Prisma client stub — uses the real generated client |
+| `apps/api/tsconfig.integration.json`       | TypeScript config (`module: ESNext`, `moduleResolution: Bundler`) so `import.meta` is valid |
+| `apps/api/test/helpers/app.ts`             | `createTestApp()` — bootstraps `AppModule` with real services               |
+| `apps/api/test/helpers/db.ts`              | `truncateAll(app)`, `seedDefaultPermissions(app)` — DB helpers              |
+| `apps/api/test/helpers/seed.ts`            | `seedUser()`, `seedAndLogin()` — data seeding helpers                       |
+
+#### Pattern for a new integration spec
+
+Place the spec at `apps/api/src/app/<entity>/<entity>.integration.spec.ts`. Helper imports use a relative path up to `test/helpers/`.
+
+```ts
+import { INestApplication } from '@nestjs/common';
+import supertest from 'supertest';
+import { createTestApp } from '../../../test/helpers/app';
+import { truncateAll, seedDefaultPermissions } from '../../../test/helpers/db';
+import { seedAndLogin } from '../../../test/helpers/seed';
+
+describe('MyEntity (integration)', () => {
+  let app: INestApplication;
+  let request: ReturnType<typeof supertest>;
+
+  beforeAll(async () => {
+    app = await createTestApp();
+    request = supertest(app.getHttpServer());
+  });
+
+  afterAll(() => app.close());
+
+  beforeEach(async () => {
+    await truncateAll(app);
+    await seedDefaultPermissions(app);
+  });
+
+  it('...', async () => {
+    // seed → request → assert
+  });
+});
+```
+
+`seedDefaultPermissions` must be called in `beforeEach` — the `PermissionsService` reads purely from the DB and has no built-in fallback. Seed data directly via `PrismaService` obtained from `app.get(PrismaService)`. Import `jest` explicitly if needed: `import { jest } from '@jest/globals'` (it is not a global in ESM mode).
 
 ## Frontend Guidelines (React)
 
@@ -249,7 +311,7 @@ _Do this before writing controllers or frontend code._
 - Add model to `prisma/schema.prisma` and run migration.
 - Create `libs/feature/src/<entity>/` with `.module.ts` and `.service.ts`.
 - Add permissions to `libs/shared/src/permissions.ts` and update `DEFAULT_ROLE_PERMISSIONS`.
-- Create controller at `apps/api/src/app/<entity>.controller.ts` with `dto/` subfolder.
+- Create `apps/api/src/app/<entity>/` with `<entity>.controller.ts`, `<entity>.integration.spec.ts`, and a `dto/` subfolder.
 - Protect routes with `@RequirePermission()`.
 - Implement DTO $\rightarrow$ Service and Service $\rightarrow$ Response mapping in the controller.
 - Export module from `libs/feature/src/index.ts` and import in `app.module.ts`.

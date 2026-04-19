@@ -33,7 +33,10 @@ export function CreateUserForm({
   isPending,
   error,
 }: CreateUserFormProps) {
-  function set<K extends keyof CreateUserFormValues>(key: K, value: CreateUserFormValues[K]) {
+  function set<K extends keyof CreateUserFormValues>(
+    key: K,
+    value: CreateUserFormValues[K],
+  ) {
     onChange({ ...values, [key]: value });
   }
 
@@ -62,7 +65,8 @@ export function CreateUserForm({
       </div>
       <div className="space-y-1.5">
         <Label>
-          Name <span className="text-muted-foreground font-normal">(optional)</span>
+          Name{' '}
+          <span className="text-muted-foreground font-normal">(optional)</span>
         </Label>
         <Input
           type="text"
@@ -73,7 +77,10 @@ export function CreateUserForm({
       </div>
       <div className="space-y-1.5">
         <Label>Role</Label>
-        <Select value={values.role} onValueChange={(value) => set('role', value)}>
+        <Select
+          value={values.role}
+          onValueChange={(value) => set('role', value)}
+        >
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>

@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@ube-hr/ui';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@ube-hr/ui';
 import { useLogin, useAuth, LoginForm } from '../../features/authentication';
 
 export function LoginPage() {
@@ -30,7 +36,7 @@ export function LoginPage() {
             setError('Something went wrong. Please try again.');
           }
         },
-      }
+      },
     );
   }
 

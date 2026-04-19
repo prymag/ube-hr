@@ -1,10 +1,10 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app/app.controller';
 import { AppService } from './app/app.service';
-import { AuthController } from './app/auth.controller';
-import { UsersController } from './app/users.controller';
-import { TeamsController } from './app/teams.controller';
-import { PermissionsController } from './app/permissions.controller';
+import { AuthController } from './app/auth/auth.controller';
+import { UsersController } from './app/users/users.controller';
+import { TeamsController } from './app/teams/teams.controller';
+import { PermissionsController } from './app/permissions/permissions.controller';
 import { AppConfigModule, PrismaModule } from '@ube-hr/backend';
 import { AuthModule, AuthMiddleware, UsersModule, TeamsModule, PermissionsModule } from '@ube-hr/feature';
 

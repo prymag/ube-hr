@@ -7,7 +7,10 @@
       "@ube-hr/feature": ["../libs/feature/src/index.ts"],
       "@ube-hr/shared": ["../libs/shared/src/index.ts"],
       "@ube-hr/ui": ["../libs/ui/src/index.ts"],
-      "@ube-hr/backend": ["../libs/backend/src/index.ts"]
+      "@ube-hr/backend": ["../libs/backend/src/index.ts"],
+      "@ube-hr/prisma-client": ["../generated/prisma/client.ts"],
+      "@ube-hr/prisma-enums": ["../generated/prisma/enums.ts"],
+      "@ube-hr/prisma-models": ["../generated/prisma/models.ts"]
     }
   }
 }

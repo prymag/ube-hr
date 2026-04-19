@@ -1,4 +1,11 @@
-export { getUsers, getUser, getUserTeams, createUser, updateUser, deleteUser } from './users.api';
+export {
+  getUsers,
+  getUser,
+  getUserTeams,
+  createUser,
+  updateUser,
+  deleteUser,
+} from './users.api';
 export { useUsersTable } from './useUsersTable';
 export type { UserSortField, SortDir as UserSortDir } from './useUsersTable';
 export { UsersTable } from './components/UsersTable';

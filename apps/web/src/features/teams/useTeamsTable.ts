@@ -23,7 +23,7 @@ export function useTeamsTable() {
 
   function toggleSort(field: TeamSortField) {
     if (sortField === field) {
-      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortField(field);
       setSortDir('asc');
@@ -31,13 +31,16 @@ export function useTeamsTable() {
     setPage(1);
   }
 
-  const params = useMemo<TeamsListParams>(() => ({
-    ...(search ? { search } : {}),
-    sortField,
-    sortDir,
-    page,
-    pageSize,
-  }), [search, sortField, sortDir, page, pageSize]);
+  const params = useMemo<TeamsListParams>(
+    () => ({
+      ...(search ? { search } : {}),
+      sortField,
+      sortDir,
+      page,
+      pageSize,
+    }),
+    [search, sortField, sortDir, page, pageSize],
+  );
 
   return {
     rawSearch,

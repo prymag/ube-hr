@@ -22,8 +22,9 @@ export function AuthLayout() {
   const navigate = useNavigate();
   const { data: me } = useMe();
 
-  const visibleNavItems = navItems.filter(({ permission }) =>
-    !permission || (me?.permissions?.includes(permission) ?? false)
+  const visibleNavItems = navItems.filter(
+    ({ permission }) =>
+      !permission || (me?.permissions?.includes(permission) ?? false),
   );
 
   async function handleLogout() {
@@ -44,7 +45,9 @@ export function AuthLayout() {
         {/* User info */}
         <div className="px-6 py-4 border-b">
           <p className="text-sm font-medium truncate">{user?.email}</p>
-          <p className="text-xs text-muted-foreground mt-0.5 capitalize">{user?.role}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 capitalize">
+            {user?.role}
+          </p>
         </div>
 
         {/* Navigation */}

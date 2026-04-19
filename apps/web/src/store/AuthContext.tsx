@@ -1,15 +1,31 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import axios from 'axios';
 import { setAccessToken } from '../services/axios';
-import type { AuthUser, AuthContextType } from '../features/authentication/auth.types';
+import type {
+  AuthUser,
+  AuthContextType,
+} from '../features/authentication/auth.types';
 
 export type { AuthUser, AuthContextType };
 
 function decodeJwt(token: string): AuthUser | null {
   try {
     const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-    return { id: decoded.sub, email: decoded.email, role: decoded.role, impersonatedBy: decoded.impersonatedBy };
+    const decoded = JSON.parse(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/')),
+    );
+    return {
+      id: decoded.sub,
+      email: decoded.email,
+      role: decoded.role,
+      impersonatedBy: decoded.impersonatedBy,
+    };
   } catch {
     return null;
   }
@@ -61,7 +77,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       axios
         .post('/api/auth/refresh', {}, { withCredentials: true })
         .then(({ data }) => {
-          channel.postMessage({ type: 'TOKEN_READY', token: data.access_token } satisfies ChannelMessage);
+          channel.postMessage({
+            type: 'TOKEN_READY',
+            token: data.access_token,
+          } satisfies ChannelMessage);
           resolve(data.access_token);
         })
         .catch(() => resolve(null))
@@ -80,7 +99,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const channel = new BroadcastChannel(CHANNEL_NAME);
     channel.onmessage = (e: MessageEvent<ChannelMessage>) => {
       if (e.data.type === 'REQUEST_TOKEN') {
-        channel.postMessage({ type: 'TOKEN_READY', token: accessToken } satisfies ChannelMessage);
+        channel.postMessage({
+          type: 'TOKEN_READY',
+          token: accessToken,
+        } satisfies ChannelMessage);
       }
     };
     return () => channel.close();

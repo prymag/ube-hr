@@ -1,8 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '../../../../generated/prisma/client';
+import { PrismaClient } from '@ube-hr/prisma-client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { ConfigService } from '@nestjs/config';
-
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
@@ -30,10 +29,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         return;
       } catch (err) {
         if (attempt === maxRetries) throw err;
-        this.logger.warn(`Database not ready, retrying in ${delayMs / 1000}s... (${attempt}/${maxRetries})`);
+        this.logger.warn(
+          `Database not ready, retrying in ${delayMs / 1000}s... (${attempt}/${maxRetries})`,
+        );
         await new Promise((r) => setTimeout(r, delayMs));
       }
     }
   }
-
 }

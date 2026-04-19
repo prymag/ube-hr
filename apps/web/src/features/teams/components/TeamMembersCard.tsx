@@ -9,7 +9,11 @@ import {
   SelectValue,
 } from '@ube-hr/ui';
 import { useUsers } from '../../users';
-import { useTeamMembers, useAddTeamMember, useRemoveTeamMember } from '../teams.queries';
+import {
+  useTeamMembers,
+  useAddTeamMember,
+  useRemoveTeamMember,
+} from '../teams.queries';
 
 interface TeamMembersCardProps {
   teamId: number;
@@ -33,7 +37,10 @@ export function TeamMembersCard({ teamId }: TeamMembersCardProps) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base">
-          Members <span className="text-muted-foreground font-normal">({members.length})</span>
+          Members{' '}
+          <span className="text-muted-foreground font-normal">
+            ({members.length})
+          </span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -54,7 +61,9 @@ export function TeamMembersCard({ teamId }: TeamMembersCardProps) {
             <Button
               onClick={() => {
                 if (!addUserId) return;
-                addMember.mutate(Number(addUserId), { onSuccess: () => setAddUserId('') });
+                addMember.mutate(Number(addUserId), {
+                  onSuccess: () => setAddUserId(''),
+                });
               }}
               disabled={!addUserId || addMember.isPending}
             >
@@ -73,7 +82,9 @@ export function TeamMembersCard({ teamId }: TeamMembersCardProps) {
         )}
 
         {members.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">No members yet.</p>
+          <p className="text-sm text-muted-foreground py-4 text-center">
+            No members yet.
+          </p>
         ) : (
           <ul className="space-y-1">
             {members.map((member) => (
@@ -82,8 +93,12 @@ export function TeamMembersCard({ teamId }: TeamMembersCardProps) {
                 className="flex items-center justify-between px-3 py-2.5 rounded-md hover:bg-muted"
               >
                 <div>
-                  <div className="text-sm font-medium">{member.name ?? '—'}</div>
-                  <div className="text-xs text-muted-foreground">{member.email}</div>
+                  <div className="text-sm font-medium">
+                    {member.name ?? '—'}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {member.email}
+                  </div>
                 </div>
                 <Button
                   variant="ghost"

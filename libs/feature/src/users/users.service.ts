@@ -95,8 +95,8 @@ export class UsersService {
       ...(search
         ? {
             OR: [
-              { name: { contains: search, mode: 'insensitive' as const } },
-              { email: { contains: search, mode: 'insensitive' as const } },
+              { name: { contains: search } },
+              { email: { contains: search } },
             ],
           }
         : {}),

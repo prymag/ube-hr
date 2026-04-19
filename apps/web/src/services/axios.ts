@@ -17,7 +17,10 @@ api.interceptors.request.use((config) => {
 
 // Queue of requests waiting for a token refresh
 let isRefreshing = false;
-let queue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = [];
+let queue: Array<{
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
+}> = [];
 
 function processQueue(error: unknown, token: string | null = null) {
   queue.forEach((p) => (error ? p.reject(error) : p.resolve(token ?? '')));
@@ -45,7 +48,11 @@ api.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+      const { data } = await axios.post(
+        '/api/auth/refresh',
+        {},
+        { withCredentials: true },
+      );
       setAccessToken(data.access_token);
       processQueue(null, data.access_token);
       original.headers.Authorization = `Bearer ${data.access_token}`;

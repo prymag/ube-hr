@@ -24,10 +24,10 @@ import {
 import { PERMISSIONS } from '@ube-hr/shared';
 import { type TeamModel } from '@ube-hr/backend';
 import { type TeamResponse, type TeamMember, type PaginatedResponse } from '@ube-hr/shared';
-import { CreateTeamDto } from './teams/dto/create-team.dto';
-import { UpdateTeamDto } from './teams/dto/update-team.dto';
-import { TeamResponseDto, TeamMemberDto } from './teams/dto/team-response.dto';
-import { AddMemberDto } from './teams/dto/add-member.dto';
+import { CreateTeamDto } from './dto/create-team.dto';
+import { UpdateTeamDto } from './dto/update-team.dto';
+import { TeamResponseDto, TeamMemberDto } from './dto/team-response.dto';
+import { AddMemberDto } from './dto/add-member.dto';
 
 function toTeamResponse(team: TeamModel): TeamResponse {
   return {

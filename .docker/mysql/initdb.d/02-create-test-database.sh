@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+mysql -u root -p"${MYSQL_ROOT_PASSWORD}" <<-EOSQL
+    CREATE DATABASE IF NOT EXISTS \`ube_hr_test\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    GRANT ALL PRIVILEGES ON \`ube_hr_test\`.* TO '${MYSQL_USER}'@'%';
+    FLUSH PRIVILEGES;
+EOSQL

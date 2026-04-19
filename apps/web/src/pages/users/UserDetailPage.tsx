@@ -24,11 +24,16 @@ export function UserDetailPage() {
   const callerRank = ROLE_RANK[authUser?.role ?? 'USER'] ?? 0;
   const assignableRoles = ALL_ROLES.filter((r) => ROLE_RANK[r] <= callerRank);
 
-  if (userQuery.isLoading) return <div className="text-sm text-muted-foreground">Loading…</div>;
-  if (!user) return <div className="text-sm text-destructive">User not found.</div>;
+  if (userQuery.isLoading)
+    return <div className="text-sm text-muted-foreground">Loading…</div>;
+  if (!user)
+    return <div className="text-sm text-destructive">User not found.</div>;
 
   function handleSubmit(values: EditUserFormValues) {
-    updateUser.mutate({ name: values.name.trim() || undefined, role: values.role });
+    updateUser.mutate({
+      name: values.name.trim() || undefined,
+      role: values.role,
+    });
   }
 
   return (

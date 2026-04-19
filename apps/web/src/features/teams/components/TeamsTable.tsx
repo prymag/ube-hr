@@ -21,14 +21,31 @@ interface TeamsTableProps {
   onSort: (field: TeamSortField) => void;
 }
 
-function SortIcon({ field, sortField, sortDir }: { field: TeamSortField; sortField: TeamSortField; sortDir: SortDir }) {
-  if (sortField !== field) return <ChevronsUpDown className="ml-1 inline h-3.5 w-3.5 opacity-40" />;
-  return sortDir === 'asc'
-    ? <ChevronUp className="ml-1 inline h-3.5 w-3.5" />
-    : <ChevronDown className="ml-1 inline h-3.5 w-3.5" />;
+function SortIcon({
+  field,
+  sortField,
+  sortDir,
+}: {
+  field: TeamSortField;
+  sortField: TeamSortField;
+  sortDir: SortDir;
+}) {
+  if (sortField !== field)
+    return <ChevronsUpDown className="ml-1 inline h-3.5 w-3.5 opacity-40" />;
+  return sortDir === 'asc' ? (
+    <ChevronUp className="ml-1 inline h-3.5 w-3.5" />
+  ) : (
+    <ChevronDown className="ml-1 inline h-3.5 w-3.5" />
+  );
 }
 
-export function TeamsTable({ teams, onDeleteRequest, sortField, sortDir, onSort }: TeamsTableProps) {
+export function TeamsTable({
+  teams,
+  onDeleteRequest,
+  sortField,
+  sortDir,
+  onSort,
+}: TeamsTableProps) {
   const navigate = useNavigate();
 
   const th = (field: TeamSortField, label: string) => (
@@ -72,7 +89,10 @@ export function TeamsTable({ teams, onDeleteRequest, sortField, sortDir, onSort 
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={(e) => { e.stopPropagation(); onDeleteRequest(team); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteRequest(team);
+                  }}
                   className="text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                   Delete

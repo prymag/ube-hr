@@ -13,14 +13,17 @@ export function CreateTeamPage() {
   const [form, setForm] = useState<CreateTeamFormValues>(EMPTY_FORM);
 
   const error = createTeam.isError
-    ? ((createTeam.error as AxiosError<{ message: string }>)?.response?.data?.message ??
-      'Failed to create team. Name may already be taken.')
+    ? ((createTeam.error as AxiosError<{ message: string }>)?.response?.data
+        ?.message ?? 'Failed to create team. Name may already be taken.')
     : null;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     createTeam.mutate(
-      { name: form.name.trim(), description: form.description.trim() || undefined },
+      {
+        name: form.name.trim(),
+        description: form.description.trim() || undefined,
+      },
       { onSuccess: () => navigate('/teams') },
     );
   }

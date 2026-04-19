@@ -7,7 +7,12 @@ import { useAuth } from '../../store/AuthContext';
 import { ROLE_RANK, ALL_ROLES } from '../../config/roles';
 import { Button, Card, CardContent } from '@ube-hr/ui';
 
-const EMPTY_FORM: CreateUserFormValues = { email: '', password: '', name: '', role: 'USER' };
+const EMPTY_FORM: CreateUserFormValues = {
+  email: '',
+  password: '',
+  name: '',
+  role: 'USER',
+};
 
 export function CreateUserPage() {
   const navigate = useNavigate();
@@ -19,13 +24,19 @@ export function CreateUserPage() {
   const assignableRoles = ALL_ROLES.filter((r) => ROLE_RANK[r] <= callerRank);
 
   const error = createUser.isError
-    ? ((createUser.error as AxiosError<{ message: string }>)?.response?.data?.message ?? 'Failed to create user.')
+    ? ((createUser.error as AxiosError<{ message: string }>)?.response?.data
+        ?.message ?? 'Failed to create user.')
     : null;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     createUser.mutate(
-      { email: form.email, password: form.password, name: form.name || undefined, role: form.role },
+      {
+        email: form.email,
+        password: form.password,
+        name: form.name || undefined,
+        role: form.role,
+      },
       { onSuccess: () => navigate('/users') },
     );
   }
