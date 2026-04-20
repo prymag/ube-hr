@@ -35,7 +35,13 @@ export const createUser = async (data: {
 
 export const updateUser = async (
   id: number,
-  data: { name?: string; role?: string; profilePicture?: File | null },
+  data: {
+    name?: string;
+    role?: string;
+    profilePicture?: File | null;
+    positionId?: number | null;
+    departmentId?: number | null;
+  },
 ) => {
   const formData = new FormData();
   if (data.name) formData.append('name', data.name);
@@ -44,6 +50,18 @@ export const updateUser = async (
     formData.append('file', data.profilePicture);
   } else if (data.profilePicture === null) {
     formData.append('profilePicture', 'null');
+  }
+  if (data.positionId !== undefined) {
+    formData.append(
+      'positionId',
+      data.positionId === null ? '' : String(data.positionId),
+    );
+  }
+  if (data.departmentId !== undefined) {
+    formData.append(
+      'departmentId',
+      data.departmentId === null ? '' : String(data.departmentId),
+    );
   }
 
   const r = await api.patch<UserResponse>(`/api/users/${id}`, formData, {

@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Button } from '@ube-hr/ui';
-import { Input } from '@ube-hr/ui';
-import { Label } from '@ube-hr/ui';
 import {
+  Button,
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
@@ -17,20 +17,33 @@ export interface EditUserFormValues {
   name: string;
   role: string;
   profilePicture?: File | null;
+  positionId: string;
+  departmentId: string;
+}
+
+interface SelectOption {
+  id: number;
+  name: string;
 }
 
 interface EditUserFormProps {
   user: UserResponse;
   assignableRoles: string[];
+  positions: SelectOption[];
+  departments: SelectOption[];
   isPending: boolean;
   isError: boolean;
   onSubmit: (values: EditUserFormValues) => void;
   onCancel: () => void;
 }
 
+const UNASSIGNED = '__none__';
+
 export function EditUserForm({
   user,
   assignableRoles,
+  positions,
+  departments,
   isPending,
   isError,
   onSubmit,
@@ -47,14 +60,27 @@ export function EditUserForm({
     defaultValues: {
       name: user.name ?? '',
       role: user.role,
+      positionId:
+        user.positionId != null ? String(user.positionId) : UNASSIGNED,
+      departmentId:
+        user.departmentId != null ? String(user.departmentId) : UNASSIGNED,
     },
   });
 
   useEffect(() => {
-    reset({ name: user.name ?? '', role: user.role });
+    reset({
+      name: user.name ?? '',
+      role: user.role,
+      positionId:
+        user.positionId != null ? String(user.positionId) : UNASSIGNED,
+      departmentId:
+        user.departmentId != null ? String(user.departmentId) : UNASSIGNED,
+    });
   }, [user, reset]);
 
   const role = watch('role');
+  const positionId = watch('positionId');
+  const departmentId = watch('departmentId');
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -91,6 +117,56 @@ export function EditUserForm({
               {assignableRoles.map((r) => (
                 <SelectItem key={r} value={r}>
                   {r.replace('_', ' ')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>
+            Position{' '}
+            <span className="text-muted-foreground font-normal">
+              (optional)
+            </span>
+          </Label>
+          <Select
+            value={positionId}
+            onValueChange={(val) => setValue('positionId', val)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="No position assigned" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={UNASSIGNED}>— None —</SelectItem>
+              {positions.map((p) => (
+                <SelectItem key={p.id} value={String(p.id)}>
+                  {p.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>
+            Department{' '}
+            <span className="text-muted-foreground font-normal">
+              (optional)
+            </span>
+          </Label>
+          <Select
+            value={departmentId}
+            onValueChange={(val) => setValue('departmentId', val)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="No department assigned" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={UNASSIGNED}>— None —</SelectItem>
+              {departments.map((d) => (
+                <SelectItem key={d.id} value={String(d.id)}>
+                  {d.name}
                 </SelectItem>
               ))}
             </SelectContent>

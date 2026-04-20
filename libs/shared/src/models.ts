@@ -19,6 +19,10 @@ export interface UserResponse {
   role: UserRole;
   status: UserStatus;
   profilePicture: string | null;
+  positionId: number | null;
+  positionName: string | null;
+  departmentId: number | null;
+  departmentName: string | null;
   createdAt: string;
 }
 
@@ -58,6 +62,44 @@ export interface TeamMember {
 }
 
 export interface TeamsListParams {
+  search?: string;
+  sortField?: string;
+  sortDir?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+// --- Department wire types ---
+
+export interface DepartmentResponse {
+  id: number;
+  name: string;
+  description: string | null;
+  headId: number | null;
+  headName: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DepartmentsListParams {
+  search?: string;
+  sortField?: string;
+  sortDir?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+// --- Position wire types ---
+
+export interface PositionResponse {
+  id: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PositionsListParams {
   search?: string;
   sortField?: string;
   sortDir?: string;

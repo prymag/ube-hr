@@ -15,12 +15,61 @@ const adapter = new PrismaMariaDb({
 });
 const prisma = new PrismaClient({ adapter });
 
+const SEED_DEPARTMENTS = [
+  {
+    name: 'Engineering',
+    description: 'Software development and infrastructure',
+  },
+  {
+    name: 'Human Resources',
+    description: 'People operations and talent management',
+  },
+  { name: 'Finance', description: 'Financial planning and accounting' },
+  { name: 'Marketing', description: 'Brand, growth and communications' },
+  { name: 'Operations', description: 'Business processes and logistics' },
+];
+
+const SEED_POSITIONS = [
+  {
+    name: 'Software Engineer',
+    description: 'Designs and builds software systems',
+  },
+  {
+    name: 'Senior Software Engineer',
+    description: 'Leads technical work and mentors engineers',
+  },
+  {
+    name: 'Engineering Manager',
+    description: 'Manages engineering teams and delivery',
+  },
+  {
+    name: 'HR Specialist',
+    description: 'Handles recruitment and employee relations',
+  },
+  { name: 'HR Manager', description: 'Leads the HR function and policy' },
+  {
+    name: 'Financial Analyst',
+    description: 'Analyses budgets and financial reports',
+  },
+  { name: 'Accountant', description: 'Manages accounts and financial records' },
+  { name: 'Marketing Specialist', description: 'Executes marketing campaigns' },
+  {
+    name: 'Marketing Manager',
+    description: 'Leads marketing strategy and team',
+  },
+  {
+    name: 'Operations Coordinator',
+    description: 'Coordinates day-to-day operations',
+  },
+];
+
 async function main() {
   // Seed one user per role
   const users = await Promise.all(
     Object.values(Role).map(async (role) => {
       const email = `${role.toLowerCase().replace('_', '.')}@example.com`;
-      const name = role.charAt(0) + role.slice(1).toLowerCase().replace('_', ' ');
+      const name =
+        role.charAt(0) + role.slice(1).toLowerCase().replace('_', ' ');
       return prisma.user.upsert({
         where: { email },
         update: {},
@@ -35,7 +84,9 @@ async function main() {
   );
 
   // Seed role permissions
-  for (const [role, permissions] of Object.entries(DEFAULT_ROLE_PERMISSIONS) as [Role, string[]][]) {
+  for (const [role, permissions] of Object.entries(
+    DEFAULT_ROLE_PERMISSIONS,
+  ) as [Role, string[]][]) {
     for (const permission of permissions) {
       await prisma.rolePermission.upsert({
         where: { role_permission: { role, permission } },
@@ -45,7 +96,40 @@ async function main() {
     }
   }
 
-  console.log('Seeded users:', users.map((u) => `${u.email} (${u.role})`));
+  // Seed departments
+  const departments = await Promise.all(
+    SEED_DEPARTMENTS.map((dept) =>
+      prisma.department.upsert({
+        where: { name: dept.name },
+        update: {},
+        create: dept,
+      }),
+    ),
+  );
+
+  // Seed positions
+  const positions = await Promise.all(
+    SEED_POSITIONS.map((pos) =>
+      prisma.position.upsert({
+        where: { name: pos.name },
+        update: {},
+        create: pos,
+      }),
+    ),
+  );
+
+  console.log(
+    'Seeded users:',
+    users.map((u) => `${u.email} (${u.role})`),
+  );
+  console.log(
+    'Seeded departments:',
+    departments.map((d) => d.name),
+  );
+  console.log(
+    'Seeded positions:',
+    positions.map((p) => p.name),
+  );
 }
 
 main()

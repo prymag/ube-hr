@@ -58,6 +58,8 @@ export function useUpdateUser(userId: number) {
       name?: string;
       role?: string;
       profilePicture?: File | null;
+      positionId?: number | null;
+      departmentId?: number | null;
     }) => updateUser(userId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.lists() }),
   });

@@ -10,6 +10,12 @@ import { UserDetailPage } from '../pages/users/UserDetailPage';
 import { TeamsPage } from '../pages/teams/TeamsPage';
 import { CreateTeamPage } from '../pages/teams/CreateTeamPage';
 import { TeamDetailPage } from '../pages/teams/TeamDetailPage';
+import { DepartmentsPage } from '../pages/departments/DepartmentsPage';
+import { CreateDepartmentPage } from '../pages/departments/CreateDepartmentPage';
+import { DepartmentDetailPage } from '../pages/departments/DepartmentDetailPage';
+import { PositionsPage } from '../pages/positions/PositionsPage';
+import { CreatePositionPage } from '../pages/positions/CreatePositionPage';
+import { PositionDetailPage } from '../pages/positions/PositionDetailPage';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { PERMISSIONS } from '@ube-hr/shared';
 
@@ -63,6 +69,30 @@ export function App() {
               <Route path="/teams" element={<TeamsPage />} />
               <Route path="/teams/new" element={<CreateTeamPage />} />
               <Route path="/teams/:id" element={<TeamDetailPage />} />
+            </Route>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.DEPARTMENTS_READ} />
+              }
+            >
+              <Route path="/departments" element={<DepartmentsPage />} />
+              <Route
+                path="/departments/new"
+                element={<CreateDepartmentPage />}
+              />
+              <Route
+                path="/departments/:id"
+                element={<DepartmentDetailPage />}
+              />
+            </Route>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.POSITIONS_READ} />
+              }
+            >
+              <Route path="/positions" element={<PositionsPage />} />
+              <Route path="/positions/new" element={<CreatePositionPage />} />
+              <Route path="/positions/:id" element={<PositionDetailPage />} />
             </Route>
           </Route>
         </Route>

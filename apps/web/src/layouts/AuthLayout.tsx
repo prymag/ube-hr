@@ -15,6 +15,16 @@ const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard' },
   { to: '/users', label: 'Users', permission: PERMISSIONS.USERS_READ },
   { to: '/teams', label: 'Teams', permission: PERMISSIONS.TEAMS_READ },
+  {
+    to: '/departments',
+    label: 'Departments',
+    permission: PERMISSIONS.DEPARTMENTS_READ,
+  },
+  {
+    to: '/positions',
+    label: 'Positions',
+    permission: PERMISSIONS.POSITIONS_READ,
+  },
 ];
 
 export function AuthLayout() {

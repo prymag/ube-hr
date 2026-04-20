@@ -43,6 +43,7 @@ import {
   type UserResponse,
   type UserTeam,
   type PaginatedResponse,
+  parseFormInt,
 } from '@ube-hr/shared';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -64,6 +65,10 @@ function toUserResponse(
     profilePicture: user.profilePicture
       ? storageService.getUrl(user.profilePicture)
       : null,
+    positionId: user.positionId,
+    positionName: user.position?.name ?? null,
+    departmentId: user.departmentId,
+    departmentName: user.department?.name ?? null,
     createdAt: user.createdAt.toISOString(),
   };
 }
@@ -236,7 +241,7 @@ export class UsersController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserResponse | null> {
-    const user = await this.usersService.findById(id);
+    const user = await this.usersService.findUserRecordById(id);
     return user ? toUserResponse(user, this.storageService) : null;
   }
 
@@ -286,8 +291,11 @@ export class UsersController {
     const user = await this.usersService.update(
       id,
       {
-        ...dto,
+        name: dto.name,
+        role: dto.role,
         profilePicture: profilePicturePath,
+        positionId: parseFormInt(dto.positionId),
+        departmentId: parseFormInt(dto.departmentId),
       },
       req.user!.role,
     );
