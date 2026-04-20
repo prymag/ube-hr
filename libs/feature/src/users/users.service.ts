@@ -12,8 +12,13 @@ import {
   UserStatus,
   type UserModel,
 } from '@ube-hr/backend';
-import { type PaginatedResponse, JOB_QUEUES, EMAIL_JOBS, type WelcomeEmailPayload } from '@ube-hr/shared';
-
+import { StorageService } from '@ube-hr/backend';
+import {
+  type PaginatedResponse,
+  JOB_QUEUES,
+  EMAIL_JOBS,
+  type WelcomeEmailPayload,
+} from '@ube-hr/shared';
 import { roleRank, visibleRoles } from '../permissions';
 import { QueueService } from '../queue/queue.service';
 
@@ -22,6 +27,16 @@ export interface CreateUserInput {
   password: string;
   name?: string;
   role?: Role;
+}
+
+export interface UserRecord {
+  id: number;
+  email: string;
+  name: string | null;
+  role: Role;
+  status: UserStatus;
+  profilePicture: string | null;
+  createdAt: Date;
 }
 
 export interface UserRecord {
@@ -59,6 +74,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly queue: QueueService,
+    private readonly storage: StorageService,
   ) {}
 
   async findAll(
@@ -117,6 +133,7 @@ export class UsersService {
           name: true,
           role: true,
           status: true,
+          profilePicture: true,
           createdAt: true,
         },
         orderBy: { [validSort]: validDir },
@@ -152,13 +169,18 @@ export class UsersService {
         name: true,
         role: true,
         status: true,
+        profilePicture: true,
         createdAt: true,
       },
     });
-    await this.queue.dispatch<WelcomeEmailPayload>(JOB_QUEUES.EMAIL, EMAIL_JOBS.SEND_WELCOME, {
-      to: user.email,
-      name: user.name ?? user.email,
-    });
+    await this.queue.dispatch<WelcomeEmailPayload>(
+      JOB_QUEUES.EMAIL,
+      EMAIL_JOBS.SEND_WELCOME,
+      {
+        to: user.email,
+        name: user.name ?? user.email,
+      },
+    );
     return user;
   }
 
@@ -234,5 +256,38 @@ export class UsersService {
       data: { refreshTokenVersion: { increment: 1 } },
     });
     return user.refreshTokenVersion;
+  }
+
+  async updateProfilePicture(
+    userId: number,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.profilePicture) {
+      await this.storage.delete(user.profilePicture);
+    }
+
+    const path = await this.storage.upload(file, 'profile_pictures');
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { profilePicture: path },
+    });
+
+    return updatedUser.profilePicture!;
+  }
+
+  async removeProfilePicture(userId: number): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.profilePicture) {
+      await this.storage.delete(user.profilePicture);
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { profilePicture: null },
+      });
+    }
   }
 }

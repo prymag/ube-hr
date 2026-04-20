@@ -5,6 +5,7 @@ import {
   EditUserForm,
   OwnedTeamsCard,
   UserTeamsCard,
+  ProfilePicture,
 } from '../../features/users';
 import type { EditUserFormValues } from '../../features/users';
 import { useAuth } from '../../store/AuthContext';
@@ -46,6 +47,8 @@ export function UserDetailPage() {
       >
         ← Back to Users
       </Button>
+
+      <ProfilePicture userId={userId} url={user.profilePicture} />
 
       <Card className="mb-6">
         <CardContent className="p-6">

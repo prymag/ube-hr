@@ -13,7 +13,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import {
   AuthService,
   LocalAuthGuard,
@@ -56,14 +62,18 @@ export class AuthController {
     @Body() _body: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { access_token, refresh_token } = await this.authService.login(req.user!);
+    const { access_token, refresh_token } = await this.authService.login(
+      req.user!,
+    );
     res.cookie(REFRESH_COOKIE, refresh_token, cookieOptions);
     return { access_token };
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Exchange refresh token cookie for a new token pair' })
+  @ApiOperation({
+    summary: 'Exchange refresh token cookie for a new token pair',
+  })
   @ApiOkResponse({ type: TokenResponseDto })
   async refresh(
     @Req() req: AuthenticatedRequest,
@@ -72,7 +82,8 @@ export class AuthController {
     const token = (req as any).cookies?.[REFRESH_COOKIE];
     if (!token) throw new UnauthorizedException('Missing refresh token');
 
-    const { access_token, refresh_token } = await this.authService.refresh(token);
+    const { access_token, refresh_token } =
+      await this.authService.refresh(token);
     res.cookie(REFRESH_COOKIE, refresh_token, cookieOptions);
     return { access_token };
   }
@@ -81,7 +92,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Logout and invalidate refresh token' })
-  @ApiOkResponse({ schema: { properties: { message: { type: 'string', example: 'Logged out successfully' } } } })
+  @ApiOkResponse({
+    schema: {
+      properties: {
+        message: { type: 'string', example: 'Logged out successfully' },
+      },
+    },
+  })
   async logout(
     @Req() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
@@ -96,7 +113,10 @@ export class AuthController {
   @UseGuards(PermissionGuard)
   @RequirePermission(PERMISSIONS.AUTH_IMPERSONATE)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Issue a 30-minute impersonation token for a target user (admin only)' })
+  @ApiOperation({
+    summary:
+      'Issue a 30-minute impersonation token for a target user (admin only)',
+  })
   @ApiOkResponse({ type: TokenResponseDto })
   impersonate(
     @Req() req: AuthenticatedRequest,
@@ -114,6 +134,7 @@ export class AuthController {
       id: req.user!.id,
       email: req.user!.email,
       role: req.user!.role as MeResponse['role'],
+      profilePicture: req.user!.profilePicture,
       impersonatedBy: req.user!.impersonatedBy,
       permissions,
     };

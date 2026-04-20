@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "docker compose up -d --wait && npx nx run-many --target=serve --projects=api,web,worker --parallel",
+    "dev": "docker compose up -d --wait && npx nx run-many --target=serve --projects=api,web --parallel",
     "sync-ai": "bash scripts/sync-instructions.sh",
     "migrate:dev": "prisma migrate dev && MYSQL_DATABASE=ube_hr_test prisma migrate deploy",
     "migrate:deploy": "prisma migrate deploy && MYSQL_DATABASE=ube_hr_test prisma migrate deploy"
@@ -52,6 +52,7 @@
     "@testing-library/react": "16.3.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/jest": "^30.0.0",
+    "@types/multer": "^2.1.0",
     "@types/node": "^20.19.9",
     "@types/nodemailer": "^8.0.0",
     "@types/passport": "^1.0.17",
@@ -93,6 +94,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1032.0",
     "@nestjs-modules/mailer": "^2.3.4",
     "@nestjs/bullmq": "^11.0.4",
     "@nestjs/common": "^11.0.0",

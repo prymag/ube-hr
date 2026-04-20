@@ -10,7 +10,13 @@ import { Role } from '@ube-hr/backend';
 import { JwtPayload } from '../strategies/jwt.strategy';
 
 export interface AuthenticatedRequest extends Request {
-  user?: { id: number; email: string; role: Role; impersonatedBy?: number };
+  user?: {
+    id: number;
+    email: string;
+    role: Role;
+    profilePicture?: string | null;
+    impersonatedBy?: number;
+  };
 }
 
 @Injectable()
@@ -35,6 +41,7 @@ export class AuthMiddleware implements NestMiddleware {
         id: payload.sub,
         email: payload.email,
         role: payload.role,
+        profilePicture: payload.profilePicture,
         impersonatedBy: payload.impersonatedBy,
       };
       next();

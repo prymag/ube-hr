@@ -12,6 +12,7 @@ export { UsersTable } from './components/UsersTable';
 export { CreateUserForm } from './components/CreateUserForm';
 export { DeleteUserDialog } from './components/DeleteUserDialog';
 export { EditUserForm } from './components/EditUserForm';
+export { ProfilePicture } from './components/ProfilePicture';
 export { UserTeamsCard } from './components/UserTeamsCard';
 export { OwnedTeamsCard } from './components/OwnedTeamsCard';
 export type { CreateUserFormValues } from './components/CreateUserForm';

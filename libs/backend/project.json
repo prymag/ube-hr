@@ -5,5 +5,12 @@
   "projectType": "library",
   "tags": ["type:lib", "platform:server"],
   "// targets": "to see all targets run: nx show project backend --web",
-  "targets": {}
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/backend/tsconfig.lib.json --noEmit"
+      }
+    }
+  }
 }

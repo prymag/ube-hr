@@ -67,6 +67,12 @@
         "command": "NODE_OPTIONS=--experimental-vm-modules npx jest --config=apps/api/jest.integration.config.cts --forceExit --runInBand",
         "cwd": "{workspaceRoot}"
       }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p apps/api/tsconfig.app.json --noEmit"
+      }
     }
   }
 }
