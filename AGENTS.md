@@ -36,32 +36,32 @@ This repository is an Nx monorepo with a NestJS API (`apps/api`) and a React web
 
 ### Backend
 
-| Concern | File |
-|---|---|
-| Server bootstrap | `apps/api/src/main.ts` |
-| Root module (middleware, imports) | `apps/api/src/app/app.module.ts` |
-| Controllers | `apps/api/src/app/<entity>/<entity>.controller.ts` |
-| Auth service (login, refresh, impersonate) | `libs/feature/src/auth/auth.service.ts` |
-| Auth middleware (JWT validation, global) | `libs/feature/src/auth/middleware/auth.middleware.ts` |
-| Permission guard | `libs/feature/src/auth/guards/permission.guard.ts` |
-| `@RequirePermission()` decorator | `libs/feature/src/auth/decorators/require-permission.decorator.ts` |
-| Permission cache service | `libs/feature/src/permissions/permissions.service.ts` |
-| Users service | `libs/feature/src/users/users.service.ts` |
-| Teams service | `libs/feature/src/teams/teams.service.ts` |
-| Database schema | `prisma/schema.prisma` |
-| Prisma service | `libs/backend/src/prisma/prisma.service.ts` |
-| Permission constants + defaults | `libs/shared/src/permissions.ts` |
+| Concern                                    | File                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------ |
+| Server bootstrap                           | `apps/api/src/main.ts`                                             |
+| Root module (middleware, imports)          | `apps/api/src/app/app.module.ts`                                   |
+| Controllers                                | `apps/api/src/app/<entity>/<entity>.controller.ts`                 |
+| Auth service (login, refresh, impersonate) | `libs/feature/src/auth/auth.service.ts`                            |
+| Auth middleware (JWT validation, global)   | `libs/feature/src/auth/middleware/auth.middleware.ts`              |
+| Permission guard                           | `libs/feature/src/auth/guards/permission.guard.ts`                 |
+| `@RequirePermission()` decorator           | `libs/feature/src/auth/decorators/require-permission.decorator.ts` |
+| Permission cache service                   | `libs/feature/src/permissions/permissions.service.ts`              |
+| Users service                              | `libs/feature/src/users/users.service.ts`                          |
+| Teams service                              | `libs/feature/src/teams/teams.service.ts`                          |
+| Database schema                            | `prisma/schema.prisma`                                             |
+| Prisma service                             | `libs/backend/src/prisma/prisma.service.ts`                        |
+| Permission constants + defaults            | `libs/shared/src/permissions.ts`                                   |
 
 ### Frontend
 
-| Concern | File |
-|---|---|
-| React entry point | `apps/web/src/main.tsx` |
-| Routes + route guards | `apps/web/src/app/app.tsx` |
-| Auth state (token, user, cross-tab sync) | `apps/web/src/store/AuthContext.tsx` |
-| Axios instance (interceptors, auto-refresh) | `apps/web/src/services/axios.ts` |
-| Role rank / badge config | `apps/web/src/config/roles.ts` |
-| Sidebar + nav layout | `apps/web/src/layouts/AuthLayout.tsx` |
+| Concern                                     | File                                  |
+| ------------------------------------------- | ------------------------------------- |
+| React entry point                           | `apps/web/src/main.tsx`               |
+| Routes + route guards                       | `apps/web/src/app/app.tsx`            |
+| Auth state (token, user, cross-tab sync)    | `apps/web/src/store/AuthContext.tsx`  |
+| Axios instance (interceptors, auto-refresh) | `apps/web/src/services/axios.ts`      |
+| Role rank / badge config                    | `apps/web/src/config/roles.ts`        |
+| Sidebar + nav layout                        | `apps/web/src/layouts/AuthLayout.tsx` |
 
 ## Backend Guidelines (NestJS)
 
@@ -139,12 +139,12 @@ Unit tests live next to the service they test: `<service>.service.spec.ts`. Run 
 
 #### Infrastructure
 
-| File                                           | Purpose                                                                             |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `libs/feature/jest.config.cts`                 | Jest config (CJS mode); stubs only the generated Prisma client                      |
-| `libs/feature/tsconfig.spec.json`              | Spec tsconfig; includes `src/testing/**/*.ts` so helpers see Jest globals           |
-| `libs/feature/tsconfig.lib.json`               | Excludes `src/testing/**/*.ts` so VS Code uses the spec tsconfig for those files    |
-| `libs/feature/src/testing/prisma.mock.ts`      | `createPrismaMock()` — returns an object of `jest.fn()` stubs matching the Prisma model API |
+| File                                             | Purpose                                                                                                                       |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `libs/feature/jest.config.cts`                   | Jest config (CJS mode); stubs only the generated Prisma client                                                                |
+| `libs/feature/tsconfig.spec.json`                | Spec tsconfig; includes `src/testing/**/*.ts` so helpers see Jest globals                                                     |
+| `libs/feature/tsconfig.lib.json`                 | Excludes `src/testing/**/*.ts` so VS Code uses the spec tsconfig for those files                                              |
+| `libs/feature/src/testing/prisma.mock.ts`        | `createPrismaMock()` — returns an object of `jest.fn()` stubs matching the Prisma model API                                   |
 | `libs/feature/src/testing/prisma-client.stub.ts` | Minimal CJS `PrismaClient` stub; satisfies `extends PrismaClient` in `PrismaService` without loading the generated ESM client |
 
 #### Why only the generated Prisma client is stubbed
@@ -198,13 +198,13 @@ Tests live co-located with the controller they cover: `apps/api/src/app/<entity>
 
 #### Infrastructure
 
-| File                                       | Purpose                                                                     |
-| ------------------------------------------ | --------------------------------------------------------------------------- |
-| `apps/api/jest.integration.config.cts`     | Jest config (ESM mode via `--experimental-vm-modules`); no Prisma client stub — uses the real generated client |
-| `apps/api/tsconfig.integration.json`       | TypeScript config (`module: ESNext`, `moduleResolution: Bundler`) so `import.meta` is valid |
-| `apps/api/test/helpers/app.ts`             | `createTestApp()` — bootstraps `AppModule` with real services               |
-| `apps/api/test/helpers/db.ts`              | `truncateAll(app)`, `seedDefaultPermissions(app)` — DB helpers              |
-| `apps/api/test/helpers/seed.ts`            | `seedUser()`, `seedAndLogin()` — data seeding helpers                       |
+| File                                   | Purpose                                                                                                        |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `apps/api/jest.integration.config.cts` | Jest config (ESM mode via `--experimental-vm-modules`); no Prisma client stub — uses the real generated client |
+| `apps/api/tsconfig.integration.json`   | TypeScript config (`module: ESNext`, `moduleResolution: Bundler`) so `import.meta` is valid                    |
+| `apps/api/test/helpers/app.ts`         | `createTestApp()` — bootstraps `AppModule` with real services                                                  |
+| `apps/api/test/helpers/db.ts`          | `truncateAll(app)`, `seedDefaultPermissions(app)` — DB helpers                                                 |
+| `apps/api/test/helpers/seed.ts`        | `seedUser()`, `seedAndLogin()` — data seeding helpers                                                          |
 
 #### Pattern for a new integration spec
 
@@ -329,3 +329,13 @@ _Do this before writing controllers or frontend code._
 2. **Build**: `npx nx build <project>` (Ensure no production build errors).
 3. **Tests**: Run affected tests or specific file tests.
 4. **Prisma**: If schema changes, run migration and verify `deletedAt` filters.
+
+## Stability & Regression Prevention Workflow
+
+To prevent code duplication and structural breakage during edits:
+
+- **Atomic Edits**: Use `oldString` with sufficient surrounding context to ensure uniqueness.
+- **Proactive Verification**: Run `lint` and `typecheck` immediately after any modification.
+- **Fresh Reads**: Always `Read` the file immediately before an `Edit` to avoid stale state.
+- **Full Overwrites for Structural Changes**: Use `Write` instead of multiple `Edit` calls for complex refactors or adding multiple functions to avoid duplication.
+- **Manual Review**: `Read` the modified section after complex edits to verify structural integrity.

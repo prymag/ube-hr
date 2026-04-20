@@ -14,6 +14,7 @@ export type UserStatus = 'ACTIVE' | 'BLOCKED';
 export interface UserResponse {
   id: number;
   email: string;
+  phone: string | null;
   name: string | null;
   role: UserRole;
   status: UserStatus;

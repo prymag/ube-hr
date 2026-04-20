@@ -35,27 +35,67 @@ export const createUser = async (data: {
 
 export const updateUser = async (
   id: number,
-  data: { name?: string; role?: string },
+  data: { name?: string; role?: string; profilePicture?: File | null },
 ) => {
-  const r = await api.patch<UserResponse>(`/api/users/${id}`, data);
+  const formData = new FormData();
+  if (data.name) formData.append('name', data.name);
+  if (data.role) formData.append('role', data.role);
+  if (data.profilePicture instanceof File) {
+    formData.append('file', data.profilePicture);
+  } else if (data.profilePicture === null) {
+    formData.append('profilePicture', 'null');
+  }
+
+  const r = await api.patch<UserResponse>(`/api/users/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return r.data;
 };
 
 export const deleteUser = (id: number) => api.delete(`/api/users/${id}`);
 
-export const uploadUserProfilePicture = async (id: number, file: File) => {
-  const formData = new FormData();
-  formData.append('file', file);
-  const r = await api.post<string>(
-    `/api/users/${id}/profile-picture`,
-    formData,
-    {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    },
+export const requestVerificationCode = async (type: 'EMAIL' | 'PHONE') => {
+  const r = await api.post<{ success: boolean }>(
+    '/api/users/me/verification-code',
+    { type },
   );
   return r.data;
 };
 
-export const removeUserProfilePicture = async (id: number) => {
-  await api.delete(`/api/users/${id}/profile-picture`);
+export const verifyAndUpdateContact = async (data: {
+  type: 'EMAIL' | 'PHONE';
+  code: string;
+  value: string;
+}) => {
+  const r = await api.patch<UserResponse>(
+    '/api/users/me/verify-and-update',
+    data,
+  );
+  return r.data;
+};
+
+export const requestVerificationCodeForUser = async (
+  userId: number,
+  type: 'EMAIL' | 'PHONE',
+) => {
+  const r = await api.post<{ success: boolean }>(
+    `/api/users/${userId}/verification-code`,
+    { type },
+  );
+  return r.data;
+};
+
+export const verifyAndUpdateContactForUser = async (
+  userId: number,
+  data: {
+    type: 'EMAIL' | 'PHONE';
+    code: string;
+    value: string;
+  },
+) => {
+  const r = await api.patch<UserResponse>(
+    `/api/users/${userId}/verify-and-update`,
+    data,
+  );
+  return r.data;
 };

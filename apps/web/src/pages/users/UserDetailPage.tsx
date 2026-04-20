@@ -6,6 +6,7 @@ import {
   OwnedTeamsCard,
   UserTeamsCard,
   ProfilePicture,
+  SecurityUpdateCard,
 } from '../../features/users';
 import type { EditUserFormValues } from '../../features/users';
 import { useAuth } from '../../store/AuthContext';
@@ -34,6 +35,7 @@ export function UserDetailPage() {
     updateUser.mutate({
       name: values.name.trim() || undefined,
       role: values.role,
+      profilePicture: values.profilePicture,
     });
   }
 
@@ -48,8 +50,6 @@ export function UserDetailPage() {
         ← Back to Users
       </Button>
 
-      <ProfilePicture userId={userId} url={user.profilePicture} />
-
       <Card className="mb-6">
         <CardContent className="p-6">
           <h2 className="text-sm font-semibold mb-4">Edit Details</h2>
@@ -63,6 +63,8 @@ export function UserDetailPage() {
           />
         </CardContent>
       </Card>
+
+      <SecurityUpdateCard userId={userId} />
 
       <OwnedTeamsCard userId={userId} />
       <UserTeamsCard userId={userId} />
