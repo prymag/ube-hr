@@ -42,3 +42,20 @@ export const updateUser = async (
 };
 
 export const deleteUser = (id: number) => api.delete(`/api/users/${id}`);
+
+export const uploadUserProfilePicture = async (id: number, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const r = await api.post<string>(
+    `/api/users/${id}/profile-picture`,
+    formData,
+    {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    },
+  );
+  return r.data;
+};
+
+export const removeUserProfilePicture = async (id: number) => {
+  await api.delete(`/api/users/${id}/profile-picture`);
+};

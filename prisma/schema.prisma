@@ -28,6 +28,7 @@ model User {
   name                String?
   role                Role         @default(USER)
   status              UserStatus   @default(ACTIVE)
+  profilePicture        String?
   deletedAt           DateTime?
   refreshTokenVersion Int          @default(0)
   createdAt           DateTime     @default(now())

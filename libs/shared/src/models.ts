@@ -17,6 +17,7 @@ export interface UserResponse {
   name: string | null;
   role: UserRole;
   status: UserStatus;
+  profilePicture: string | null;
   createdAt: string;
 }
 
@@ -69,6 +70,7 @@ export interface MeResponse {
   id: number;
   email: string;
   role: UserRole;
+  profilePicture: string | null;
   impersonatedBy?: number;
   permissions: string[];
 }

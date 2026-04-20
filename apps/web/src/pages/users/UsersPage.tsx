@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUsers, UsersTable, DeleteUserDialog } from '../../features/users';
 import { useUsersTable } from '../../features/users/useUsersTable';
-import type { User } from '../../features/users';
+import type { UserResponse } from '../../features/users';
 import { useAuth } from '../../store/AuthContext';
 import { ROLE_RANK, ALL_ROLES } from '../../config/roles';
 import {
@@ -18,7 +18,7 @@ import {
 export function UsersPage() {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
-  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UserResponse | null>(null);
 
   const callerRank = ROLE_RANK[authUser?.role ?? 'USER'] ?? 0;
   const filterableRoles = ALL_ROLES.filter(

@@ -12,6 +12,12 @@
       "options": {
         "jestConfig": "libs/feature/jest.config.cts"
       }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/feature/tsconfig.lib.json --noEmit"
+      }
     }
   }
 }
