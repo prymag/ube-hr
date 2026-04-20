@@ -17,6 +17,7 @@ import {
   UsersModule,
   TeamsModule,
   PermissionsModule,
+  VerificationModule,
   QueueModule,
 } from '@ube-hr/feature';
 
@@ -30,6 +31,7 @@ import {
     AuthModule,
     UsersModule,
     TeamsModule,
+    VerificationModule,
   ],
   controllers: [
     AppController,

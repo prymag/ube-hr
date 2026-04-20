@@ -15,6 +15,7 @@ export { EditUserForm } from './components/EditUserForm';
 export { ProfilePicture } from './components/ProfilePicture';
 export { UserTeamsCard } from './components/UserTeamsCard';
 export { OwnedTeamsCard } from './components/OwnedTeamsCard';
+export { SecurityUpdateCard } from './components/SecurityUpdateCard';
 export type { CreateUserFormValues } from './components/CreateUserForm';
 export type { EditUserFormValues } from './components/EditUserForm';
 export type { UserResponse, UserTeam } from '@ube-hr/shared';

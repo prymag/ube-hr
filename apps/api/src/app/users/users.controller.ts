@@ -13,7 +13,9 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
-  ForbiddenException,
+  Patch,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -24,6 +26,7 @@ import {
   ApiNoContentResponse,
   ApiOkResponse,
   ApiQuery,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import {
   UsersService,
@@ -31,6 +34,8 @@ import {
   RequirePermission,
   AuthenticatedRequest,
   type UserRecord,
+  VerificationService,
+  VerificationType,
 } from '@ube-hr/feature';
 import { StorageService } from '@ube-hr/backend';
 import { PERMISSIONS } from '@ube-hr/shared';
@@ -40,7 +45,10 @@ import {
   type PaginatedResponse,
 } from '@ube-hr/shared';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { RequestVerificationCodeDto } from './dto/request-verification-code.dto';
+import { VerifyAndUpdateContactDto } from './dto/verify-and-update-contact.dto';
 
 function toUserResponse(
   user: UserRecord,
@@ -49,6 +57,7 @@ function toUserResponse(
   return {
     id: user.id,
     email: user.email,
+    phone: user.phone,
     name: user.name,
     role: user.role as UserResponse['role'],
     status: user.status as UserResponse['status'],
@@ -81,6 +90,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly storageService: StorageService,
+    private readonly verificationService: VerificationService,
   ) {}
 
   @Post()
@@ -132,6 +142,93 @@ export class UsersController {
     };
   }
 
+  @Post('me/verification-code')
+  @ApiOperation({
+    summary: 'Request a security code for updating own email or phone',
+  })
+  @ApiOkResponse()
+  async requestCode(
+    @Body() dto: RequestVerificationCodeDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{ success: boolean }> {
+    return this.verificationService.generateCode(req.user!.id, dto.type);
+  }
+
+  @Patch('me/verify-and-update')
+  @ApiOperation({
+    summary: 'Verify security code and update own email or phone',
+  })
+  @ApiOkResponse({ type: UserResponseDto })
+  async verifyAndUpdate(
+    @Body() dto: VerifyAndUpdateContactDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<UserResponse> {
+    await this.verificationService.verifyCode(req.user!.id, dto.type, dto.code);
+
+    const updateData: any = {};
+    if (dto.type === VerificationType.EMAIL) {
+      if (!dto.value) throw new BadRequestException('Email value is required');
+      updateData.email = dto.value;
+    } else if (dto.type === VerificationType.PHONE) {
+      if (!dto.value) throw new BadRequestException('Phone value is required');
+      updateData.phone = dto.value;
+    }
+
+    const user = await this.usersService.update(
+      req.user!.id,
+      updateData,
+      req.user!.role,
+    );
+    return toUserResponse(user, this.storageService);
+  }
+
+  @Post(':id/verification-code')
+  @RequirePermission(PERMISSIONS.USERS_UPDATE)
+  @ApiOperation({
+    summary:
+      "Request a security code for updating a user's email or phone (sent to admin)",
+  })
+  @ApiOkResponse()
+  async requestCodeForUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: RequestVerificationCodeDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{ success: boolean }> {
+    const targetUser = await this.usersService.findById(id);
+    if (!targetUser) throw new NotFoundException('User not found');
+
+    // The security code is sent to the ADMIN who is performing the update
+    return this.verificationService.generateCode(req.user!.id, dto.type);
+  }
+
+  @Patch(':id/verify-and-update')
+  @RequirePermission(PERMISSIONS.USERS_UPDATE)
+  @ApiOperation({
+    summary: "Verify admin security code and update a user's email or phone",
+  })
+  @ApiOkResponse({ type: UserResponseDto })
+  async verifyAndUpdateForUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: VerifyAndUpdateContactDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<UserResponse> {
+    // Verify the code for the ADMIN
+    await this.verificationService.verifyCode(req.user!.id, dto.type, dto.code);
+
+    const updateData: any = {};
+    if (dto.type === VerificationType.EMAIL) {
+      if (!dto.value) throw new BadRequestException('Email value is required');
+      updateData.email = dto.value;
+    } else if (dto.type === VerificationType.PHONE) {
+      if (!dto.value) throw new BadRequestException('Phone value is required');
+      updateData.phone = dto.value;
+    }
+
+    // Permission check (role hierarchy) is handled inside usersService.update
+    const user = await this.usersService.update(id, updateData, req.user!.role);
+    return toUserResponse(user, this.storageService);
+  }
+
   @Get(':id')
   @RequirePermission(PERMISSIONS.USERS_READ)
   @ApiOperation({ summary: 'Get user details' })
@@ -163,45 +260,38 @@ export class UsersController {
     return this.usersService.remove(id, req.user!.role);
   }
 
-  @Post(':id/profile-picture')
-  @ApiOperation({ summary: 'Upload user profile picture' })
-  @UseInterceptors(FileInterceptor('file'))
+  @Patch(':id')
+  @RequirePermission(PERMISSIONS.USERS_UPDATE)
+  @ApiOperation({ summary: 'Update user details and profile picture' })
+  @ApiConsumes('multipart/form-data')
   @ApiOkResponse({ type: UserResponseDto })
-  async uploadProfilePicture(
+  @UseInterceptors(FileInterceptor('file'))
+  async update(
     @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File,
     @Req() req: AuthenticatedRequest,
-  ): Promise<string> {
-    if (
-      req.user!.id !== id &&
-      req.user!.role !== 'SUPER_ADMIN' &&
-      req.user!.role !== 'ADMIN'
-    ) {
-      throw new ForbiddenException(
-        'You can only upload your own profile picture',
-      );
-    }
-    const path = await this.usersService.updateProfilePicture(id, file);
-    return this.storageService.getUrl(path);
-  }
+  ): Promise<UserResponse> {
+    let profilePicturePath: string | null | undefined = undefined;
 
-  @Delete(':id/profile-picture')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Remove user profile picture' })
-  @ApiNoContentResponse()
-  async removeProfilePicture(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() req: AuthenticatedRequest,
-  ): Promise<void> {
-    if (
-      req.user!.id !== id &&
-      req.user!.role !== 'SUPER_ADMIN' &&
-      req.user!.role !== 'ADMIN'
-    ) {
-      throw new ForbiddenException(
-        'You can only remove your own profile picture',
+    if (file) {
+      profilePicturePath = await this.storageService.upload(
+        file,
+        'profile_pictures',
       );
+    } else if (dto.profilePicture === 'null') {
+      profilePicturePath = null;
     }
-    return this.usersService.removeProfilePicture(id);
+
+    const user = await this.usersService.update(
+      id,
+      {
+        ...dto,
+        profilePicture: profilePicturePath,
+      },
+      req.user!.role,
+    );
+
+    return toUserResponse(user, this.storageService);
   }
 }

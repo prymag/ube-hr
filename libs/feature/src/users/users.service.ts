@@ -29,9 +29,16 @@ export interface CreateUserInput {
   role?: Role;
 }
 
+export interface UpdateUserInput {
+  name?: string;
+  role?: Role;
+  profilePicture?: string | null;
+}
+
 export interface UserRecord {
   id: number;
   email: string;
+  phone: string | null;
   name: string | null;
   role: Role;
   status: UserStatus;
@@ -42,6 +49,7 @@ export interface UserRecord {
 export interface UserRecord {
   id: number;
   email: string;
+  phone: string | null;
   name: string | null;
   role: Role;
   status: UserStatus;
@@ -130,6 +138,7 @@ export class UsersService {
         select: {
           id: true,
           email: true,
+          phone: true,
           name: true,
           role: true,
           status: true,
@@ -166,6 +175,7 @@ export class UsersService {
       select: {
         id: true,
         email: true,
+        phone: true,
         name: true,
         role: true,
         status: true,
@@ -182,6 +192,56 @@ export class UsersService {
       },
     );
     return user;
+  }
+
+  async update(
+    id: number,
+    dto: UpdateUserInput,
+    callerRole: Role,
+  ): Promise<UserRecord> {
+    const user = await this.prisma.user.findUnique({
+      where: { id, deletedAt: null },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (
+      callerRole !== Role.SUPER_ADMIN &&
+      roleRank(user.role) >= roleRank(callerRole)
+    ) {
+      throw new ForbiddenException(
+        'Cannot update a user with an equal or higher role',
+      );
+    }
+
+    if (dto.role && roleRank(dto.role) > roleRank(callerRole)) {
+      throw new ForbiddenException('Cannot assign a role higher than your own');
+    }
+
+    const data: any = { ...dto };
+
+    if (dto.profilePicture !== undefined) {
+      if (user.profilePicture) {
+        await this.storage.delete(user.profilePicture);
+      }
+      data.profilePicture = dto.profilePicture;
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        email: true,
+        phone: true,
+        name: true,
+        role: true,
+        status: true,
+        profilePicture: true,
+        createdAt: true,
+      },
+    });
+
+    return updatedUser;
   }
 
   async findByEmailAndPassword(

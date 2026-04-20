@@ -11,8 +11,6 @@ import {
   createUser,
   updateUser,
   deleteUser,
-  uploadUserProfilePicture,
-  removeUserProfilePicture,
 } from './users.api';
 import { addTeamMember, removeTeamMember } from '../teams/teams.api';
 import type { UsersListParams } from '@ube-hr/shared';
@@ -56,8 +54,11 @@ export function useCreateUser() {
 export function useUpdateUser(userId: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { name?: string; role?: string }) =>
-      updateUser(userId, data),
+    mutationFn: (data: {
+      name?: string;
+      role?: string;
+      profilePicture?: File | null;
+    }) => updateUser(userId, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: userKeys.lists() }),
   });
 }
@@ -94,28 +95,6 @@ export function useRemoveUserFromTeam(userId: number | null) {
     onSuccess: () => {
       if (userId !== null)
         qc.invalidateQueries({ queryKey: userKeys.teams(userId) });
-    },
-  });
-}
-
-export function useUploadUserProfilePicture(userId: number) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (file: File) => uploadUserProfilePicture(userId, file),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: userKeys.detail(userId) });
-      qc.invalidateQueries({ queryKey: userKeys.lists() });
-    },
-  });
-}
-
-export function useRemoveUserProfilePicture(userId: number) {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: () => removeUserProfilePicture(userId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: userKeys.detail(userId) });
-      qc.invalidateQueries({ queryKey: userKeys.lists() });
     },
   });
 }

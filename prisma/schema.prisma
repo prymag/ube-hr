@@ -29,12 +29,14 @@ model User {
   role                Role         @default(USER)
   status              UserStatus   @default(ACTIVE)
   profilePicture        String?
+  phone               String?
   deletedAt           DateTime?
   refreshTokenVersion Int          @default(0)
   createdAt           DateTime     @default(now())
   updatedAt           DateTime     @updatedAt
   memberships         Membership[]
   ownedTeams          Team[]       @relation("OwnedTeams")
+  verificationCodes   VerificationCode[]
 }
 
 model Team {
@@ -65,4 +67,14 @@ model Membership {
   team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@id([userId, teamId])
+}
+
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  code      String
+  type      String   // 'EMAIL' | 'PHONE'
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

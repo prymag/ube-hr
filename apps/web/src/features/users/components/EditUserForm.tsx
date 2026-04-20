@@ -10,11 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ube-hr/ui';
+import { ProfilePicture } from './ProfilePicture';
 import type { UserResponse } from '@ube-hr/shared';
 
 export interface EditUserFormValues {
   name: string;
   role: string;
+  profilePicture?: File | null;
 }
 
 interface EditUserFormProps {
@@ -55,34 +57,45 @@ export function EditUserForm({
   const role = watch('role');
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-      <div className="space-y-1.5">
-        <Label>Name</Label>
-        <Input
-          {...register('name')}
-          type="text"
-          placeholder="Jane Doe"
-          autoFocus
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="flex justify-center">
+        <ProfilePicture
+          url={user.profilePicture}
+          onUpload={(file) => setValue('profilePicture', file)}
+          onRemove={() => setValue('profilePicture', null)}
+          isPending={isPending}
         />
-        {errors.name && (
-          <p className="text-sm text-destructive">{errors.name.message}</p>
-        )}
       </div>
 
-      <div className="space-y-1.5">
-        <Label>Role</Label>
-        <Select value={role} onValueChange={(val) => setValue('role', val)}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {assignableRoles.map((r) => (
-              <SelectItem key={r} value={r}>
-                {r.replace('_', ' ')}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="space-y-3">
+        <div className="space-y-1.5">
+          <Label>Name</Label>
+          <Input
+            {...register('name')}
+            type="text"
+            placeholder="Jane Doe"
+            autoFocus
+          />
+          {errors.name && (
+            <p className="text-sm text-destructive">{errors.name.message}</p>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Role</Label>
+          <Select value={role} onValueChange={(val) => setValue('role', val)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {assignableRoles.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {r.replace('_', ' ')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {isError && (
