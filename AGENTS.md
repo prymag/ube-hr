@@ -256,6 +256,7 @@ describe('MyEntity (integration)', () => {
 - **No Modals for CRUD**: Use dedicated pages for Create (`/new`) and Update (`/:id`).
 - **Modals**: Only for Delete confirmation or simple single-field actions.
 - **Form Components**: Presentational only. Props: `values`, `onChange`, `onSubmit`, `isPending`, `error`. Parent page owns state/mutations.
+- **Relationship Fields — Never expose raw IDs**: When a form field represents a relationship (e.g. `positionId`, `departmentId`), always render a `Select` dropdown populated with human-readable names. Never use a plain number `Input` for a foreign key. The parent page fetches the option list (e.g. `usePositions({ pageSize: 1000 })`) and passes it as a prop (e.g. `positions: { id: number; name: string }[]`) to the form component. Include a "— None —" option (value `''`) to allow unassigning.
 
 ### State Management & Data Flow
 
@@ -336,6 +337,4 @@ To prevent code duplication and structural breakage during edits:
 
 - **Atomic Edits**: Use `oldString` with sufficient surrounding context to ensure uniqueness.
 - **Proactive Verification**: Run `lint` and `typecheck` immediately after any modification.
-- **Fresh Reads**: Always `Read` the file immediately before an `Edit` to avoid stale state.
-- **Full Overwrites for Structural Changes**: Use `Write` instead of multiple `Edit` calls for complex refactors or adding multiple functions to avoid duplication.
 - **Manual Review**: `Read` the modified section after complex edits to verify structural integrity.

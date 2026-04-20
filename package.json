@@ -11,7 +11,8 @@
     "dev": "docker compose up -d --wait && npx nx run-many --target=serve --projects=api,web --parallel",
     "sync-ai": "bash scripts/sync-instructions.sh",
     "migrate:dev": "prisma migrate dev && MYSQL_DATABASE=ube_hr_test prisma migrate deploy",
-    "migrate:deploy": "prisma migrate deploy && MYSQL_DATABASE=ube_hr_test prisma migrate deploy"
+    "migrate:deploy": "prisma migrate deploy && MYSQL_DATABASE=ube_hr_test prisma migrate deploy",
+    "seed": "tsx --tsconfig prisma/tsconfig.json prisma/seed.ts"
   },
   "repository": {
     "type": "git",

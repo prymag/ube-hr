@@ -10,6 +10,8 @@ import { AuthController } from './app/auth/auth.controller';
 import { UsersController } from './app/users/users.controller';
 import { TeamsController } from './app/teams/teams.controller';
 import { PermissionsController } from './app/permissions/permissions.controller';
+import { DepartmentsController } from './app/departments/departments.controller';
+import { PositionsController } from './app/positions/positions.controller';
 import { AppConfigModule, PrismaModule, StorageModule } from '@ube-hr/backend';
 import {
   AuthModule,
@@ -19,6 +21,8 @@ import {
   PermissionsModule,
   VerificationModule,
   QueueModule,
+  DepartmentsModule,
+  PositionsModule,
 } from '@ube-hr/feature';
 
 @Module({
@@ -32,6 +36,8 @@ import {
     UsersModule,
     TeamsModule,
     VerificationModule,
+    DepartmentsModule,
+    PositionsModule,
   ],
   controllers: [
     AppController,
@@ -39,6 +45,8 @@ import {
     UsersController,
     TeamsController,
     PermissionsController,
+    DepartmentsController,
+    PositionsController,
   ],
   providers: [AppService],
 })

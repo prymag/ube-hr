@@ -33,6 +33,8 @@ export interface UpdateUserInput {
   name?: string;
   role?: Role;
   profilePicture?: string | null;
+  positionId?: number | null;
+  departmentId?: number | null;
 }
 
 export interface UserRecord {
@@ -43,16 +45,10 @@ export interface UserRecord {
   role: Role;
   status: UserStatus;
   profilePicture: string | null;
-  createdAt: Date;
-}
-
-export interface UserRecord {
-  id: number;
-  email: string;
-  phone: string | null;
-  name: string | null;
-  role: Role;
-  status: UserStatus;
+  positionId: number | null;
+  position: { id: number; name: string } | null;
+  departmentId: number | null;
+  department: { id: number; name: string } | null;
   createdAt: Date;
 }
 
@@ -143,6 +139,10 @@ export class UsersService {
           role: true,
           status: true,
           profilePicture: true,
+          positionId: true,
+          position: { select: { id: true, name: true } },
+          departmentId: true,
+          department: { select: { id: true, name: true } },
           createdAt: true,
         },
         orderBy: { [validSort]: validDir },
@@ -180,6 +180,10 @@ export class UsersService {
         role: true,
         status: true,
         profilePicture: true,
+        positionId: true,
+        position: { select: { id: true, name: true } },
+        departmentId: true,
+        department: { select: { id: true, name: true } },
         createdAt: true,
       },
     });
@@ -237,6 +241,10 @@ export class UsersService {
         role: true,
         status: true,
         profilePicture: true,
+        positionId: true,
+        position: { select: { id: true, name: true } },
+        departmentId: true,
+        department: { select: { id: true, name: true } },
         createdAt: true,
       },
     });
@@ -263,6 +271,26 @@ export class UsersService {
 
   async findById(id: number): Promise<UserModel | null> {
     return this.prisma.user.findUnique({ where: { id, deletedAt: null } });
+  }
+
+  async findUserRecordById(id: number): Promise<UserRecord | null> {
+    return this.prisma.user.findUnique({
+      where: { id, deletedAt: null },
+      select: {
+        id: true,
+        email: true,
+        phone: true,
+        name: true,
+        role: true,
+        status: true,
+        profilePicture: true,
+        positionId: true,
+        position: { select: { id: true, name: true } },
+        departmentId: true,
+        department: { select: { id: true, name: true } },
+        createdAt: true,
+      },
+    });
   }
 
   async findTeams(

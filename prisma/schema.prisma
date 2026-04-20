@@ -30,6 +30,8 @@ model User {
   status              UserStatus   @default(ACTIVE)
   profilePicture        String?
   phone               String?
+  positionId          Int?
+  departmentId        Int?
   deletedAt           DateTime?
   refreshTokenVersion Int          @default(0)
   createdAt           DateTime     @default(now())
@@ -37,6 +39,9 @@ model User {
   memberships         Membership[]
   ownedTeams          Team[]       @relation("OwnedTeams")
   verificationCodes   VerificationCode[]
+  position            Position?    @relation(fields: [positionId], references: [id])
+  department          Department?  @relation("DepartmentMembers", fields: [departmentId], references: [id])
+  headOfDepartments   Department[] @relation("DepartmentHead")
 }
 
 model Team {
@@ -77,4 +82,26 @@ model VerificationCode {
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Department {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  headId      Int?
+  head        User?      @relation("DepartmentHead", fields: [headId], references: [id])
+  members     User[]     @relation("DepartmentMembers")
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Position {
+  id           Int        @id @default(autoincrement())
+  name         String     @unique
+  description  String?
+  deletedAt    DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  users        User[]
 }

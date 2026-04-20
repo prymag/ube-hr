@@ -9,9 +9,12 @@ import {
   SecurityUpdateCard,
 } from '../../features/users';
 import type { EditUserFormValues } from '../../features/users';
+import { usePositions } from '../../features/positions';
+import { useDepartments } from '../../features/departments';
 import { useAuth } from '../../store/AuthContext';
 import { ROLE_RANK, ALL_ROLES } from '../../config/roles';
 import { Button, Card, CardContent } from '@ube-hr/ui';
+import { parseFormInt } from '@ube-hr/shared';
 
 export function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,11 +23,16 @@ export function UserDetailPage() {
   const { user: authUser } = useAuth();
 
   const userQuery = useUser(userId);
+  const positionsQuery = usePositions({ pageSize: 1000 });
+  const departmentsQuery = useDepartments({ pageSize: 1000 });
   const user = userQuery.data;
   const updateUser = useUpdateUser(userId);
 
   const callerRank = ROLE_RANK[authUser?.role ?? 'USER'] ?? 0;
   const assignableRoles = ALL_ROLES.filter((r) => ROLE_RANK[r] <= callerRank);
+
+  const positions = positionsQuery.data?.data ?? [];
+  const departments = departmentsQuery.data?.data ?? [];
 
   if (userQuery.isLoading)
     return <div className="text-sm text-muted-foreground">Loading…</div>;
@@ -36,6 +44,8 @@ export function UserDetailPage() {
       name: values.name.trim() || undefined,
       role: values.role,
       profilePicture: values.profilePicture,
+      positionId: parseFormInt(values.positionId),
+      departmentId: parseFormInt(values.departmentId),
     });
   }
 
@@ -56,6 +66,8 @@ export function UserDetailPage() {
           <EditUserForm
             user={user}
             assignableRoles={assignableRoles}
+            positions={positions}
+            departments={departments}
             isPending={updateUser.isPending}
             isError={updateUser.isError}
             onSubmit={handleSubmit}

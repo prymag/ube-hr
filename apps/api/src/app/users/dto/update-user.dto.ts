@@ -19,4 +19,20 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   profilePicture?: string;
+
+  @ApiPropertyOptional({
+    description: 'Position ID to assign (empty string to remove)',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  positionId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Department ID to assign (empty string to remove)',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  departmentId?: string;
 }

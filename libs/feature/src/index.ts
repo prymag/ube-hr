@@ -5,3 +5,7 @@ export * from './permissions';
 export * from './verification';
 export * from './queue/queue.module';
 export * from './queue/queue.service';
+export * from './departments/departments.module';
+export * from './departments/departments.service';
+export * from './positions/positions.module';
+export * from './positions/positions.service';
