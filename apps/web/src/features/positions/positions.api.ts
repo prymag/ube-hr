@@ -21,6 +21,7 @@ export const getPosition = async (id: number) => {
 export const createPosition = async (data: {
   name: string;
   description?: string;
+  reportsToId?: number | null;
 }) => {
   const r = await api.post<PositionResponse>('/api/positions', data);
   return r.data;
@@ -31,6 +32,7 @@ export const updatePosition = async (
   data: {
     name?: string;
     description?: string | null;
+    reportsToId?: number | null;
   },
 ) => {
   const r = await api.patch<PositionResponse>(`/api/positions/${id}`, data);

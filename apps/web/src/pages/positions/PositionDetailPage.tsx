@@ -4,6 +4,7 @@ import type { AxiosError } from 'axios';
 import {
   usePosition,
   useUpdatePosition,
+  usePositions,
   PositionForm,
 } from '../../features/positions';
 import type { PositionFormValues } from '../../features/positions';
@@ -18,9 +19,13 @@ export function PositionDetailPage() {
   const updatePosition = useUpdatePosition(posId);
   const pos = posQuery.data;
 
+  const positionsQuery = usePositions({ pageSize: 1000 });
+  const allPositions = positionsQuery.data?.data ?? [];
+
   const [form, setForm] = useState<PositionFormValues>({
     name: '',
     description: '',
+    reportsToId: '',
   });
 
   useEffect(() => {
@@ -28,6 +33,7 @@ export function PositionDetailPage() {
       setForm({
         name: pos.name,
         description: pos.description ?? '',
+        reportsToId: pos.reportsToId ? String(pos.reportsToId) : '',
       });
     }
   }, [pos]);
@@ -37,7 +43,7 @@ export function PositionDetailPage() {
         ?.message ?? 'Failed to update position.')
     : null;
 
-  if (posQuery.isLoading)
+  if (posQuery.isLoading || positionsQuery.isLoading)
     return <div className="text-sm text-muted-foreground">Loading…</div>;
   if (posQuery.isError || !pos)
     return <div className="text-sm text-destructive">Position not found.</div>;
@@ -47,6 +53,7 @@ export function PositionDetailPage() {
     updatePosition.mutate({
       name: form.name.trim(),
       description: form.description.trim() || null,
+      reportsToId: form.reportsToId ? Number(form.reportsToId) : null,
     });
   }
 
@@ -73,6 +80,8 @@ export function PositionDetailPage() {
             isPending={updatePosition.isPending}
             error={error}
             submitLabel="Save Changes"
+            positions={allPositions}
+            currentId={posId}
           />
         </CardContent>
       </Card>

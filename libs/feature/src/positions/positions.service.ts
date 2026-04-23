@@ -9,11 +9,13 @@ import { type PaginatedResponse } from '@ube-hr/shared';
 export interface CreatePositionInput {
   name: string;
   description?: string;
+  reportsToId?: number | null;
 }
 
 export interface UpdatePositionInput {
   name?: string;
   description?: string | null;
+  reportsToId?: number | null;
 }
 
 const VALID_POS_SORT = ['name', 'createdAt'] as const;
@@ -27,7 +29,9 @@ export interface PositionsQuery {
   pageSize?: string | number;
 }
 
-export type PositionRecord = PositionModel;
+export type PositionRecord = PositionModel & {
+  reportsTo: { id: number; name: string } | null;
+};
 
 export type PaginatedPositions = PaginatedResponse<PositionRecord>;
 
@@ -42,7 +46,14 @@ export class PositionsService {
     if (existing)
       throw new ConflictException('Position with this name already exists');
 
-    return this.prisma.position.create({ data: input });
+    if (input.reportsToId) {
+      await this.validatePosition(input.reportsToId);
+    }
+
+    return this.prisma.position.create({
+      data: input,
+      include: { reportsTo: { select: { id: true, name: true } } },
+    });
   }
 
   async findAll(query: PositionsQuery = {}): Promise<PaginatedPositions> {
@@ -77,6 +88,7 @@ export class PositionsService {
       this.prisma.position.count({ where }),
       this.prisma.position.findMany({
         where,
+        include: { reportsTo: { select: { id: true, name: true } } },
         orderBy: { [validSort]: validDir },
         skip: (pageNum - 1) * pageSizeNum,
         take: pageSizeNum,
@@ -95,6 +107,7 @@ export class PositionsService {
   async findById(id: number): Promise<PositionRecord> {
     const pos = await this.prisma.position.findUnique({
       where: { id, deletedAt: null },
+      include: { reportsTo: { select: { id: true, name: true } } },
     });
     if (!pos) throw new NotFoundException('Position not found');
     return pos;
@@ -114,7 +127,25 @@ export class PositionsService {
         throw new ConflictException('Position with this name already exists');
     }
 
-    return this.prisma.position.update({ where: { id }, data: input });
+    if (input.reportsToId) {
+      if (input.reportsToId === id)
+        throw new ConflictException('A position cannot report to itself');
+      await this.validatePosition(input.reportsToId);
+    }
+
+    return this.prisma.position.update({
+      where: { id },
+      data: input,
+      include: { reportsTo: { select: { id: true, name: true } } },
+    });
+  }
+
+  private async validatePosition(positionId: number): Promise<void> {
+    const pos = await this.prisma.position.findUnique({
+      where: { id: positionId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!pos) throw new NotFoundException('Reports-to position not found');
   }
 
   async remove(id: number): Promise<void> {

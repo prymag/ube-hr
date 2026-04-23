@@ -25,6 +25,11 @@ const navItems: NavItem[] = [
     label: 'Positions',
     permission: PERMISSIONS.POSITIONS_READ,
   },
+  {
+    to: '/org-chart',
+    label: 'Org Chart',
+    permission: PERMISSIONS.POSITIONS_READ,
+  },
 ];
 
 export function AuthLayout() {

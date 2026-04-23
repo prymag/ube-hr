@@ -42,7 +42,7 @@ export function DepartmentDetailPage() {
         ?.data?.message ?? 'Failed to update department.')
     : null;
 
-  if (deptQuery.isLoading)
+  if (deptQuery.isLoading || usersQuery.isLoading)
     return <div className="text-sm text-muted-foreground">Loading…</div>;
   if (deptQuery.isError || !dept)
     return (

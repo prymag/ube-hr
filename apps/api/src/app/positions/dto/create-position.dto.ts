@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, MinLength } from 'class-validator';
+import { IsString, IsOptional, MinLength, IsInt, IsPositive } from 'class-validator';
 
 export class CreatePositionDto {
   @ApiProperty({ example: 'Software Engineer' })
@@ -11,4 +11,10 @@ export class CreatePositionDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ example: 1, description: 'ID of the position this role reports to' })
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  reportsToId?: number;
 }

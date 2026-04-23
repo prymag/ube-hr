@@ -1,19 +1,27 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AxiosError } from 'axios';
-import { useCreatePosition, PositionForm } from '../../features/positions';
+import {
+  useCreatePosition,
+  usePositions,
+  PositionForm,
+} from '../../features/positions';
 import type { PositionFormValues } from '../../features/positions';
 import { Button, Card, CardContent } from '@ube-hr/ui';
 
 const EMPTY_FORM: PositionFormValues = {
   name: '',
   description: '',
+  reportsToId: '',
 };
 
 export function CreatePositionPage() {
   const navigate = useNavigate();
   const createPosition = useCreatePosition();
   const [form, setForm] = useState<PositionFormValues>(EMPTY_FORM);
+
+  const positionsQuery = usePositions({ pageSize: 1000 });
+  const allPositions = positionsQuery.data?.data ?? [];
 
   const error = createPosition.isError
     ? ((createPosition.error as AxiosError<{ message: string }>)?.response?.data
@@ -26,6 +34,7 @@ export function CreatePositionPage() {
       {
         name: form.name.trim(),
         description: form.description.trim() || undefined,
+        reportsToId: form.reportsToId ? Number(form.reportsToId) : undefined,
       },
       { onSuccess: () => navigate('/positions') },
     );
@@ -51,6 +60,7 @@ export function CreatePositionPage() {
             isPending={createPosition.isPending}
             error={error}
             submitLabel="Create Position"
+            positions={allPositions}
           />
         </CardContent>
       </Card>

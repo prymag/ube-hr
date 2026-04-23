@@ -16,77 +16,179 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter });
 
 const SEED_DEPARTMENTS = [
-  {
-    name: 'Engineering',
-    description: 'Software development and infrastructure',
-  },
-  {
-    name: 'Human Resources',
-    description: 'People operations and talent management',
-  },
+  { name: 'Engineering', description: 'Software development and infrastructure' },
+  { name: 'Human Resources', description: 'People operations and talent management' },
   { name: 'Finance', description: 'Financial planning and accounting' },
   { name: 'Marketing', description: 'Brand, growth and communications' },
   { name: 'Operations', description: 'Business processes and logistics' },
 ];
 
 const SEED_POSITIONS = [
-  {
-    name: 'Software Engineer',
-    description: 'Designs and builds software systems',
-  },
-  {
-    name: 'Senior Software Engineer',
-    description: 'Leads technical work and mentors engineers',
-  },
-  {
-    name: 'Engineering Manager',
-    description: 'Manages engineering teams and delivery',
-  },
-  {
-    name: 'HR Specialist',
-    description: 'Handles recruitment and employee relations',
-  },
+  { name: 'Software Engineer', description: 'Designs and builds software systems' },
+  { name: 'Senior Software Engineer', description: 'Leads technical work and mentors engineers' },
+  { name: 'Engineering Manager', description: 'Manages engineering teams and delivery' },
+  { name: 'HR Specialist', description: 'Handles recruitment and employee relations' },
   { name: 'HR Manager', description: 'Leads the HR function and policy' },
-  {
-    name: 'Financial Analyst',
-    description: 'Analyses budgets and financial reports',
-  },
+  { name: 'Financial Analyst', description: 'Analyses budgets and financial reports' },
   { name: 'Accountant', description: 'Manages accounts and financial records' },
   { name: 'Marketing Specialist', description: 'Executes marketing campaigns' },
+  { name: 'Marketing Manager', description: 'Leads marketing strategy and team' },
+  { name: 'Operations Coordinator', description: 'Coordinates day-to-day operations' },
+  { name: 'Operations Manager', description: 'Oversees business processes and logistics' },
+];
+
+// dept and position are matched by name to the arrays above
+type UserSeed = {
+  email: string;
+  name: string;
+  role: Role;
+  dept?: string;
+  position?: string;
+  isDeptHead?: boolean;
+};
+
+const SEED_USERS: UserSeed[] = [
+  // Super admin — no dept
+  { email: 'super.admin@example.com', name: 'Super Admin', role: Role.SUPER_ADMIN },
+
+  // Engineering
   {
-    name: 'Marketing Manager',
-    description: 'Leads marketing strategy and team',
+    email: 'alice.johnson@example.com',
+    name: 'Alice Johnson',
+    role: Role.ADMIN,
+    dept: 'Engineering',
+    position: 'Engineering Manager',
+    isDeptHead: true,
   },
   {
-    name: 'Operations Coordinator',
-    description: 'Coordinates day-to-day operations',
+    email: 'bob.smith@example.com',
+    name: 'Bob Smith',
+    role: Role.MANAGER,
+    dept: 'Engineering',
+    position: 'Senior Software Engineer',
+  },
+  {
+    email: 'carol.white@example.com',
+    name: 'Carol White',
+    role: Role.USER,
+    dept: 'Engineering',
+    position: 'Software Engineer',
+  },
+  {
+    email: 'david.lee@example.com',
+    name: 'David Lee',
+    role: Role.USER,
+    dept: 'Engineering',
+    position: 'Software Engineer',
+  },
+  {
+    email: 'ethan.nguyen@example.com',
+    name: 'Ethan Nguyen',
+    role: Role.USER,
+    dept: 'Engineering',
+    position: 'Senior Software Engineer',
+  },
+
+  // Human Resources
+  {
+    email: 'fiona.brown@example.com',
+    name: 'Fiona Brown',
+    role: Role.MANAGER,
+    dept: 'Human Resources',
+    position: 'HR Manager',
+    isDeptHead: true,
+  },
+  {
+    email: 'george.wilson@example.com',
+    name: 'George Wilson',
+    role: Role.USER,
+    dept: 'Human Resources',
+    position: 'HR Specialist',
+  },
+  {
+    email: 'hannah.taylor@example.com',
+    name: 'Hannah Taylor',
+    role: Role.USER,
+    dept: 'Human Resources',
+    position: 'HR Specialist',
+  },
+
+  // Finance
+  {
+    email: 'ivan.martin@example.com',
+    name: 'Ivan Martin',
+    role: Role.MANAGER,
+    dept: 'Finance',
+    position: 'Financial Analyst',
+    isDeptHead: true,
+  },
+  {
+    email: 'julia.anderson@example.com',
+    name: 'Julia Anderson',
+    role: Role.USER,
+    dept: 'Finance',
+    position: 'Financial Analyst',
+  },
+  {
+    email: 'kevin.thomas@example.com',
+    name: 'Kevin Thomas',
+    role: Role.USER,
+    dept: 'Finance',
+    position: 'Accountant',
+  },
+
+  // Marketing
+  {
+    email: 'laura.jackson@example.com',
+    name: 'Laura Jackson',
+    role: Role.MANAGER,
+    dept: 'Marketing',
+    position: 'Marketing Manager',
+    isDeptHead: true,
+  },
+  {
+    email: 'mike.harris@example.com',
+    name: 'Mike Harris',
+    role: Role.USER,
+    dept: 'Marketing',
+    position: 'Marketing Specialist',
+  },
+  {
+    email: 'nina.clark@example.com',
+    name: 'Nina Clark',
+    role: Role.USER,
+    dept: 'Marketing',
+    position: 'Marketing Specialist',
+  },
+
+  // Operations
+  {
+    email: 'oscar.robinson@example.com',
+    name: 'Oscar Robinson',
+    role: Role.MANAGER,
+    dept: 'Operations',
+    position: 'Operations Manager',
+    isDeptHead: true,
+  },
+  {
+    email: 'paula.lewis@example.com',
+    name: 'Paula Lewis',
+    role: Role.USER,
+    dept: 'Operations',
+    position: 'Operations Coordinator',
+  },
+  {
+    email: 'quinn.walker@example.com',
+    name: 'Quinn Walker',
+    role: Role.USER,
+    dept: 'Operations',
+    position: 'Operations Coordinator',
   },
 ];
 
 async function main() {
-  // Seed one user per role
-  const users = await Promise.all(
-    Object.values(Role).map(async (role) => {
-      const email = `${role.toLowerCase().replace('_', '.')}@example.com`;
-      const name =
-        role.charAt(0) + role.slice(1).toLowerCase().replace('_', ' ');
-      return prisma.user.upsert({
-        where: { email },
-        update: {},
-        create: {
-          email,
-          name,
-          role,
-          password: await secrets.hash('password123'),
-        },
-      });
-    }),
-  );
-
-  // Seed role permissions
-  for (const [role, permissions] of Object.entries(
-    DEFAULT_ROLE_PERMISSIONS,
-  ) as [Role, string[]][]) {
+  // 1. Seed role permissions
+  for (const [role, permissions] of Object.entries(DEFAULT_ROLE_PERMISSIONS) as [Role, string[]][]) {
     for (const permission of permissions) {
       await prisma.rolePermission.upsert({
         where: { role_permission: { role, permission } },
@@ -96,40 +198,102 @@ async function main() {
     }
   }
 
-  // Seed departments
-  const departments = await Promise.all(
-    SEED_DEPARTMENTS.map((dept) =>
-      prisma.department.upsert({
-        where: { name: dept.name },
-        update: {},
-        create: dept,
-      }),
-    ),
-  );
+  // 2. Seed departments (no heads yet)
+  const departments = new Map<string, { id: number }>();
+  for (const dept of SEED_DEPARTMENTS) {
+    const record = await prisma.department.upsert({
+      where: { name: dept.name },
+      update: {},
+      create: dept,
+    });
+    departments.set(dept.name, record);
+  }
 
-  // Seed positions
-  const positions = await Promise.all(
-    SEED_POSITIONS.map((pos) =>
-      prisma.position.upsert({
-        where: { name: pos.name },
-        update: {},
-        create: pos,
-      }),
-    ),
-  );
+  // 3. Seed positions (two passes: create first, then set reportsToId)
+  const POSITION_REPORTS_TO: Record<string, string> = {
+    'Software Engineer': 'Engineering Manager',
+    'Senior Software Engineer': 'Engineering Manager',
+    'HR Specialist': 'HR Manager',
+    'Financial Analyst': 'HR Manager',
+    'Accountant': 'Financial Analyst',
+    'Marketing Specialist': 'Marketing Manager',
+    'Operations Coordinator': 'Operations Manager',
+  };
 
-  console.log(
-    'Seeded users:',
-    users.map((u) => `${u.email} (${u.role})`),
-  );
-  console.log(
-    'Seeded departments:',
-    departments.map((d) => d.name),
-  );
-  console.log(
-    'Seeded positions:',
-    positions.map((p) => p.name),
-  );
+  const positions = new Map<string, { id: number }>();
+  for (const pos of SEED_POSITIONS) {
+    const record = await prisma.position.upsert({
+      where: { name: pos.name },
+      update: {},
+      create: pos,
+    });
+    positions.set(pos.name, record);
+  }
+
+  for (const [posName, reportsToName] of Object.entries(POSITION_REPORTS_TO)) {
+    const pos = positions.get(posName);
+    const reportsTo = positions.get(reportsToName);
+    if (pos && reportsTo) {
+      await prisma.position.update({
+        where: { id: pos.id },
+        data: { reportsToId: reportsTo.id },
+      });
+    }
+  }
+
+  // 4. Seed users with dept + position assignments
+  const hashedPassword = await secrets.hash('password123');
+  const users: Array<{ id: number; email: string; role: Role }> = [];
+
+  for (const u of SEED_USERS) {
+    const deptId = u.dept ? departments.get(u.dept)?.id : undefined;
+    const posId = u.position ? positions.get(u.position)?.id : undefined;
+
+    const record = await prisma.user.upsert({
+      where: { email: u.email },
+      update: {
+        name: u.name,
+        role: u.role,
+        ...(deptId !== undefined && { departmentId: deptId }),
+        ...(posId !== undefined && { positionId: posId }),
+      },
+      create: {
+        email: u.email,
+        name: u.name,
+        role: u.role,
+        password: hashedPassword,
+        ...(deptId !== undefined && { departmentId: deptId }),
+        ...(posId !== undefined && { positionId: posId }),
+      },
+    });
+    users.push(record);
+  }
+
+  // 5. Set department heads
+  for (const u of SEED_USERS) {
+    if (!u.isDeptHead || !u.dept) continue;
+    const dept = departments.get(u.dept);
+    const user = users.find((x) => x.email === u.email);
+    if (!dept || !user) continue;
+
+    await prisma.department.update({
+      where: { id: dept.id },
+      data: { headId: user.id },
+    });
+  }
+
+  console.log('Seeded users:');
+  for (const u of SEED_USERS) {
+    const dept = u.dept ?? '—';
+    const pos = u.position ?? '—';
+    const head = u.isDeptHead ? ' [dept head]' : '';
+    console.log(`  ${u.email} (${u.role}) | ${dept} | ${pos}${head}`);
+  }
+
+  console.log('\nDepartment heads:');
+  for (const u of SEED_USERS.filter((x) => x.isDeptHead)) {
+    console.log(`  ${u.dept}: ${u.name}`);
+  }
 }
 
 main()

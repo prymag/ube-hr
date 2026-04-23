@@ -16,6 +16,7 @@ import { DepartmentDetailPage } from '../pages/departments/DepartmentDetailPage'
 import { PositionsPage } from '../pages/positions/PositionsPage';
 import { CreatePositionPage } from '../pages/positions/CreatePositionPage';
 import { PositionDetailPage } from '../pages/positions/PositionDetailPage';
+import { OrgChartPage } from '../pages/org-chart/OrgChartPage';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { PERMISSIONS } from '@ube-hr/shared';
 
@@ -93,6 +94,13 @@ export function App() {
               <Route path="/positions" element={<PositionsPage />} />
               <Route path="/positions/new" element={<CreatePositionPage />} />
               <Route path="/positions/:id" element={<PositionDetailPage />} />
+            </Route>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.POSITIONS_READ} />
+              }
+            >
+              <Route path="/org-chart" element={<OrgChartPage />} />
             </Route>
           </Route>
         </Route>

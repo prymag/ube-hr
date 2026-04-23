@@ -95,6 +95,8 @@ export interface PositionResponse {
   id: number;
   name: string;
   description: string | null;
+  reportsToId: number | null;
+  reportsToName: string | null;
   createdAt: string;
   updatedAt: string;
 }

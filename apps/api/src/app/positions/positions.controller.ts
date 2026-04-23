@@ -41,6 +41,8 @@ function toPositionResponse(pos: PositionRecord): PositionResponse {
     id: pos.id,
     name: pos.name,
     description: pos.description,
+    reportsToId: pos.reportsToId,
+    reportsToName: pos.reportsTo?.name ?? null,
     createdAt: pos.createdAt.toISOString(),
     updatedAt: pos.updatedAt.toISOString(),
   };

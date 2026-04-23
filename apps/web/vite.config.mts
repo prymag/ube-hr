@@ -21,6 +21,9 @@ export default defineConfig(() => ({
     port: 4200,
     host: 'localhost',
   },
+  define: {
+    global: 'window',
+  },
   plugins: [react(), nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
   // Uncomment this if you are using workers.
   // worker: {
