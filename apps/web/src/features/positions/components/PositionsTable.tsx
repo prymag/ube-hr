@@ -65,6 +65,7 @@ export function PositionsTable({
           <TableRow>
             {th('name', 'Title')}
             <TableHead>Description</TableHead>
+            <TableHead>Reports To</TableHead>
             {th('createdAt', 'Created')}
             <TableHead />
           </TableRow>
@@ -81,6 +82,9 @@ export function PositionsTable({
               </TableCell>
               <TableCell className="text-muted-foreground text-sm">
                 {pos.description ?? '—'}
+              </TableCell>
+              <TableCell className="text-muted-foreground text-sm">
+                {pos.reportsToName ?? '—'}
               </TableCell>
               <TableCell className="text-muted-foreground text-xs">
                 {new Date(pos.createdAt).toLocaleDateString()}

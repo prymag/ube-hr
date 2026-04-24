@@ -5,6 +5,7 @@ import {
   MinLength,
   IsInt,
   IsPositive,
+  ValidateIf,
 } from 'class-validator';
 
 export class UpdateDepartmentDto {
@@ -28,6 +29,7 @@ export class UpdateDepartmentDto {
     description: 'User ID of the department head (null to remove)',
   })
   @IsOptional()
+  @ValidateIf((o) => o.headId !== null)
   @IsInt()
   @IsPositive()
   headId?: number | null;

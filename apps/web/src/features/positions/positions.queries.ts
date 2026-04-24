@@ -42,7 +42,7 @@ export function useUpdatePosition(id: number) {
     mutationFn: (data: {
       name?: string;
       description?: string | null;
-      departmentId?: number;
+      reportsToId?: number | null;
     }) => updatePosition(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: positionKeys.detail(id) });

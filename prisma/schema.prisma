@@ -100,8 +100,11 @@ model Position {
   id           Int        @id @default(autoincrement())
   name         String     @unique
   description  String?
+  reportsToId  Int?
   deletedAt    DateTime?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   users        User[]
+  reportsTo    Position?  @relation("PositionHierarchy", fields: [reportsToId], references: [id])
+  reportees    Position[] @relation("PositionHierarchy")
 }
