@@ -30,6 +30,7 @@ export function UserDetailPage() {
 
   const callerRank = ROLE_RANK[authUser?.role ?? 'USER'] ?? 0;
   const assignableRoles = ALL_ROLES.filter((r) => ROLE_RANK[r] <= callerRank);
+  const readOnly = (ROLE_RANK[user?.role ?? 'USER'] ?? 0) >= callerRank;
 
   const positions = positionsQuery.data?.data ?? [];
   const departments = departmentsQuery.data?.data ?? [];
@@ -70,6 +71,7 @@ export function UserDetailPage() {
             departments={departments}
             isPending={updateUser.isPending}
             isError={updateUser.isError}
+            readOnly={readOnly}
             onSubmit={handleSubmit}
             onCancel={() => navigate('/users')}
           />

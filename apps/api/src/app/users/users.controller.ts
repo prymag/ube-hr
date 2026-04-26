@@ -132,15 +132,11 @@ export class UsersController {
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
   ): Promise<PaginatedResponse<UserResponse>> {
-    const result = await this.usersService.findAll(req.user!.role, {
-      search,
-      role,
-      status,
-      sortField,
-      sortDir,
-      page,
-      pageSize,
-    });
+    const result = await this.usersService.findAll(
+      req.user!.role,
+      { search, role, status, sortField, sortDir, page, pageSize },
+      req.user!.id,
+    );
     return {
       ...result,
       data: result.data.map((u) => toUserResponse(u, this.storageService)),
@@ -230,8 +226,31 @@ export class UsersController {
     }
 
     // Permission check (role hierarchy) is handled inside usersService.update
-    const user = await this.usersService.update(id, updateData, req.user!.role);
+    const user = await this.usersService.update(id, updateData, req.user!.role, req.user!.id);
     return toUserResponse(user, this.storageService);
+  }
+
+  @Get('assignable')
+  @RequirePermission(PERMISSIONS.TEAMS_UPDATE)
+  @ApiOperation({ summary: 'List users available for team assignment' })
+  @ApiQuery({ name: 'search', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'pageSize', required: false })
+  async findAssignable(
+    @Req() req: AuthenticatedRequest,
+    @Query('search') search?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ): Promise<PaginatedResponse<UserResponse>> {
+    const result = await this.usersService.findAll(req.user!.role, {
+      search,
+      page,
+      pageSize,
+    });
+    return {
+      ...result,
+      data: result.data.map((u) => toUserResponse(u, this.storageService)),
+    };
   }
 
   @Get(':id')
@@ -240,15 +259,24 @@ export class UsersController {
   @ApiOkResponse({ type: UserResponseDto })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
   ): Promise<UserResponse | null> {
-    const user = await this.usersService.findUserRecordById(id);
+    const user = await this.usersService.findUserRecordById(
+      id,
+      req.user!.role,
+      req.user!.id,
+    );
     return user ? toUserResponse(user, this.storageService) : null;
   }
 
   @Get(':id/teams')
   @RequirePermission(PERMISSIONS.USERS_READ)
   @ApiOperation({ summary: 'List teams for a user' })
-  async findTeams(@Param('id', ParseIntPipe) id: number): Promise<UserTeam[]> {
+  async findTeams(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<UserTeam[]> {
+    await this.usersService.findUserRecordById(id, req.user!.role, req.user!.id);
     const teams = await this.usersService.findTeams(id);
     return teams.map(toUserTeam);
   }
@@ -298,6 +326,7 @@ export class UsersController {
         departmentId: parseFormInt(dto.departmentId),
       },
       req.user!.role,
+      req.user!.id,
     );
 
     return toUserResponse(user, this.storageService);

@@ -51,10 +51,20 @@ export class TeamsService {
   // --- Teams CRUD ---
 
   async create(dto: CreateTeamInput, ownerId: number): Promise<TeamModel> {
-    return this.prisma.team.create({ data: { ...dto, ownerId } });
+    return this.prisma.team.create({
+      data: {
+        ...dto,
+        ownerId,
+        memberships: { create: { userId: ownerId } },
+      },
+    });
   }
 
-  async findAll(query: TeamsQuery = {}): Promise<PaginatedTeams> {
+  async findAll(
+    query: TeamsQuery = {},
+    callerId?: number,
+    callerRole?: Role,
+  ): Promise<PaginatedTeams> {
     const { search, sortField, sortDir, page, pageSize } = query;
 
     const pageNum = Math.max(1, parseInt(String(page ?? 1), 10) || 1);
@@ -72,6 +82,9 @@ export class TeamsService {
 
     const where = {
       deletedAt: null as null,
+      ...(callerRole === Role.MANAGER && callerId
+        ? { memberships: { some: { userId: callerId } } }
+        : {}),
       ...(search
         ? {
             OR: [

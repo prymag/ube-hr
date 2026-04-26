@@ -81,9 +81,24 @@ export class UsersService {
     private readonly storage: StorageService,
   ) {}
 
+  private async assertTeamAccess(
+    callerId: number,
+    targetUserId: number,
+  ): Promise<void> {
+    if (callerId === targetUserId) return;
+    const shared = await this.prisma.membership.findFirst({
+      where: {
+        userId: targetUserId,
+        team: { memberships: { some: { userId: callerId } } },
+      },
+    });
+    if (!shared) throw new NotFoundException('User not found');
+  }
+
   async findAll(
     callerRole: Role,
     query: UsersQuery = {},
+    callerId?: number,
   ): Promise<PaginatedUsers> {
     const { search, role, status, sortField, sortDir, page, pageSize } = query;
 
@@ -116,6 +131,15 @@ export class UsersService {
     const where = {
       deletedAt: null as null,
       role: roleFilter,
+      ...(callerRole === Role.MANAGER && callerId
+        ? {
+            memberships: {
+              some: {
+                team: { memberships: { some: { userId: callerId } } },
+              },
+            },
+          }
+        : {}),
       ...(validStatus ? { status: validStatus } : {}),
       ...(search
         ? {
@@ -202,7 +226,11 @@ export class UsersService {
     id: number,
     dto: UpdateUserInput,
     callerRole: Role,
+    callerId?: number,
   ): Promise<UserRecord> {
+    if (callerRole === Role.MANAGER && callerId !== undefined) {
+      await this.assertTeamAccess(callerId, id);
+    }
     const user = await this.prisma.user.findUnique({
       where: { id, deletedAt: null },
     });
@@ -273,7 +301,14 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { id, deletedAt: null } });
   }
 
-  async findUserRecordById(id: number): Promise<UserRecord | null> {
+  async findUserRecordById(
+    id: number,
+    callerRole?: Role,
+    callerId?: number,
+  ): Promise<UserRecord | null> {
+    if (callerRole === Role.MANAGER && callerId !== undefined) {
+      await this.assertTeamAccess(callerId, id);
+    }
     return this.prisma.user.findUnique({
       where: { id, deletedAt: null },
       select: {

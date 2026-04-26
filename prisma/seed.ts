@@ -282,6 +282,104 @@ async function main() {
     });
   }
 
+  // 6. Seed teams and memberships
+  // owner email → member emails
+  const SEED_TEAMS: {
+    name: string;
+    description: string;
+    ownerEmail: string;
+    memberEmails: string[];
+  }[] = [
+    {
+      name: 'Engineering Team',
+      description: 'Core engineering squad responsible for product development',
+      ownerEmail: 'alice.johnson@example.com',
+      memberEmails: [
+        'alice.johnson@example.com',
+        'bob.smith@example.com',
+        'carol.white@example.com',
+        'david.lee@example.com',
+        'ethan.nguyen@example.com',
+      ],
+    },
+    {
+      name: 'HR Team',
+      description: 'People operations and talent acquisition',
+      ownerEmail: 'fiona.brown@example.com',
+      memberEmails: [
+        'fiona.brown@example.com',
+        'george.wilson@example.com',
+        'hannah.taylor@example.com',
+      ],
+    },
+    {
+      name: 'Finance Team',
+      description: 'Financial planning, reporting and accounting',
+      ownerEmail: 'ivan.martin@example.com',
+      memberEmails: [
+        'ivan.martin@example.com',
+        'julia.anderson@example.com',
+        'kevin.thomas@example.com',
+      ],
+    },
+    {
+      name: 'Marketing Team',
+      description: 'Brand growth, campaigns and communications',
+      ownerEmail: 'laura.jackson@example.com',
+      memberEmails: [
+        'laura.jackson@example.com',
+        'mike.harris@example.com',
+        'nina.clark@example.com',
+      ],
+    },
+    {
+      name: 'Operations Team',
+      description: 'Day-to-day business operations and logistics',
+      ownerEmail: 'oscar.robinson@example.com',
+      memberEmails: [
+        'oscar.robinson@example.com',
+        'paula.lewis@example.com',
+        'quinn.walker@example.com',
+      ],
+    },
+    {
+      name: 'Leadership',
+      description: 'Cross-functional leadership and strategic planning',
+      ownerEmail: 'alice.johnson@example.com',
+      memberEmails: [
+        'alice.johnson@example.com',
+        'bob.smith@example.com',
+        'fiona.brown@example.com',
+        'ivan.martin@example.com',
+        'laura.jackson@example.com',
+        'oscar.robinson@example.com',
+      ],
+    },
+  ];
+
+  const userByEmail = new Map(users.map((u) => [u.email, u]));
+
+  for (const t of SEED_TEAMS) {
+    const owner = userByEmail.get(t.ownerEmail);
+    if (!owner) continue;
+
+    const team = await prisma.team.upsert({
+      where: { name: t.name },
+      update: { description: t.description, ownerId: owner.id },
+      create: { name: t.name, description: t.description, ownerId: owner.id },
+    });
+
+    for (const email of t.memberEmails) {
+      const member = userByEmail.get(email);
+      if (!member) continue;
+      await prisma.membership.upsert({
+        where: { userId_teamId: { userId: member.id, teamId: team.id } },
+        update: {},
+        create: { userId: member.id, teamId: team.id },
+      });
+    }
+  }
+
   console.log('Seeded users:');
   for (const u of SEED_USERS) {
     const dept = u.dept ?? '—';
@@ -293,6 +391,11 @@ async function main() {
   console.log('\nDepartment heads:');
   for (const u of SEED_USERS.filter((x) => x.isDeptHead)) {
     console.log(`  ${u.dept}: ${u.name}`);
+  }
+
+  console.log('\nSeeded teams:');
+  for (const t of SEED_TEAMS) {
+    console.log(`  ${t.name} (owner: ${t.ownerEmail}) — ${t.memberEmails.length} members`);
   }
 }
 

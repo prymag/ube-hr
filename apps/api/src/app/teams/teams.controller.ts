@@ -71,13 +71,18 @@ export class TeamsController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
   async findAll(
+    @Req() req: AuthenticatedRequest,
     @Query('search') search?: string,
     @Query('sortField') sortField?: string,
     @Query('sortDir') sortDir?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
   ): Promise<PaginatedResponse<TeamResponse>> {
-    const result = await this.teamsService.findAll({ search, sortField, sortDir, page, pageSize });
+    const result = await this.teamsService.findAll(
+      { search, sortField, sortDir, page, pageSize },
+      req.user!.id,
+      req.user!.role,
+    );
     return { ...result, data: result.data.map(toTeamResponse) };
   }
 
