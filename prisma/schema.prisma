@@ -42,6 +42,10 @@ model User {
   position            Position?    @relation(fields: [positionId], references: [id])
   department          Department?  @relation("DepartmentMembers", fields: [departmentId], references: [id])
   headOfDepartments   Department[] @relation("DepartmentHead")
+  leaveRequests         LeaveRequest[]
+  leaveApprovals        LeaveApprovalStep[] @relation("LeaveApprovals")
+  leaveBalances         LeaveBalance[]
+  leaveBalanceAudits    LeaveBalanceAudit[]
 }
 
 model Team {
@@ -107,4 +111,116 @@ model Position {
   users        User[]
   reportsTo    Position?  @relation("PositionHierarchy", fields: [reportsToId], references: [id])
   reportees    Position[] @relation("PositionHierarchy")
+}
+
+// --- Leave Management ---
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  UNPAID
+  MATERNITY
+  PATERNITY
+  BEREAVEMENT
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  PENDING_MANAGER
+  PENDING_ADMIN
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ApprovalStage {
+  MANAGER
+  ADMIN
+}
+
+enum HalfDayPeriod {
+  AM
+  PM
+}
+
+model LeaveRequest {
+  id            Int                   @id @default(autoincrement())
+  userId        Int
+  leaveType     LeaveType
+  status        LeaveStatus           @default(PENDING_MANAGER)
+  startDate     DateTime
+  endDate       DateTime
+  isHalfDay     Boolean               @default(false)
+  halfDayPeriod HalfDayPeriod?
+  durationDays  Float                 @default(0)
+  reason        String?
+  deletedAt     DateTime?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  user          User                  @relation(fields: [userId], references: [id])
+  approvalSteps LeaveApprovalStep[]
+}
+
+model LeaveApprovalStep {
+  id             Int           @id @default(autoincrement())
+  leaveRequestId Int
+  approverId     Int
+  stage          ApprovalStage
+  status         LeaveStatus   @default(PENDING)
+  comment        String?
+  decidedAt      DateTime?
+  createdAt      DateTime      @default(now())
+  leaveRequest   LeaveRequest  @relation(fields: [leaveRequestId], references: [id])
+  approver       User          @relation("LeaveApprovals", fields: [approverId], references: [id])
+}
+
+model LeaveBalance {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  leaveType     LeaveType
+  year          Int
+  allocated     Float     @default(0)
+  used          Float     @default(0)
+  pending       Float     @default(0)
+  debt          Float     @default(0)
+  lastAccruedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, leaveType, year])
+}
+
+model LeaveBalanceAudit {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  leaveType LeaveType
+  eventType String
+  amount    Float
+  debtDelta Float     @default(0)
+  note      String?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model LeaveAccrualConfig {
+  id             Int       @id @default(autoincrement())
+  leaveType      LeaveType @unique
+  monthlyRate    Float     @default(0)
+  daysPerYear    Float     @default(0)
+  carryOverLimit Float     @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model PublicHoliday {
+  id          Int      @id @default(autoincrement())
+  name        String
+  date        DateTime
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([date])
 }

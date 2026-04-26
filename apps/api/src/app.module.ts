@@ -12,6 +12,9 @@ import { TeamsController } from './app/teams/teams.controller';
 import { PermissionsController } from './app/permissions/permissions.controller';
 import { DepartmentsController } from './app/departments/departments.controller';
 import { PositionsController } from './app/positions/positions.controller';
+import { HolidaysController } from './app/holidays/holidays.controller';
+import { LeavesController } from './app/leaves/leaves.controller';
+import { LeaveBalanceController } from './app/leave-balance/leave-balance.controller';
 import { AppConfigModule, PrismaModule, StorageModule } from '@ube-hr/backend';
 import {
   AuthModule,
@@ -23,6 +26,9 @@ import {
   QueueModule,
   DepartmentsModule,
   PositionsModule,
+  HolidaysModule,
+  LeavesModule,
+  LeaveBalanceModule,
 } from '@ube-hr/feature';
 
 @Module({
@@ -38,6 +44,9 @@ import {
     VerificationModule,
     DepartmentsModule,
     PositionsModule,
+    HolidaysModule,
+    LeavesModule,
+    LeaveBalanceModule,
   ],
   controllers: [
     AppController,
@@ -47,6 +56,9 @@ import {
     PermissionsController,
     DepartmentsController,
     PositionsController,
+    HolidaysController,
+    LeavesController,
+    LeaveBalanceController,
   ],
   providers: [AppService],
 })

@@ -9,6 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "docker compose up -d --wait && npx nx run-many --target=serve --projects=api,web --parallel",
+    "dev-full": "docker compose up -d --wait && npx nx run-many --target=serve --projects=api,web,worker --parallel",
     "sync-ai": "bash scripts/sync-instructions.sh",
     "migrate:dev": "prisma migrate dev && MYSQL_DATABASE=ube_hr_test prisma migrate deploy",
     "migrate:deploy": "prisma migrate deploy && MYSQL_DATABASE=ube_hr_test prisma migrate deploy",
