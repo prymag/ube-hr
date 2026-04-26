@@ -5,6 +5,7 @@ export {
   createUser,
   updateUser,
   deleteUser,
+  getAssignableUsers,
 } from './users.api';
 export { useUsersTable } from './useUsersTable';
 export type { UserSortField, SortDir as UserSortDir } from './useUsersTable';
@@ -22,6 +23,7 @@ export type { UserResponse, UserTeam } from '@ube-hr/shared';
 export {
   userKeys,
   useUsers,
+  useAssignableUsers,
   useUser,
   useUserTeams,
   useCreateUser,

@@ -7,6 +7,7 @@ interface ProfilePictureProps {
   onUpload?: (file: File) => void;
   onRemove?: () => void;
   isPending?: boolean;
+  disabled?: boolean;
 }
 
 export function ProfilePicture({
@@ -14,6 +15,7 @@ export function ProfilePicture({
   onUpload,
   onRemove,
   isPending,
+  disabled,
 }: ProfilePictureProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(url);
@@ -55,7 +57,7 @@ export function ProfilePicture({
           size="icon"
           className="absolute bottom-0 right-0 w-8 h-8 rounded-full p-0 shadow-sm"
           onClick={() => fileInputRef.current?.click()}
-          disabled={isPending}
+          disabled={isPending || disabled}
         >
           <Camera className="w-4 h-4" />
         </Button>
@@ -68,7 +70,7 @@ export function ProfilePicture({
           size="sm"
           className="text-xs text-destructive hover:text-destructive"
           onClick={handleRemove}
-          disabled={isPending}
+          disabled={isPending || disabled}
         >
           <X className="w-3 h-3 mr-1" />
           Remove Photo

@@ -13,6 +13,18 @@ export const getUsers = async (params?: UsersListParams) => {
   return r.data;
 };
 
+export const getAssignableUsers = async (params?: {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}) => {
+  const r = await api.get<PaginatedResponse<UserResponse>>(
+    '/api/users/assignable',
+    { params },
+  );
+  return r.data;
+};
+
 export const getUser = async (id: number) => {
   const r = await api.get<UserResponse>(`/api/users/${id}`);
   return r.data;

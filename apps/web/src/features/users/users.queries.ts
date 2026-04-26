@@ -11,6 +11,7 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  getAssignableUsers,
 } from './users.api';
 import { addTeamMember, removeTeamMember } from '../teams/teams.api';
 import type { UsersListParams } from '@ube-hr/shared';
@@ -26,6 +27,17 @@ export function useUsers(params?: UsersListParams) {
   return useQuery({
     queryKey: [...userKeys.lists(), params],
     queryFn: () => getUsers(params),
+  });
+}
+
+export function useAssignableUsers(params?: {
+  search?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  return useQuery({
+    queryKey: [...userKeys.all, 'assignable', params] as const,
+    queryFn: () => getAssignableUsers(params),
   });
 }
 

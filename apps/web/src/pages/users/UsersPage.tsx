@@ -4,7 +4,9 @@ import { useUsers, UsersTable, DeleteUserDialog } from '../../features/users';
 import { useUsersTable } from '../../features/users/useUsersTable';
 import type { UserResponse } from '../../features/users';
 import { useAuth } from '../../store/AuthContext';
+import { useMe } from '../../features/authentication';
 import { ROLE_RANK, ALL_ROLES } from '../../config/roles';
+import { PERMISSIONS } from '@ube-hr/shared';
 import {
   Button,
   Input,
@@ -18,6 +20,8 @@ import {
 export function UsersPage() {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
+  const { data: me } = useMe();
+  const canCreateUsers = me?.permissions?.includes(PERMISSIONS.USERS_CREATE) ?? false;
   const [deleteTarget, setDeleteTarget] = useState<UserResponse | null>(null);
 
   const callerRank = ROLE_RANK[authUser?.role ?? 'USER'] ?? 0;
@@ -54,7 +58,9 @@ export function UsersPage() {
             {total} result{total !== 1 ? 's' : ''}
           </p>
         </div>
-        <Button onClick={() => navigate('/users/new')}>New User</Button>
+        {canCreateUsers && (
+          <Button onClick={() => navigate('/users/new')}>New User</Button>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2 mb-3">

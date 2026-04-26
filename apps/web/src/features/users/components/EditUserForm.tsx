@@ -33,6 +33,7 @@ interface EditUserFormProps {
   departments: SelectOption[];
   isPending: boolean;
   isError: boolean;
+  readOnly?: boolean;
   onSubmit: (values: EditUserFormValues) => void;
   onCancel: () => void;
 }
@@ -46,6 +47,7 @@ export function EditUserForm({
   departments,
   isPending,
   isError,
+  readOnly = false,
   onSubmit,
   onCancel,
 }: EditUserFormProps) {
@@ -90,6 +92,7 @@ export function EditUserForm({
           onUpload={(file) => setValue('profilePicture', file)}
           onRemove={() => setValue('profilePicture', null)}
           isPending={isPending}
+          disabled={readOnly}
         />
       </div>
 
@@ -101,6 +104,7 @@ export function EditUserForm({
             type="text"
             placeholder="Jane Doe"
             autoFocus
+            disabled={readOnly}
           />
           {errors.name && (
             <p className="text-sm text-destructive">{errors.name.message}</p>
@@ -109,7 +113,7 @@ export function EditUserForm({
 
         <div className="space-y-1.5">
           <Label>Role</Label>
-          <Select value={role} onValueChange={(val) => setValue('role', val)}>
+          <Select value={role} onValueChange={(val) => setValue('role', val)} disabled={readOnly}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -133,6 +137,7 @@ export function EditUserForm({
           <Select
             value={positionId}
             onValueChange={(val) => setValue('positionId', val)}
+            disabled={readOnly}
           >
             <SelectTrigger>
               <SelectValue placeholder="No position assigned" />
@@ -158,6 +163,7 @@ export function EditUserForm({
           <Select
             value={departmentId}
             onValueChange={(val) => setValue('departmentId', val)}
+            disabled={readOnly}
           >
             <SelectTrigger>
               <SelectValue placeholder="No department assigned" />
@@ -179,9 +185,11 @@ export function EditUserForm({
       )}
 
       <div className="flex gap-2 pt-1">
-        <Button type="submit" disabled={isPending}>
-          {isPending ? 'Saving…' : 'Save'}
-        </Button>
+        {!readOnly && (
+          <Button type="submit" disabled={isPending}>
+            {isPending ? 'Saving…' : 'Save'}
+          </Button>
+        )}
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel
         </Button>

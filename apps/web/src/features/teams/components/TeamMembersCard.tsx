@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@ube-hr/ui';
-import { useUsers } from '../../users';
+import { useAssignableUsers } from '../../users';
 import {
   useTeamMembers,
   useAddTeamMember,
@@ -21,7 +21,7 @@ interface TeamMembersCardProps {
 
 export function TeamMembersCard({ teamId }: TeamMembersCardProps) {
   const membersQuery = useTeamMembers(teamId);
-  const usersQuery = useUsers({ pageSize: 1000 });
+  const usersQuery = useAssignableUsers({ pageSize: 1000 });
   const addMember = useAddTeamMember(teamId);
   const removeMember = useRemoveTeamMember(teamId);
 
