@@ -23,6 +23,6 @@ import { QueueService } from './queue.service';
     }),
   ],
   providers: [QueueService],
-  exports: [QueueService],
+  exports: [BullModule, QueueService],
 })
 export class QueueModule {}

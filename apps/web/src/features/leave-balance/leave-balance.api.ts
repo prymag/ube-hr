@@ -9,7 +9,9 @@ import type {
 } from '@ube-hr/shared';
 
 export const getBalancesForUser = async (userId: number) => {
-  const r = await api.get<LeaveBalanceResponse[]>(`/api/leave-balance/${userId}`);
+  const r = await api.get<LeaveBalanceResponse[]>(
+    `/api/leave-balance/${userId}`,
+  );
   return r.data;
 };
 
@@ -19,12 +21,21 @@ export const getAllBalances = async (params?: {
   page?: number;
   pageSize?: number;
 }) => {
-  const r = await api.get<PaginatedResponse<LeaveBalanceWithUser>>('/api/leave-balance', { params });
+  const r = await api.get<PaginatedResponse<LeaveBalanceWithUser>>(
+    '/api/leave-balance',
+    { params },
+  );
   return r.data;
 };
 
-export const grantBalance = async (userId: number, data: LeaveBalanceGrantInput) => {
-  const r = await api.post<{ ok: boolean }>(`/api/leave-balance/${userId}/grant`, data);
+export const grantBalance = async (
+  userId: number,
+  data: LeaveBalanceGrantInput,
+) => {
+  const r = await api.post<{ ok: boolean }>(
+    `/api/leave-balance/${userId}/grant`,
+    data,
+  );
   return r.data;
 };
 
@@ -37,11 +48,16 @@ export const getAuditHistory = async (userId: number, leaveType?: string) => {
 };
 
 export const getAccrualConfigs = async () => {
-  const r = await api.get<LeaveAccrualConfigResponse[]>('/api/leave-balance/config');
+  const r = await api.get<LeaveAccrualConfigResponse[]>(
+    '/api/leave-balance/config',
+  );
   return r.data;
 };
 
-export const updateAccrualConfig = async (type: string, monthlyRate: number) => {
+export const updateAccrualConfig = async (
+  type: string,
+  monthlyRate: number,
+) => {
   const r = await api.put<LeaveAccrualConfigResponse>(
     `/api/leave-balance/config/${type}`,
     { monthlyRate },
@@ -50,6 +66,8 @@ export const updateAccrualConfig = async (type: string, monthlyRate: number) => 
 };
 
 export const triggerAccrual = async () => {
-  const r = await api.post<{ processed: number; skipped: number }>('/api/leave-balance/accrue');
+  const r = await api.post<{ runId: string; jobsEnqueued: number }>(
+    '/api/leave-accruals/run',
+  );
   return r.data;
 };

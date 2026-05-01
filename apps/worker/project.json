@@ -50,7 +50,8 @@
       "dependsOn": ["build"],
       "options": {
         "buildTarget": "worker:build",
-        "runBuildTargetDependencies": false
+        "runBuildTargetDependencies": false,
+        "waitUntilTargets": ["api:serve"]
       },
       "configurations": {
         "development": {
