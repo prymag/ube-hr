@@ -7,4 +7,8 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../../coverage/apps/worker',
+  moduleNameMapper: {
+    '^@ube-hr/prisma-client$': '<rootDir>/../../libs/feature/src/testing/prisma-client.stub.ts',
+    '^.+/generated/prisma/client$': '<rootDir>/../../libs/feature/src/testing/prisma-client.stub.ts',
+  },
 };

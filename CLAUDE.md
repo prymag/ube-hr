@@ -77,37 +77,38 @@ npx nx g @nx/nest:library <lib-name> --directory=libs/<lib-name>
 
 - **Strict Dependency Rule**: `libs/` **cannot** import from `apps/`.
 - **Feature Rule**: Use relative imports between sibling modules within `libs/feature`. Use the alias only from outside.
+- **Why `libs/backend` is not inside `libs/feature`**: `libs/backend` is pure infrastructure — DB connection (`PrismaService`), env config (`AppConfigModule`), file storage (`StorageService`), and crypto (`secrets`). It has zero knowledge of the HR domain. `libs/feature` depends on it; the reverse is never true. Keeping them separate enforces this one-way dependency, makes infrastructure swappable (e.g. replacing storage backends) without touching business logic, and gives `apps/api`, `apps/worker`, and test helpers a clean place to import low-level primitives without pulling in domain services.
 
 ## Key Files by Concern
 
 ### Backend
 
-| Concern | File |
-|---|---|
-| Server bootstrap | `apps/api/src/main.ts` |
-| Root module (middleware, imports) | `apps/api/src/app/app.module.ts` |
-| Controllers | `apps/api/src/app/<entity>/<entity>.controller.ts` |
-| Auth service (login, refresh, impersonate) | `libs/feature/src/auth/auth.service.ts` |
-| Auth middleware (JWT validation, global) | `libs/feature/src/auth/middleware/auth.middleware.ts` |
-| Permission guard | `libs/feature/src/auth/guards/permission.guard.ts` |
-| `@RequirePermission()` decorator | `libs/feature/src/auth/decorators/require-permission.decorator.ts` |
-| Permission cache service | `libs/feature/src/permissions/permissions.service.ts` |
-| Users service | `libs/feature/src/users/users.service.ts` |
-| Teams service | `libs/feature/src/teams/teams.service.ts` |
-| Database schema | `prisma/schema.prisma` |
-| Prisma service | `libs/backend/src/prisma/prisma.service.ts` |
-| Permission constants + defaults | `libs/shared/src/permissions.ts` |
+| Concern                                    | File                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------ |
+| Server bootstrap                           | `apps/api/src/main.ts`                                             |
+| Root module (middleware, imports)          | `apps/api/src/app/app.module.ts`                                   |
+| Controllers                                | `apps/api/src/app/<entity>/<entity>.controller.ts`                 |
+| Auth service (login, refresh, impersonate) | `libs/feature/src/auth/auth.service.ts`                            |
+| Auth middleware (JWT validation, global)   | `libs/feature/src/auth/middleware/auth.middleware.ts`              |
+| Permission guard                           | `libs/feature/src/auth/guards/permission.guard.ts`                 |
+| `@RequirePermission()` decorator           | `libs/feature/src/auth/decorators/require-permission.decorator.ts` |
+| Permission cache service                   | `libs/feature/src/permissions/permissions.service.ts`              |
+| Users service                              | `libs/feature/src/users/users.service.ts`                          |
+| Teams service                              | `libs/feature/src/teams/teams.service.ts`                          |
+| Database schema                            | `prisma/schema.prisma`                                             |
+| Prisma service                             | `libs/backend/src/prisma/prisma.service.ts`                        |
+| Permission constants + defaults            | `libs/shared/src/permissions.ts`                                   |
 
 ### Frontend
 
-| Concern | File |
-|---|---|
-| React entry point | `apps/web/src/main.tsx` |
-| Routes + route guards | `apps/web/src/app/app.tsx` |
-| Auth state (token, user, cross-tab sync) | `apps/web/src/store/AuthContext.tsx` |
-| Axios instance (interceptors, auto-refresh) | `apps/web/src/services/axios.ts` |
-| Role rank / badge config | `apps/web/src/config/roles.ts` |
-| Sidebar + nav layout | `apps/web/src/layouts/AuthLayout.tsx` |
+| Concern                                     | File                                  |
+| ------------------------------------------- | ------------------------------------- |
+| React entry point                           | `apps/web/src/main.tsx`               |
+| Routes + route guards                       | `apps/web/src/app/app.tsx`            |
+| Auth state (token, user, cross-tab sync)    | `apps/web/src/store/AuthContext.tsx`  |
+| Axios instance (interceptors, auto-refresh) | `apps/web/src/services/axios.ts`      |
+| Role rank / badge config                    | `apps/web/src/config/roles.ts`        |
+| Sidebar + nav layout                        | `apps/web/src/layouts/AuthLayout.tsx` |
 
 ## Backend Guidelines (NestJS)
 
@@ -185,12 +186,12 @@ Unit tests live next to the service they test: `<service>.service.spec.ts`. Run 
 
 #### Infrastructure
 
-| File                                           | Purpose                                                                             |
-| ---------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `libs/feature/jest.config.cts`                 | Jest config (CJS mode); stubs only the generated Prisma client                      |
-| `libs/feature/tsconfig.spec.json`              | Spec tsconfig; includes `src/testing/**/*.ts` so helpers see Jest globals           |
-| `libs/feature/tsconfig.lib.json`               | Excludes `src/testing/**/*.ts` so VS Code uses the spec tsconfig for those files    |
-| `libs/feature/src/testing/prisma.mock.ts`      | `createPrismaMock()` — returns an object of `jest.fn()` stubs matching the Prisma model API |
+| File                                             | Purpose                                                                                                                       |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `libs/feature/jest.config.cts`                   | Jest config (CJS mode); stubs only the generated Prisma client                                                                |
+| `libs/feature/tsconfig.spec.json`                | Spec tsconfig; includes `src/testing/**/*.ts` so helpers see Jest globals                                                     |
+| `libs/feature/tsconfig.lib.json`                 | Excludes `src/testing/**/*.ts` so VS Code uses the spec tsconfig for those files                                              |
+| `libs/feature/src/testing/prisma.mock.ts`        | `createPrismaMock()` — returns an object of `jest.fn()` stubs matching the Prisma model API                                   |
 | `libs/feature/src/testing/prisma-client.stub.ts` | Minimal CJS `PrismaClient` stub; satisfies `extends PrismaClient` in `PrismaService` without loading the generated ESM client |
 
 #### Why only the generated Prisma client is stubbed
@@ -244,13 +245,13 @@ Tests live co-located with the controller they cover: `apps/api/src/app/<entity>
 
 #### Infrastructure
 
-| File                                       | Purpose                                                                     |
-| ------------------------------------------ | --------------------------------------------------------------------------- |
-| `apps/api/jest.integration.config.cts`     | Jest config (ESM mode via `--experimental-vm-modules`); no Prisma client stub — uses the real generated client |
-| `apps/api/tsconfig.integration.json`       | TypeScript config (`module: ESNext`, `moduleResolution: Bundler`) so `import.meta` is valid |
-| `apps/api/test/helpers/app.ts`             | `createTestApp()` — bootstraps `AppModule` with real services               |
-| `apps/api/test/helpers/db.ts`              | `truncateAll(app)`, `seedDefaultPermissions(app)` — DB helpers              |
-| `apps/api/test/helpers/seed.ts`            | `seedUser()`, `seedAndLogin()` — data seeding helpers                       |
+| File                                   | Purpose                                                                                                        |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `apps/api/jest.integration.config.cts` | Jest config (ESM mode via `--experimental-vm-modules`); no Prisma client stub — uses the real generated client |
+| `apps/api/tsconfig.integration.json`   | TypeScript config (`module: ESNext`, `moduleResolution: Bundler`) so `import.meta` is valid                    |
+| `apps/api/test/helpers/app.ts`         | `createTestApp()` — bootstraps `AppModule` with real services                                                  |
+| `apps/api/test/helpers/db.ts`          | `truncateAll(app)`, `seedDefaultPermissions(app)` — DB helpers                                                 |
+| `apps/api/test/helpers/seed.ts`        | `seedUser()`, `seedAndLogin()` — data seeding helpers                                                          |
 
 #### Pattern for a new integration spec
 
@@ -302,6 +303,28 @@ describe('MyEntity (integration)', () => {
 - **No Modals for CRUD**: Use dedicated pages for Create (`/new`) and Update (`/:id`).
 - **Modals**: Only for Delete confirmation or simple single-field actions.
 - **Form Components**: Presentational only. Props: `values`, `onChange`, `onSubmit`, `isPending`, `error`. Parent page owns state/mutations.
+- **Relationship Fields — Never expose raw IDs**: When a form field represents a relationship (e.g. `positionId`, `departmentId`), always render a `Select` dropdown populated with human-readable names. Never use a plain number `Input` for a foreign key. The parent page fetches the option list (e.g. `usePositions({ pageSize: 1000 })`) and passes it as a prop (e.g. `positions: { id: number; name: string }[]`) to the form component. Include a "— None —" option (value `''`) to allow unassigning.
+
+### Radix UI `Select` — No Empty String Values
+
+**`SelectItem` crashes at runtime if given `value=""`**. Radix UI forbids empty strings as item values.
+
+For "All / none" filter options, use a non-empty sentinel and convert in `onValueChange`:
+
+```tsx
+// correct
+<Select value={filter || 'all'} onValueChange={(v) => setFilter(v === 'all' ? '' : v)}>
+  <SelectItem value="all">All types</SelectItem>
+  ...
+</Select>
+
+// wrong — crashes
+<Select value={filter}>
+  <SelectItem value="">All types</SelectItem>
+</Select>
+```
+
+For form fields where the empty state maps to a meaningful model value (e.g. "Full day" → `halfDay: ''`), use a sentinel like `'full'` in the UI and convert it in `onValueChange` without changing the underlying model value.
 
 ### State Management & Data Flow
 
@@ -375,3 +398,11 @@ _Do this before writing controllers or frontend code._
 2. **Build**: `npx nx build <project>` (Ensure no production build errors).
 3. **Tests**: Run affected tests or specific file tests.
 4. **Prisma**: If schema changes, run migration and verify `deletedAt` filters.
+
+## Stability & Regression Prevention Workflow
+
+To prevent code duplication and structural breakage during edits:
+
+- **Atomic Edits**: Use `oldString` with sufficient surrounding context to ensure uniqueness.
+- **Proactive Verification**: Run `lint` and `typecheck` immediately after any modification.
+- **Manual Review**: `Read` the modified section after complex edits to verify structural integrity.

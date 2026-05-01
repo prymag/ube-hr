@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'sonner';
 
 const api = axios.create({ withCredentials: true });
 
@@ -32,6 +33,9 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config;
     if (error.response?.status !== 401 || original._retry) {
+      if (error.response?.status === 403) {
+        toast.error("You don't have permission to perform this action.");
+      }
       return Promise.reject(error);
     }
 

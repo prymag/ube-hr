@@ -8,6 +8,8 @@ import {
 import * as backendSecrets from '@ube-hr/backend';
 import { PrismaService, Role, UserStatus } from '@ube-hr/backend';
 import { UsersService } from './users.service';
+import { QueueService } from '../queue/queue.service';
+import { StorageService } from '@ube-hr/backend';
 import { createPrismaMock, PrismaMock } from '../testing/prisma.mock';
 
 describe('UsersService', () => {
@@ -17,10 +19,21 @@ describe('UsersService', () => {
   beforeEach(async () => {
     prisma = createPrismaMock();
 
+    const queueService: jest.Mocked<Pick<QueueService, 'dispatch'>> = {
+      dispatch: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const storageService: jest.Mocked<Pick<StorageService, 'upload' | 'delete'>> = {
+      upload: jest.fn().mockResolvedValue('path/to/file'),
+      delete: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
         { provide: PrismaService, useValue: prisma },
+        { provide: QueueService, useValue: queueService },
+        { provide: StorageService, useValue: storageService },
       ],
     }).compile();
 

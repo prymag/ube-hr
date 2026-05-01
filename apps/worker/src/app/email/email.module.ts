@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
-import { BullModule } from '@nestjs/bullmq';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { JOB_QUEUES } from '@ube-hr/shared';
 import { EmailProcessor } from './email.processor';
 
 @Module({
   imports: [
-    BullModule.registerQueue({ name: JOB_QUEUES.EMAIL }),
     MailerModule.forRootAsync({
       useFactory: (config: ConfigService) => {
         const user = config.get<string>('SMTP_USER', '');

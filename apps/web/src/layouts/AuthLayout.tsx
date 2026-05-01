@@ -30,6 +30,26 @@ const navItems: NavItem[] = [
     label: 'Org Chart',
     permission: PERMISSIONS.POSITIONS_READ,
   },
+  {
+    to: '/leaves',
+    label: 'My Leaves',
+    permission: PERMISSIONS.LEAVES_READ,
+  },
+  {
+    to: '/leaves/approvals',
+    label: 'Approval Queue',
+    permission: PERMISSIONS.LEAVES_APPROVE,
+  },
+  {
+    to: '/admin/holidays',
+    label: 'Holidays',
+    permission: PERMISSIONS.HOLIDAYS_MANAGE,
+  },
+  {
+    to: '/admin/leave-balance',
+    label: 'Leave Balances',
+    permission: PERMISSIONS.LEAVES_BALANCE_MANAGE,
+  },
 ];
 
 export function AuthLayout() {

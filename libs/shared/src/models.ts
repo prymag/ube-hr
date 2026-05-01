@@ -119,3 +119,156 @@ export interface MeResponse {
   impersonatedBy?: number;
   permissions: string[];
 }
+
+// --- Leave wire types ---
+
+export type LeaveType =
+  | 'ANNUAL'
+  | 'SICK'
+  | 'UNPAID'
+  | 'MATERNITY'
+  | 'PATERNITY'
+  | 'BEREAVEMENT'
+  | 'OTHER';
+
+export type LeaveStatus =
+  | 'PENDING'
+  | 'PENDING_MANAGER'
+  | 'PENDING_ADMIN'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'CANCELLED';
+
+export type HalfDay = 'AM' | 'PM';
+
+export type ApprovalStage = 'MANAGER' | 'ADMIN';
+
+export interface LeaveRequestResponse {
+  id: number;
+  userId: number;
+  userName: string | null;
+  userEmail: string;
+  leaveType: LeaveType;
+  status: LeaveStatus;
+  startDate: string;
+  endDate: string;
+  isHalfDay: boolean;
+  halfDayPeriod: HalfDay | null;
+  durationDays: number;
+  reason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeaveApprovalStepResponse {
+  id: number;
+  leaveRequestId: number;
+  approverId: number;
+  approverName: string | null;
+  approverEmail: string;
+  stage: ApprovalStage;
+  status: LeaveStatus;
+  comment: string | null;
+  decidedAt: string | null;
+  createdAt: string;
+}
+
+export interface LeaveRequestDetailResponse extends LeaveRequestResponse {
+  approvalSteps: LeaveApprovalStepResponse[];
+}
+
+export interface LeaveBalanceResponse {
+  id: number;
+  userId: number;
+  leaveType: LeaveType;
+  year: number;
+  allocated: number;
+  used: number;
+  pending: number;
+  debt: number;
+  lastAccruedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeaveBalanceAuditResponse {
+  id: number;
+  userId: number;
+  leaveType: LeaveType;
+  eventType: string;
+  amount: number;
+  debtDelta: number;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface LeaveAccrualConfigResponse {
+  id: number;
+  leaveType: LeaveType;
+  monthlyRate: number;
+  daysPerYear: number;
+  carryOverLimit: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeaveBalanceGrantInput {
+  leaveType: string;
+  amount: number;
+  note?: string;
+}
+
+export interface LeaveBalanceWithUser extends LeaveBalanceResponse {
+  userName: string | null;
+  userEmail: string;
+}
+
+export interface PublicHolidayResponse {
+  id: number;
+  name: string;
+  date: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeaveRequestsListParams {
+  search?: string;
+  status?: string;
+  leaveType?: string;
+  userId?: number;
+  sortField?: string;
+  sortDir?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface LeaveBalancesListParams {
+  userId?: number;
+  leaveType?: string;
+  year?: number;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface LeaveAccrualConfigsListParams {
+  leaveType?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PublicHolidaysListParams {
+  year?: number;
+  sortField?: string;
+  sortDir?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface AccrueBalancePayload {
+  runId: string;
+  userId: number;
+  leaveType: LeaveType;
+  year: number;
+  month: number;
+}

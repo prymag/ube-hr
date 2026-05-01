@@ -17,8 +17,12 @@ import { QueueService } from './queue.service';
       inject: [ConfigService],
     }),
     BullModule.registerQueue({ name: JOB_QUEUES.EMAIL }),
+    BullModule.registerQueue({
+      name: JOB_QUEUES.LEAVE,
+      defaultJobOptions: { attempts: 1 },
+    }),
   ],
   providers: [QueueService],
-  exports: [QueueService],
+  exports: [BullModule, QueueService],
 })
 export class QueueModule {}

@@ -1,16 +1,29 @@
-import { Controller, Get, Post, Delete, Param, ParseEnumPipe, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiOkResponse, ApiNoContentResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  ParseEnumPipe,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiNoContentResponse,
+} from '@nestjs/swagger';
 import { Role } from '@ube-hr/backend';
 import {
   PermissionsService,
   PermissionGuard,
-  RequirePermission
+  RequirePermission,
 } from '@ube-hr/feature';
-import {
-  Permission,
-    ALL_PERMISSIONS,
-    PERMISSIONS,
-} from '@ube-hr/shared'
+import { Permission, ALL_PERMISSIONS, PERMISSIONS } from '@ube-hr/shared';
 
 @ApiTags('permissions')
 @ApiBearerAuth()
@@ -22,7 +35,12 @@ export class PermissionsController {
 
   @Get()
   @ApiOperation({ summary: 'List all permissions grouped by role' })
-  @ApiOkResponse({ schema: { type: 'object', additionalProperties: { type: 'array', items: { type: 'string' } } } })
+  @ApiOkResponse({
+    schema: {
+      type: 'object',
+      additionalProperties: { type: 'array', items: { type: 'string' } },
+    },
+  })
   getAll() {
     return this.permissionsService.getAll();
   }
@@ -39,6 +57,16 @@ export class PermissionsController {
   @ApiOkResponse({ schema: { type: 'array', items: { type: 'string' } } })
   getForRole(@Param('role', new ParseEnumPipe(Role)) role: Role) {
     return this.permissionsService.getForRole(role);
+  }
+
+  @Post('reload')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Reload the in-memory permissions cache from the database',
+  })
+  @ApiNoContentResponse()
+  async reload() {
+    await this.permissionsService.reload();
   }
 
   @Post(':role/:permission')

@@ -17,6 +17,14 @@ import { PositionsPage } from '../pages/positions/PositionsPage';
 import { CreatePositionPage } from '../pages/positions/CreatePositionPage';
 import { PositionDetailPage } from '../pages/positions/PositionDetailPage';
 import { OrgChartPage } from '../pages/org-chart/OrgChartPage';
+import { HolidaysPage } from '../pages/holidays/HolidaysPage';
+import { CreateHolidayPage } from '../pages/holidays/CreateHolidayPage';
+import { HolidayDetailPage } from '../pages/holidays/HolidayDetailPage';
+import { LeavesPage } from '../pages/leaves/LeavesPage';
+import { LeaveBalancePage } from '../pages/admin/leave-balance/LeaveBalancePage';
+import { FileLeave } from '../pages/leaves/FileLeave';
+import { ApprovalQueuePage } from '../pages/leaves/ApprovalQueuePage';
+import { LeaveDetailPage } from '../pages/leaves/LeaveDetailPage';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { PERMISSIONS } from '@ube-hr/shared';
 
@@ -101,6 +109,50 @@ export function App() {
               }
             >
               <Route path="/org-chart" element={<OrgChartPage />} />
+            </Route>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.LEAVES_READ} />
+              }
+            >
+              <Route path="/leaves" element={<LeavesPage />} />
+              <Route path="/leaves/:id" element={<LeaveDetailPage />} />
+            </Route>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.LEAVES_CREATE} />
+              }
+            >
+              <Route path="/leaves/new" element={<FileLeave />} />
+            </Route>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.LEAVES_APPROVE} />
+              }
+            >
+              <Route path="/leaves/approvals" element={<ApprovalQueuePage />} />
+            </Route>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.HOLIDAYS_MANAGE} />
+              }
+            >
+              <Route path="/admin/holidays" element={<HolidaysPage />} />
+              <Route
+                path="/admin/holidays/new"
+                element={<CreateHolidayPage />}
+              />
+              <Route
+                path="/admin/holidays/:id"
+                element={<HolidayDetailPage />}
+              />
+            </Route>
+            <Route
+              element={
+                <RequirePermission permission={PERMISSIONS.LEAVES_BALANCE_MANAGE} />
+              }
+            >
+              <Route path="/admin/leave-balance" element={<LeaveBalancePage />} />
             </Route>
           </Route>
         </Route>
