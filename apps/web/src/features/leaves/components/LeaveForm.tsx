@@ -122,9 +122,9 @@ export function LeaveForm({
         <div className="space-y-1.5">
           <Label>Half Day</Label>
           <Select
-            value={values.isHalfDay ? (values.halfDay || '') : ''}
+            value={values.isHalfDay ? (values.halfDay || 'full') : 'full'}
             onValueChange={(v) => {
-              if (v === '') {
+              if (v === 'full') {
                 onChange({ ...values, isHalfDay: false, halfDay: '' });
               } else {
                 onChange({ ...values, isHalfDay: true, halfDay: v as 'AM' | 'PM' });
@@ -135,7 +135,7 @@ export function LeaveForm({
               <SelectValue placeholder="Full day" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Full day</SelectItem>
+              <SelectItem value="full">Full day</SelectItem>
               <SelectItem value="AM">Half day – AM</SelectItem>
               <SelectItem value="PM">Half day – PM</SelectItem>
             </SelectContent>

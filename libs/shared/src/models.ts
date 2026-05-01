@@ -264,3 +264,11 @@ export interface PublicHolidaysListParams {
   page?: number;
   pageSize?: number;
 }
+
+export interface AccrueBalancePayload {
+  runId: string;
+  userId: number;
+  leaveType: LeaveType;
+  year: number;
+  month: number;
+}

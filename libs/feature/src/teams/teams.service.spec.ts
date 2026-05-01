@@ -48,7 +48,7 @@ describe('TeamsService', () => {
       const result = await service.create({ name: 'Alpha' }, 10);
 
       expect(prisma.team.create).toHaveBeenCalledWith({
-        data: { name: 'Alpha', ownerId: 10 },
+        data: { name: 'Alpha', ownerId: 10, memberships: { create: { userId: 10 } } },
       });
       expect(result).toEqual(team);
     });

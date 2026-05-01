@@ -13,6 +13,12 @@ export async function truncateAll(app: INestApplication): Promise<void> {
   await prisma.membership.deleteMany();
   await prisma.team.deleteMany();
   await prisma.rolePermission.deleteMany();
+  await prisma.leaveApprovalStep.deleteMany();
+  await prisma.leaveRequest.deleteMany();
+  await prisma.leaveBalanceAudit.deleteMany();
+  await prisma.leaveBalance.deleteMany();
+  await prisma.leaveAccrualConfig.deleteMany();
+  await prisma.publicHoliday.deleteMany();
   await prisma.user.deleteMany();
   await app.get(PermissionsService).reload();
 }

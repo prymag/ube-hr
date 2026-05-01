@@ -52,8 +52,8 @@ describe('Teams (integration)', () => {
 
     it('returns 403 for a role without teams:create', async () => {
       const { token } = await seedAndLogin(app, request, {
-        email: 'manager@test.com',
-        role: Role.MANAGER,
+        email: 'user@test.com',
+        role: Role.USER,
       });
 
       await request
@@ -165,7 +165,7 @@ describe('Teams (integration)', () => {
   // ── GET /api/teams/:id/users ───────────────────────────────────────────────
 
   describe('GET /api/teams/:teamId/users', () => {
-    it('returns an empty member list for a new team', async () => {
+    it('returns only the owner for a new team', async () => {
       const created = await request
         .post('/api/teams')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -176,7 +176,8 @@ describe('Teams (integration)', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
-      expect(res.body).toEqual([]);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].id).toBe(adminId);
     });
   });
 
@@ -200,8 +201,8 @@ describe('Teams (integration)', () => {
         .get(`/api/teams/${team.body.id}/users`)
         .set('Authorization', `Bearer ${adminToken}`);
 
-      expect(members.body).toHaveLength(1);
-      expect(members.body[0].email).toBe('member@test.com');
+      expect(members.body).toHaveLength(2);
+      expect(members.body.map((m: { email: string }) => m.email)).toContain('member@test.com');
     });
   });
 
@@ -229,7 +230,8 @@ describe('Teams (integration)', () => {
         .get(`/api/teams/${team.body.id}/users`)
         .set('Authorization', `Bearer ${adminToken}`);
 
-      expect(members.body).toHaveLength(0);
+      expect(members.body).toHaveLength(1);
+      expect(members.body[0].id).toBe(adminId);
     });
   });
 });

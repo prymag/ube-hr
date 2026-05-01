@@ -15,3 +15,6 @@ export * from './leaves/leaves.module';
 export * from './leaves/leaves.service';
 export * from './leave-balance/leave-balance.module';
 export * from './leave-balance/leave-balance.service';
+export * from './leave-accrual/leave-accrual.module';
+export * from './leave-accrual/leave-accrual.service';
+export * from './leave-accrual/leave-accrual-cron.service';

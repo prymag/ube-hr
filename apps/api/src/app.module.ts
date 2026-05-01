@@ -4,6 +4,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app/app.controller';
 import { AppService } from './app/app.service';
 import { AuthController } from './app/auth/auth.controller';
@@ -15,6 +16,7 @@ import { PositionsController } from './app/positions/positions.controller';
 import { HolidaysController } from './app/holidays/holidays.controller';
 import { LeavesController } from './app/leaves/leaves.controller';
 import { LeaveBalanceController } from './app/leave-balance/leave-balance.controller';
+import { LeaveAccrualsController } from './app/leave-accruals/leave-accruals.controller';
 import { AppConfigModule, PrismaModule, StorageModule } from '@ube-hr/backend';
 import {
   AuthModule,
@@ -29,6 +31,7 @@ import {
   HolidaysModule,
   LeavesModule,
   LeaveBalanceModule,
+  LeaveAccrualModule,
 } from '@ube-hr/feature';
 
 @Module({
@@ -36,6 +39,7 @@ import {
     AppConfigModule,
     PrismaModule,
     StorageModule,
+    ScheduleModule.forRoot(),
     QueueModule,
     PermissionsModule,
     AuthModule,
@@ -47,6 +51,7 @@ import {
     HolidaysModule,
     LeavesModule,
     LeaveBalanceModule,
+    LeaveAccrualModule,
   ],
   controllers: [
     AppController,
@@ -59,6 +64,7 @@ import {
     HolidaysController,
     LeavesController,
     LeaveBalanceController,
+    LeaveAccrualsController,
   ],
   providers: [AppService],
 })

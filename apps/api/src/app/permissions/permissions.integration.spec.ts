@@ -85,13 +85,14 @@ describe('Permissions (integration)', () => {
       expect(res.body).toContain('users:create');
     });
 
-    it('returns an empty array for USER which has no default permissions', async () => {
+    it('returns the default permissions for USER', async () => {
       const res = await request
         .get('/api/permissions/USER')
         .set('Authorization', `Bearer ${superAdminToken}`)
         .expect(200);
 
-      expect(res.body).toEqual([]);
+      expect(res.body).toEqual(expect.arrayContaining(['leaves:read', 'leaves:create']));
+      expect(res.body).toHaveLength(2);
     });
 
     it('returns 400 for an invalid role value', async () => {

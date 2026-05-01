@@ -1,5 +1,10 @@
 export const JOB_QUEUES = {
   EMAIL: 'email',
+  LEAVE: 'leave',
+} as const;
+
+export const LEAVE_JOBS = {
+  ACCRUE_BALANCE: 'accrue-balance',
 } as const;
 
 export const EMAIL_JOBS = {

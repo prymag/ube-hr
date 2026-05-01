@@ -4,7 +4,7 @@
     "outDir": "../../dist/out-tsc",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "types": ["jest", "node"]
+    "types": ["jest", "node", "multer"]
   },
   "include": [
     "test/**/*.ts",

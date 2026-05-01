@@ -23,6 +23,7 @@ export const PERMISSIONS = {
   LEAVES_READ_ALL: 'leaves:read_all',
   LEAVES_BALANCE_MANAGE: 'leaves:balance_manage',
   HOLIDAYS_MANAGE: 'holidays:manage',
+  LEAVE_ACCRUAL_RUN: 'leave_accrual:run',
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -70,6 +71,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     PERMISSIONS.LEAVES_READ_ALL,
     PERMISSIONS.LEAVES_BALANCE_MANAGE,
     PERMISSIONS.HOLIDAYS_MANAGE,
+    PERMISSIONS.LEAVE_ACCRUAL_RUN,
   ],
 
   SUPER_ADMIN: [
@@ -97,5 +99,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     PERMISSIONS.LEAVES_READ_ALL,
     PERMISSIONS.LEAVES_BALANCE_MANAGE,
     PERMISSIONS.HOLIDAYS_MANAGE,
+    PERMISSIONS.LEAVE_ACCRUAL_RUN,
   ],
 };

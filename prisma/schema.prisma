@@ -22,30 +22,30 @@ enum Role {
 }
 
 model User {
-  id                  Int          @id @default(autoincrement())
-  email               String       @unique
+  id                  Int                 @id @default(autoincrement())
+  email               String              @unique
   password            String
   name                String?
-  role                Role         @default(USER)
-  status              UserStatus   @default(ACTIVE)
-  profilePicture        String?
+  role                Role                @default(USER)
+  status              UserStatus          @default(ACTIVE)
+  profilePicture      String?
   phone               String?
   positionId          Int?
   departmentId        Int?
   deletedAt           DateTime?
-  refreshTokenVersion Int          @default(0)
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  refreshTokenVersion Int                 @default(0)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
   memberships         Membership[]
-  ownedTeams          Team[]       @relation("OwnedTeams")
+  ownedTeams          Team[]              @relation("OwnedTeams")
   verificationCodes   VerificationCode[]
-  position            Position?    @relation(fields: [positionId], references: [id])
-  department          Department?  @relation("DepartmentMembers", fields: [departmentId], references: [id])
-  headOfDepartments   Department[] @relation("DepartmentHead")
-  leaveRequests         LeaveRequest[]
-  leaveApprovals        LeaveApprovalStep[] @relation("LeaveApprovals")
-  leaveBalances         LeaveBalance[]
-  leaveBalanceAudits    LeaveBalanceAudit[]
+  position            Position?           @relation(fields: [positionId], references: [id])
+  department          Department?         @relation("DepartmentMembers", fields: [departmentId], references: [id])
+  headOfDepartments   Department[]        @relation("DepartmentHead")
+  leaveRequests       LeaveRequest[]
+  leaveApprovals      LeaveApprovalStep[] @relation("LeaveApprovals")
+  leaveBalances       LeaveBalance[]
+  leaveBalanceAudits  LeaveBalanceAudit[]
 }
 
 model Team {
@@ -69,11 +69,11 @@ model RolePermission {
 }
 
 model Membership {
-  userId    Int
-  teamId    Int
-  joinedAt  DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId   Int
+  teamId   Int
+  joinedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@id([userId, teamId])
 }
@@ -82,35 +82,35 @@ model VerificationCode {
   id        Int      @id @default(autoincrement())
   userId    Int
   code      String
-  type      String   // 'EMAIL' | 'PHONE'
+  type      String // 'EMAIL' | 'PHONE'
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Department {
-  id          Int        @id @default(autoincrement())
-  name        String     @unique
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
   description String?
   headId      Int?
-  head        User?      @relation("DepartmentHead", fields: [headId], references: [id])
-  members     User[]     @relation("DepartmentMembers")
+  head        User?     @relation("DepartmentHead", fields: [headId], references: [id])
+  members     User[]    @relation("DepartmentMembers")
   deletedAt   DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Position {
-  id           Int        @id @default(autoincrement())
-  name         String     @unique
-  description  String?
-  reportsToId  Int?
-  deletedAt    DateTime?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  users        User[]
-  reportsTo    Position?  @relation("PositionHierarchy", fields: [reportsToId], references: [id])
-  reportees    Position[] @relation("PositionHierarchy")
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  reportsToId Int?
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  users       User[]
+  reportsTo   Position?  @relation("PositionHierarchy", fields: [reportsToId], references: [id])
+  reportees   Position[] @relation("PositionHierarchy")
 }
 
 // --- Leave Management ---
@@ -145,20 +145,20 @@ enum HalfDayPeriod {
 }
 
 model LeaveRequest {
-  id            Int                   @id @default(autoincrement())
+  id            Int                 @id @default(autoincrement())
   userId        Int
   leaveType     LeaveType
-  status        LeaveStatus           @default(PENDING_MANAGER)
+  status        LeaveStatus         @default(PENDING_MANAGER)
   startDate     DateTime
   endDate       DateTime
-  isHalfDay     Boolean               @default(false)
+  isHalfDay     Boolean             @default(false)
   halfDayPeriod HalfDayPeriod?
-  durationDays  Float                 @default(0)
+  durationDays  Float               @default(0)
   reason        String?
   deletedAt     DateTime?
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
-  user          User                  @relation(fields: [userId], references: [id])
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  user          User                @relation(fields: [userId], references: [id])
   approvalSteps LeaveApprovalStep[]
 }
 
@@ -176,18 +176,20 @@ model LeaveApprovalStep {
 }
 
 model LeaveBalance {
-  id            Int       @id @default(autoincrement())
-  userId        Int
-  leaveType     LeaveType
-  year          Int
-  allocated     Float     @default(0)
-  used          Float     @default(0)
-  pending       Float     @default(0)
-  debt          Float     @default(0)
-  lastAccruedAt DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  user          User      @relation(fields: [userId], references: [id])
+  id               Int       @id @default(autoincrement())
+  userId           Int
+  leaveType        LeaveType
+  year             Int
+  allocated        Float     @default(0)
+  used             Float     @default(0)
+  pending          Float     @default(0)
+  debt             Float     @default(0)
+  lastAccruedAt    DateTime?
+  lastAccruedMonth Int?
+  lastAccruedYear  Int?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  user             User      @relation(fields: [userId], references: [id])
 
   @@unique([userId, leaveType, year])
 }
@@ -200,6 +202,7 @@ model LeaveBalanceAudit {
   amount    Float
   debtDelta Float     @default(0)
   note      String?
+  runId     String?
   createdAt DateTime  @default(now())
   user      User      @relation(fields: [userId], references: [id])
 }
