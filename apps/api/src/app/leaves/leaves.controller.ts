@@ -156,11 +156,11 @@ export class LeavesController {
     @Query('pageSize') pageSize?: string,
   ): Promise<PaginatedResponse<LeaveRequestResponse>> {
     const role = req.user!.role;
-    const readAll = this.permissionsService.hasPermission(
+    const readAll = await this.permissionsService.hasPermission(
       role,
       PERMISSIONS.LEAVES_READ_ALL,
     );
-    const canApprove = this.permissionsService.hasPermission(
+    const canApprove = await this.permissionsService.hasPermission(
       role,
       PERMISSIONS.LEAVES_APPROVE,
     );
@@ -235,7 +235,10 @@ export class LeavesController {
 
   @Patch(':id/approve')
   @RequirePermission(PERMISSIONS.LEAVES_APPROVE)
-  @ApiOperation({ summary: 'Approve a leave request (manager or admin stage). Set override=true to approve even if balance is insufficient (admin only).' })
+  @ApiOperation({
+    summary:
+      'Approve a leave request (manager or admin stage). Set override=true to approve even if balance is insufficient (admin only).',
+  })
   @ApiOkResponse({ type: LeaveResponseDto })
   async approve(
     @Param('id', ParseIntPipe) id: number,

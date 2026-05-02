@@ -17,7 +17,12 @@ import { HolidaysController } from './app/holidays/holidays.controller';
 import { LeavesController } from './app/leaves/leaves.controller';
 import { LeaveBalanceController } from './app/leave-balance/leave-balance.controller';
 import { LeaveAccrualsController } from './app/leave-accruals/leave-accruals.controller';
-import { AppConfigModule, PrismaModule, StorageModule } from '@ube-hr/backend';
+import {
+  AppConfigModule,
+  PrismaModule,
+  StorageModule,
+  BackendCacheModule,
+} from '@ube-hr/backend';
 import {
   AuthModule,
   AuthMiddleware,
@@ -39,6 +44,7 @@ import {
     AppConfigModule,
     PrismaModule,
     StorageModule,
+    BackendCacheModule,
     ScheduleModule.forRoot(),
     QueueModule,
     PermissionsModule,

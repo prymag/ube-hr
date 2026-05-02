@@ -80,7 +80,7 @@ describe('LeaveAccrualService', () => {
           year: 2026,
           month: 4,
         }),
-        { jobId: 'accrual:42:ANNUAL:2026:4' },
+        { jobId: 'accrual_42_ANNUAL_2026_4' },
       );
     });
 

@@ -3,7 +3,7 @@ import { PrismaClient, Role } from '../generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 import { DEFAULT_ROLE_PERMISSIONS } from '@ube-hr/shared';
-import { secrets } from '@ube-hr/backend';
+import * as secrets from '../libs/backend/src/secrets';
 
 const adapter = new PrismaMariaDb({
   host: process.env.MYSQL_HOST || 'localhost',
@@ -16,25 +16,55 @@ const adapter = new PrismaMariaDb({
 const prisma = new PrismaClient({ adapter });
 
 const SEED_DEPARTMENTS = [
-  { name: 'Engineering', description: 'Software development and infrastructure' },
-  { name: 'Human Resources', description: 'People operations and talent management' },
+  {
+    name: 'Engineering',
+    description: 'Software development and infrastructure',
+  },
+  {
+    name: 'Human Resources',
+    description: 'People operations and talent management',
+  },
   { name: 'Finance', description: 'Financial planning and accounting' },
   { name: 'Marketing', description: 'Brand, growth and communications' },
   { name: 'Operations', description: 'Business processes and logistics' },
 ];
 
 const SEED_POSITIONS = [
-  { name: 'Software Engineer', description: 'Designs and builds software systems' },
-  { name: 'Senior Software Engineer', description: 'Leads technical work and mentors engineers' },
-  { name: 'Engineering Manager', description: 'Manages engineering teams and delivery' },
-  { name: 'HR Specialist', description: 'Handles recruitment and employee relations' },
+  {
+    name: 'Software Engineer',
+    description: 'Designs and builds software systems',
+  },
+  {
+    name: 'Senior Software Engineer',
+    description: 'Leads technical work and mentors engineers',
+  },
+  {
+    name: 'Engineering Manager',
+    description: 'Manages engineering teams and delivery',
+  },
+  {
+    name: 'HR Specialist',
+    description: 'Handles recruitment and employee relations',
+  },
   { name: 'HR Manager', description: 'Leads the HR function and policy' },
-  { name: 'Financial Analyst', description: 'Analyses budgets and financial reports' },
+  {
+    name: 'Financial Analyst',
+    description: 'Analyses budgets and financial reports',
+  },
   { name: 'Accountant', description: 'Manages accounts and financial records' },
   { name: 'Marketing Specialist', description: 'Executes marketing campaigns' },
-  { name: 'Marketing Manager', description: 'Leads marketing strategy and team' },
-  { name: 'Operations Coordinator', description: 'Coordinates day-to-day operations' },
-  { name: 'Operations Manager', description: 'Oversees business processes and logistics' },
+  {
+    name: 'Marketing Manager',
+    description: 'Leads marketing strategy and team',
+  },
+  {
+    name: 'Operations Coordinator',
+    description: 'Coordinates day-to-day operations',
+  },
+  {
+    name: 'Operations Manager',
+    description: 'Oversees business processes and logistics',
+  },
 ];
 
 // dept and position are matched by name to the arrays above
@@ -49,7 +79,11 @@ type UserSeed = {
 
 const SEED_USERS: UserSeed[] = [
   // Super admin — no dept
-  { email: 'super.admin@example.com', name: 'Super Admin', role: Role.SUPER_ADMIN },
+  {
+    email: 'super.admin@example.com',
+    name: 'Super Admin',
+    role: Role.SUPER_ADMIN,
+  },
 
   // Engineering
   {
@@ -188,7 +222,9 @@ const SEED_USERS: UserSeed[] = [
 
 async function main() {
   // 1. Seed role permissions
-  for (const [role, permissions] of Object.entries(DEFAULT_ROLE_PERMISSIONS) as [Role, string[]][]) {
+  for (const [role, permissions] of Object.entries(
+    DEFAULT_ROLE_PERMISSIONS,
+  ) as [Role, string[]][]) {
     for (const permission of permissions) {
       await prisma.rolePermission.upsert({
         where: { role_permission: { role, permission } },
@@ -215,7 +251,7 @@ async function main() {
     'Senior Software Engineer': 'Engineering Manager',
     'HR Specialist': 'HR Manager',
     'Financial Analyst': 'HR Manager',
-    'Accountant': 'Financial Analyst',
+    Accountant: 'Financial Analyst',
     'Marketing Specialist': 'Marketing Manager',
     'Operations Coordinator': 'Operations Manager',
   };
@@ -395,7 +431,9 @@ async function main() {
 
   console.log('\nSeeded teams:');
   for (const t of SEED_TEAMS) {
-    console.log(`  ${t.name} (owner: ${t.ownerEmail}) — ${t.memberEmails.length} members`);
+    console.log(
+      `  ${t.name} (owner: ${t.ownerEmail}) — ${t.memberEmails.length} members`,
+    );
   }
 }
 

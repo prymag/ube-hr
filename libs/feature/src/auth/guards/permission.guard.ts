@@ -17,7 +17,7 @@ export class PermissionGuard implements CanActivate {
     private readonly permissionsService: PermissionsService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const permissions = this.reflector.getAllAndOverride<Permission[]>(
       PERMISSION_KEY,
       [context.getHandler(), context.getClass()],
@@ -28,7 +28,10 @@ export class PermissionGuard implements CanActivate {
     const req = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const role = req.user?.role;
 
-    if (!role || !this.permissionsService.hasPermissions(role, permissions)) {
+    if (
+      !role ||
+      !(await this.permissionsService.hasPermissions(role, permissions))
+    ) {
       throw new ForbiddenException('Insufficient permissions');
     }
 
