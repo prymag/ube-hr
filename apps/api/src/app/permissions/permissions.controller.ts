@@ -8,8 +8,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
-
 import {
   ApiTags,
   ApiOperation,
@@ -24,6 +24,7 @@ import {
   RequirePermission,
 } from '@ube-hr/feature';
 import { Permission, ALL_PERMISSIONS, PERMISSIONS } from '@ube-hr/shared';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @ApiTags('permissions')
 @ApiBearerAuth()
@@ -33,6 +34,7 @@ import { Permission, ALL_PERMISSIONS, PERMISSIONS } from '@ube-hr/shared';
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
+  @UseInterceptors(CacheInterceptor)
   @Get()
   @ApiOperation({ summary: 'List all permissions grouped by role' })
   @ApiOkResponse({
@@ -52,6 +54,7 @@ export class PermissionsController {
     return ALL_PERMISSIONS;
   }
 
+  @UseInterceptors(CacheInterceptor)
   @Get(':role')
   @ApiOperation({ summary: 'List permissions for a role' })
   @ApiOkResponse({ schema: { type: 'array', items: { type: 'string' } } })

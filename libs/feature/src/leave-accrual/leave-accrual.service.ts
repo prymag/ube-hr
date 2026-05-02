@@ -56,7 +56,7 @@ export class LeaveAccrualService {
 
     for (const user of users) {
       for (const config of configs) {
-        const jobId = `accrual:${user.id}:${config.leaveType}:${targetYear}:${targetMonth}`;
+        const jobId = `accrual_${user.id}_${config.leaveType}_${targetYear}_${targetMonth}`;
         const payload: AccrualJobPayload = {
           runId,
           userId: user.id,

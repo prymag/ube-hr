@@ -128,8 +128,10 @@ export class AuthController {
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current authenticated user' })
-  me(@Req() req: AuthenticatedRequest): MeResponse {
-    const permissions = this.permissionsService.getForRole(req.user!.role);
+  async me(@Req() req: AuthenticatedRequest): Promise<MeResponse> {
+    const permissions = await this.permissionsService.getForRole(
+      req.user!.role,
+    );
     return {
       id: req.user!.id,
       email: req.user!.email,
