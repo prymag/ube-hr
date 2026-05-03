@@ -60,6 +60,11 @@ export function LeaveDetailPage() {
   }
   if (!leave) return null;
 
+  const rejectedStep = leave.status === 'REJECTED'
+    ? leave.approvalSteps.find((s) => s.status === 'REJECTED')
+    : undefined;
+  const rejectionComment = rejectedStep?.comment ?? null;
+
   const myPendingStep = leave.approvalSteps.find(
     (s) => s.approverId === me?.id && s.status === 'PENDING',
   );
@@ -118,9 +123,23 @@ export function LeaveDetailPage() {
             Filed by {leave.userName ?? leave.userEmail} on{' '}
             {formatDate(leave.createdAt)}
           </p>
+          {(leave.userPositionName || leave.userDepartmentName) && (
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {[leave.userPositionName, leave.userDepartmentName]
+                .filter(Boolean)
+                .join(' · ')}
+            </p>
+          )}
         </div>
         <LeaveStatusBadge status={leave.status} />
       </div>
+
+      {leave.status === 'REJECTED' && (
+        <div className="mb-6 rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <span className="font-semibold">Request rejected.</span>{' '}
+          {rejectionComment ?? 'This request was rejected.'}
+        </div>
+      )}
 
       <Card className="mb-6">
         <CardContent className="p-6 grid grid-cols-2 gap-4 text-sm">

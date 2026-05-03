@@ -184,6 +184,8 @@ export interface LeaveApprovalStepResponse {
 }
 
 export interface LeaveRequestDetailResponse extends LeaveRequestResponse {
+  userPositionName: string | null;
+  userDepartmentName: string | null;
   approvalSteps: LeaveApprovalStepResponse[];
 }
 
@@ -240,6 +242,12 @@ export interface PublicHolidayResponse {
   description: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LeaveApprovalHistoryItem extends LeaveRequestResponse {
+  myDecision: 'APPROVED' | 'REJECTED';
+  myComment: string | null;
+  myDecidedAt: string | null;
 }
 
 export interface LeaveRequestsListParams {

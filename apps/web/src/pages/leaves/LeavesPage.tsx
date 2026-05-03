@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMyLeaves, useMyBalances, LeaveStatusBadge } from '../../features/leaves';
 import { Button } from '@ube-hr/ui';
@@ -17,10 +18,12 @@ const LEAVE_TYPE_LABELS: Record<string, string> = {
 
 export function LeavesPage() {
   const navigate = useNavigate();
-  const { data: response, isLoading } = useMyLeaves();
+  const [page, setPage] = useState(1);
+  const { data: response, isLoading } = useMyLeaves({ page, pageSize: 10 });
   const { data: balances } = useMyBalances();
   const rows = response?.data ?? [];
   const total = response?.total ?? 0;
+  const pageCount = response?.pageCount ?? 1;
 
   return (
     <div>
@@ -78,7 +81,11 @@ export function LeavesPage() {
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                <tr
+                  key={row.id}
+                  className="border-b last:border-0 hover:bg-muted/30 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/leaves/${row.id}`)}
+                >
                   <td className="px-4 py-3 font-medium">
                     {LEAVE_TYPE_LABELS[row.leaveType] ?? row.leaveType}
                   </td>
@@ -104,6 +111,30 @@ export function LeavesPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {pageCount > 1 && (
+        <div className="flex items-center justify-between mt-4 text-sm">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Previous
+          </Button>
+          <span className="text-muted-foreground">
+            Page {page} of {pageCount}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= pageCount}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
         </div>
       )}
     </div>

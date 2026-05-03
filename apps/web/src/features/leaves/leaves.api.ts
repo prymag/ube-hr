@@ -3,6 +3,7 @@ import type {
   LeaveRequestResponse,
   LeaveRequestDetailResponse,
   LeaveBalanceResponse,
+  LeaveApprovalHistoryItem,
   LeaveRequestsListParams,
   PaginatedResponse,
 } from '@ube-hr/shared';
@@ -61,5 +62,13 @@ export const rejectLeave = async (id: number, comment: string) => {
 
 export const getMyBalances = async () => {
   const r = await api.get<LeaveBalanceResponse[]>('/api/leaves/balances');
+  return r.data;
+};
+
+export const getMyApprovalHistory = async (params?: LeaveRequestsListParams) => {
+  const r = await api.get<PaginatedResponse<LeaveApprovalHistoryItem>>(
+    '/api/leaves/approvals/history',
+    { params },
+  );
   return r.data;
 };

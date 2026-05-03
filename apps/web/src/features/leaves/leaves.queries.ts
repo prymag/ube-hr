@@ -8,6 +8,7 @@ import {
   approveLeave,
   rejectLeave,
   getMyBalances,
+  getMyApprovalHistory,
 } from './leaves.api';
 import type { LeaveRequestsListParams } from '@ube-hr/shared';
 import type { CreateLeavePayload } from './leaves.api';
@@ -16,6 +17,7 @@ export const leaveKeys = {
   all: ['leaves'] as const,
   myList: () => [...leaveKeys.all, 'my', 'list'] as const,
   approvalList: () => [...leaveKeys.all, 'approvals', 'list'] as const,
+  approvalHistory: () => [...leaveKeys.all, 'approvals', 'history'] as const,
   detail: (id: number) => [...leaveKeys.all, 'detail', id] as const,
   myBalances: () => [...leaveKeys.all, 'my', 'balances'] as const,
 };
@@ -38,6 +40,13 @@ export function useLeave(id: number) {
   return useQuery({
     queryKey: leaveKeys.detail(id),
     queryFn: () => getLeave(id),
+  });
+}
+
+export function useMyApprovalHistory(params?: LeaveRequestsListParams) {
+  return useQuery({
+    queryKey: [...leaveKeys.approvalHistory(), params],
+    queryFn: () => getMyApprovalHistory(params),
   });
 }
 
