@@ -58,7 +58,11 @@ export class AuthService {
   }
 
   async logout(userId: number) {
-    await this.usersService.incrementTokenVersion(userId);
+    try {
+      await this.usersService.incrementTokenVersion(userId);
+    } catch {
+      // User no longer exists (e.g. deleted or DB refreshed) — session is already invalid
+    }
   }
 
   async impersonate(adminId: number, targetUserId: number) {

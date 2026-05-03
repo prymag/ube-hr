@@ -50,13 +50,7 @@ export interface AllBalancesQuery {
   pageSize?: string | number;
 }
 
-const VALID_ACCRUAL_TYPES: LeaveType[] = [
-  LeaveType.ANNUAL,
-  LeaveType.SICK,
-  LeaveType.MATERNITY,
-  LeaveType.PATERNITY,
-  LeaveType.BEREAVEMENT,
-];
+const VALID_ACCRUAL_TYPES: LeaveType[] = [LeaveType.ANNUAL, LeaveType.SICK];
 
 @Injectable()
 export class LeaveBalanceService {
@@ -263,6 +257,10 @@ export class LeaveBalanceService {
     let skipped = 0;
 
     for (const config of configs) {
+      if (!VALID_ACCRUAL_TYPES.includes(config.leaveType)) {
+        skipped++;
+        continue;
+      }
       for (const user of users) {
         const balance = await this.prisma.leaveBalance.findUnique({
           where: {

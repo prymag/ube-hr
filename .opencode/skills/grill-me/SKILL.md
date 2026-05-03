@@ -11,3 +11,9 @@ If a question can be answered by exploring the codebase, explore
 the codebase instead.
 
 For each question, provide your recommended answer.
+
+Once all branches of the decision tree are resolved and we have reached
+a shared understanding, present the full plan back to the user as a
+structured summary (goals, decisions made, open questions if any, and
+proposed implementation steps). Wait for explicit approval before
+proceeding to implementation.

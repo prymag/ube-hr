@@ -78,6 +78,24 @@ type UserSeed = {
 };
 
 const SEED_USERS: UserSeed[] = [
+  // Named dev/demo accounts (easy to remember)
+  { email: 'superadmin@ube-hr.com', name: 'Super Admin', role: Role.SUPER_ADMIN },
+  { email: 'admin@ube-hr.com', name: 'Admin', role: Role.ADMIN },
+  {
+    email: 'manager@ube-hr.com',
+    name: 'Manager',
+    role: Role.MANAGER,
+    dept: 'Engineering',
+    position: 'Senior Software Engineer',
+  },
+  {
+    email: 'user@ube-hr.com',
+    name: 'User',
+    role: Role.USER,
+    dept: 'Engineering',
+    position: 'Software Engineer',
+  },
+
   // Super admin — no dept
   {
     email: 'super.admin@example.com',
@@ -221,6 +239,26 @@ const SEED_USERS: UserSeed[] = [
 ];
 
 async function main() {
+  const refresh = process.argv.includes('--refresh');
+
+  if (refresh) {
+    console.log('--refresh: truncating all tables...');
+    await prisma.membership.deleteMany();
+    await prisma.team.deleteMany();
+    await prisma.rolePermission.deleteMany();
+    await prisma.leaveApprovalStep.deleteMany();
+    await prisma.leaveRequest.deleteMany();
+    await prisma.leaveBalanceAudit.deleteMany();
+    await prisma.leaveBalance.deleteMany();
+    await prisma.leaveAccrualConfig.deleteMany();
+    await prisma.publicHoliday.deleteMany();
+    await prisma.department.updateMany({ data: { headId: null } });
+    await prisma.user.deleteMany();
+    await prisma.department.deleteMany();
+    await prisma.position.deleteMany();
+    console.log('Truncation complete.\n');
+  }
+
   // 1. Seed role permissions
   for (const [role, permissions] of Object.entries(
     DEFAULT_ROLE_PERMISSIONS,
@@ -336,6 +374,8 @@ async function main() {
         'carol.white@example.com',
         'david.lee@example.com',
         'ethan.nguyen@example.com',
+        'manager@ube-hr.com',
+        'user@ube-hr.com',
       ],
     },
     {
