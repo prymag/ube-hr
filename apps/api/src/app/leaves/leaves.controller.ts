@@ -28,6 +28,7 @@ import {
   type LeaveWithUserRecord,
   type LeaveWithStepsRecord,
   type LeaveApprovalStepRecord,
+  type LeaveApprovalHistoryRecord,
 } from '@ube-hr/feature';
 import { LeaveType, type LeaveBalanceModel } from '@ube-hr/backend';
 import {
@@ -36,6 +37,7 @@ import {
   type LeaveRequestDetailResponse,
   type LeaveApprovalStepResponse,
   type LeaveBalanceResponse,
+  type LeaveApprovalHistoryItem,
   type PaginatedResponse,
 } from '@ube-hr/shared';
 import { CreateLeaveDto } from './dto/create-leave.dto';
@@ -83,6 +85,8 @@ function toStepResponse(s: LeaveApprovalStepRecord): LeaveApprovalStepResponse {
 function toDetailResponse(r: LeaveWithStepsRecord): LeaveRequestDetailResponse {
   return {
     ...toLeaveResponse(r),
+    userPositionName: r.userPositionName,
+    userDepartmentName: r.userDepartmentName,
     approvalSteps: r.approvalSteps.map(toStepResponse),
   };
 }
@@ -100,6 +104,17 @@ function toBalanceResponse(b: LeaveBalanceModel): LeaveBalanceResponse {
     lastAccruedAt: b.lastAccruedAt ? b.lastAccruedAt.toISOString() : null,
     createdAt: b.createdAt.toISOString(),
     updatedAt: b.updatedAt.toISOString(),
+  };
+}
+
+function toApprovalHistoryItem(
+  r: LeaveApprovalHistoryRecord,
+): LeaveApprovalHistoryItem {
+  return {
+    ...toLeaveResponse(r),
+    myDecision: r.myDecision,
+    myComment: r.myComment,
+    myDecidedAt: r.myDecidedAt ? r.myDecidedAt.toISOString() : null,
   };
 }
 
@@ -156,10 +171,6 @@ export class LeavesController {
     @Query('pageSize') pageSize?: string,
   ): Promise<PaginatedResponse<LeaveRequestResponse>> {
     const role = req.user!.role;
-    const readAll = await this.permissionsService.hasPermission(
-      role,
-      PERMISSIONS.LEAVES_READ_ALL,
-    );
     const canApprove = await this.permissionsService.hasPermission(
       role,
       PERMISSIONS.LEAVES_APPROVE,
@@ -167,8 +178,7 @@ export class LeavesController {
     const result = await this.leavesService.findMy(
       req.user!.id,
       { status, leaveType, sortField, sortDir, page, pageSize },
-      !readAll && canApprove ? req.user!.id : undefined,
-      readAll,
+      canApprove ? req.user!.id : undefined,
     );
     return { ...result, data: result.data.map(toLeaveResponse) };
   }
@@ -194,6 +204,27 @@ export class LeavesController {
       pageSize,
     });
     return { ...result, data: result.data.map(toLeaveResponse) };
+  }
+
+  @Get('approvals/history')
+  @RequirePermission(PERMISSIONS.LEAVES_APPROVE)
+  @ApiOperation({ summary: 'List leave requests the caller has personally approved or rejected' })
+  @ApiQuery({ name: 'sortField', required: false })
+  @ApiQuery({ name: 'sortDir', required: false, enum: ['asc', 'desc'] })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'pageSize', required: false })
+  async findMyApprovalHistory(
+    @Req() req: AuthenticatedRequest,
+    @Query('sortField') sortField?: string,
+    @Query('sortDir') sortDir?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ): Promise<PaginatedResponse<LeaveApprovalHistoryItem>> {
+    const result = await this.leavesService.findMyApprovalHistory(
+      req.user!.id,
+      { sortField, sortDir, page, pageSize },
+    );
+    return { ...result, data: result.data.map(toApprovalHistoryItem) };
   }
 
   @Get('balances')

@@ -7,4 +7,5 @@ export type {
   LeaveRequestDetailResponse,
   LeaveApprovalStepResponse,
   LeaveBalanceResponse,
+  LeaveApprovalHistoryItem,
 } from '@ube-hr/shared';

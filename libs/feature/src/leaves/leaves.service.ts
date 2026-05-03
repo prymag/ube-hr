@@ -64,11 +64,19 @@ export interface LeaveWithUserRecord extends Omit<LeaveRequestModel, never> {
 }
 
 export interface LeaveWithStepsRecord extends LeaveWithUserRecord {
+  userPositionName: string | null;
+  userDepartmentName: string | null;
   approvalSteps: LeaveApprovalStepRecord[];
 }
 
 export type LeaveRecord = LeaveRequestModel;
 export type PaginatedLeaves = PaginatedResponse<LeaveWithUserRecord>;
+
+export interface LeaveApprovalHistoryRecord extends LeaveWithUserRecord {
+  myDecision: 'APPROVED' | 'REJECTED';
+  myComment: string | null;
+  myDecidedAt: Date | null;
+}
 
 const VALID_LEAVE_SORT = ['createdAt', 'startDate', 'status'] as const;
 type LeaveSortField = (typeof VALID_LEAVE_SORT)[number];
@@ -327,11 +335,90 @@ export class LeavesService {
     };
   }
 
+  async findMyApprovalHistory(
+    callerId: number,
+    query: LeavesQuery = {},
+  ): Promise<PaginatedResponse<LeaveApprovalHistoryRecord>> {
+    const { sortField, sortDir, page, pageSize } = query;
+
+    const pageNum = Math.max(1, parseInt(String(page ?? 1), 10) || 1);
+    const pageSizeNum = Math.min(
+      100,
+      Math.max(1, parseInt(String(pageSize ?? 10), 10) || 10),
+    );
+
+    const validSort: LeaveSortField = (
+      VALID_LEAVE_SORT as readonly string[]
+    ).includes(sortField ?? '')
+      ? (sortField as LeaveSortField)
+      : 'createdAt';
+    const validDir = sortDir === 'asc' ? 'asc' : ('desc' as const);
+
+    const where = {
+      deletedAt: null as null,
+      approvalSteps: {
+        some: {
+          approverId: callerId,
+          status: { in: [LeaveStatus.APPROVED, LeaveStatus.REJECTED] as LeaveStatus[] },
+        },
+      },
+    };
+
+    const [total, rows] = await Promise.all([
+      this.prisma.leaveRequest.count({ where }),
+      this.prisma.leaveRequest.findMany({
+        where,
+        orderBy: { [validSort]: validDir },
+        skip: (pageNum - 1) * pageSizeNum,
+        take: pageSizeNum,
+        include: {
+          user: { select: { name: true, email: true } },
+          approvalSteps: {
+            where: {
+              approverId: callerId,
+              status: { in: [LeaveStatus.APPROVED, LeaveStatus.REJECTED] as LeaveStatus[] },
+            },
+            orderBy: { decidedAt: 'desc' },
+            take: 1,
+          },
+        },
+      }),
+    ]);
+
+    const data: LeaveApprovalHistoryRecord[] = rows.map((r) => {
+      const step = r.approvalSteps[0];
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { approvalSteps: _steps, ...leaveWithUser } = r;
+      const base = this.flattenUser(leaveWithUser);
+      return {
+        ...base,
+        myDecision: step.status as 'APPROVED' | 'REJECTED',
+        myComment: step.comment,
+        myDecidedAt: step.decidedAt,
+      };
+    });
+
+    return {
+      data,
+      total,
+      page: pageNum,
+      pageSize: pageSizeNum,
+      pageCount: Math.max(1, Math.ceil(total / pageSizeNum)),
+    };
+  }
+
   async findById(leaveId: number): Promise<LeaveWithStepsRecord> {
     const leave = await this.prisma.leaveRequest.findUnique({
       where: { id: leaveId, deletedAt: null },
       include: {
-        user: { select: { name: true, email: true } },
+        user: {
+          select: {
+            name: true,
+            email: true,
+            position: { select: { name: true } },
+            department: { select: { name: true } },
+          },
+        },
         approvalSteps: {
           include: {
             approver: { select: { name: true, email: true } },
@@ -342,23 +429,31 @@ export class LeavesService {
     });
     if (!leave) throw new NotFoundException('Leave request not found');
 
-    const base = this.flattenUser(leave);
-    const approvalSteps: LeaveApprovalStepRecord[] = leave.approvalSteps.map(
-      (s) => ({
-        id: s.id,
-        leaveRequestId: s.leaveRequestId,
-        approverId: s.approverId,
-        approverName: s.approver.name,
-        approverEmail: s.approver.email,
-        stage: s.stage as ApprovalStage,
-        status: s.status,
-        comment: s.comment,
-        decidedAt: s.decidedAt,
-        createdAt: s.createdAt,
-      }),
-    );
+    const { user, approvalSteps: steps, ...rest } = leave;
+    const base: LeaveWithUserRecord = {
+      ...rest,
+      userName: user.name,
+      userEmail: user.email,
+    };
+    const approvalSteps: LeaveApprovalStepRecord[] = steps.map((s) => ({
+      id: s.id,
+      leaveRequestId: s.leaveRequestId,
+      approverId: s.approverId,
+      approverName: s.approver.name,
+      approverEmail: s.approver.email,
+      stage: s.stage as ApprovalStage,
+      status: s.status,
+      comment: s.comment,
+      decidedAt: s.decidedAt,
+      createdAt: s.createdAt,
+    }));
 
-    return { ...base, approvalSteps };
+    return {
+      ...base,
+      userPositionName: user.position?.name ?? null,
+      userDepartmentName: user.department?.name ?? null,
+      approvalSteps,
+    };
   }
 
   async approve(
