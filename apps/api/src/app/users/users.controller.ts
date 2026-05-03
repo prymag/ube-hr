@@ -41,6 +41,7 @@ import { StorageService } from '@ube-hr/backend';
 import { PERMISSIONS } from '@ube-hr/shared';
 import {
   type UserResponse,
+  type MyProfileResponse,
   type UserTeam,
   type PaginatedResponse,
   parseFormInt,
@@ -228,6 +229,21 @@ export class UsersController {
     // Permission check (role hierarchy) is handled inside usersService.update
     const user = await this.usersService.update(id, updateData, req.user!.role, req.user!.id);
     return toUserResponse(user, this.storageService);
+  }
+
+  @Get('me')
+  @ApiOperation({ summary: 'Get own profile with department and supervisor' })
+  @ApiOkResponse({ type: UserResponseDto })
+  async getMyProfile(
+    @Req() req: AuthenticatedRequest,
+  ): Promise<MyProfileResponse> {
+    const record = await this.usersService.findMyProfile(req.user!.id);
+    if (!record) throw new NotFoundException('User not found');
+    return {
+      ...toUserResponse(record, this.storageService),
+      supervisorId: record.supervisor?.id ?? null,
+      supervisorName: record.supervisor?.name ?? null,
+    };
   }
 
   @Get('assignable')

@@ -328,6 +328,50 @@ export class UsersService {
     });
   }
 
+  async findMyProfile(userId: number): Promise<(UserRecord & { supervisor: { id: number; name: string | null } | null }) | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId, deletedAt: null },
+      select: {
+        id: true,
+        email: true,
+        phone: true,
+        name: true,
+        role: true,
+        status: true,
+        profilePicture: true,
+        positionId: true,
+        position: {
+          select: {
+            id: true,
+            name: true,
+            reportsTo: {
+              select: {
+                users: {
+                  where: { deletedAt: null },
+                  select: { id: true, name: true },
+                  take: 1,
+                  orderBy: { id: 'asc' as const },
+                },
+              },
+            },
+          },
+        },
+        departmentId: true,
+        department: { select: { id: true, name: true } },
+        createdAt: true,
+      },
+    });
+
+    if (!user) return null;
+
+    const supervisor = user.position?.reportsTo?.users[0] ?? null;
+    return {
+      ...user,
+      position: user.position ? { id: user.position.id, name: user.position.name } : null,
+      supervisor,
+    };
+  }
+
   async findTeams(
     userId: number,
   ): Promise<

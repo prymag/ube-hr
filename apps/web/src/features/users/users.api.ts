@@ -1,6 +1,7 @@
 import api from '../../services/axios';
 import type {
   UserResponse,
+  MyProfileResponse,
   UserTeam,
   UsersListParams,
   PaginatedResponse,
@@ -22,6 +23,11 @@ export const getAssignableUsers = async (params?: {
     '/api/users/assignable',
     { params },
   );
+  return r.data;
+};
+
+export const getMyProfile = async () => {
+  const r = await api.get<MyProfileResponse>('/api/users/me');
   return r.data;
 };
 

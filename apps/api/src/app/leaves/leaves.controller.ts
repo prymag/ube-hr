@@ -249,7 +249,7 @@ export class LeavesController {
       id,
       req.user!.id,
       req.user!.role,
-      dto.override ?? false,
+      dto?.override ?? false,
     );
     return toLeaveResponse(leave);
   }
