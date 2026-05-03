@@ -2,6 +2,7 @@ import api from '../../services/axios';
 import type {
   TeamResponse,
   TeamMember,
+  MyTeamResponse,
   TeamsListParams,
   PaginatedResponse,
 } from '@ube-hr/shared';
@@ -46,3 +47,8 @@ export const addTeamMember = (teamId: number, userId: number) =>
 
 export const removeTeamMember = (teamId: number, userId: number) =>
   api.delete(`/api/teams/${teamId}/users/${userId}`);
+
+export const getMyTeams = async () => {
+  const r = await api.get<MyTeamResponse[]>('/api/teams/me');
+  return r.data;
+};

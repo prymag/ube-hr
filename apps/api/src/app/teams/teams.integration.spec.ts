@@ -1,5 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import { Role } from '@ube-hr/backend';
+import { PrismaService, Role } from '@ube-hr/backend';
 import supertest from 'supertest';
 import { createTestApp } from '../../../test/helpers/app';
 import { truncateAll, seedDefaultPermissions } from '../../../test/helpers/db';
@@ -232,6 +232,107 @@ describe('Teams (integration)', () => {
 
       expect(members.body).toHaveLength(1);
       expect(members.body[0].id).toBe(adminId);
+    });
+  });
+
+  // ── GET /api/teams/me ──────────────────────────────────────────────────────
+
+  describe('GET /api/teams/me', () => {
+    it('returns 401 without a token', async () => {
+      await request.get('/api/teams/me').expect(401);
+    });
+
+    it('returns only teams the caller is a member of', async () => {
+      const { token: userToken, user } = await seedAndLogin(app, request, {
+        email: 'user@test.com',
+        role: Role.USER,
+      });
+
+      // Create two teams as admin; add user to only one
+      const team1 = await request
+        .post('/api/teams')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name: 'Team A' });
+      await request
+        .post('/api/teams')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name: 'Team B (no user)' });
+      await request
+        .post(`/api/teams/${team1.body.id}/users`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ userId: user.id });
+
+      const res = await request
+        .get('/api/teams/me')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].name).toBe('Team A');
+    });
+
+    it('excludes soft-deleted teams', async () => {
+      const { token: userToken, user } = await seedAndLogin(app, request, {
+        email: 'user2@test.com',
+        role: Role.USER,
+      });
+
+      const team = await request
+        .post('/api/teams')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name: 'Soon Deleted' });
+      await request
+        .post(`/api/teams/${team.body.id}/users`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ userId: user.id });
+
+      // Soft-delete the team
+      await request
+        .delete(`/api/teams/${team.body.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(204);
+
+      const res = await request
+        .get('/api/teams/me')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      expect(res.body).toHaveLength(0);
+    });
+
+    it('includes positionName for each member', async () => {
+      const { token: userToken, user } = await seedAndLogin(app, request, {
+        email: 'user3@test.com',
+        role: Role.USER,
+      });
+
+      // Create a position and assign it to the user
+      const prisma = app.get(PrismaService);
+      const position = await prisma.position.create({
+        data: { name: 'Engineer' },
+      });
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { positionId: position.id },
+      });
+
+      const team = await request
+        .post('/api/teams')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name: 'Position Team' });
+      await request
+        .post(`/api/teams/${team.body.id}/users`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ userId: user.id });
+
+      const res = await request
+        .get('/api/teams/me')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      const members: { email: string; positionName: string | null }[] = res.body[0].members;
+      const userMember = members.find((m) => m.email === 'user3@test.com');
+      expect(userMember?.positionName).toBe('Engineer');
     });
   });
 });

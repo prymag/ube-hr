@@ -39,7 +39,18 @@ export interface TeamMemberRecord {
   id: number;
   email: string;
   name: string | null;
+  positionName: string | null;
   joinedAt: Date;
+}
+
+export interface TeamWithMembersRecord {
+  id: number;
+  name: string;
+  description: string | null;
+  ownerId: number;
+  createdAt: Date;
+  updatedAt: Date;
+  members: TeamMemberRecord[];
 }
 
 export type PaginatedTeams = PaginatedResponse<TeamModel>;
@@ -144,10 +155,16 @@ export class TeamsService {
     await this.findById(teamId);
     const memberships = await this.prisma.membership.findMany({
       where: { teamId, user: { role: { in: visibleRoles(callerRole) } } },
-      include: { user: { select: { id: true, email: true, name: true } } },
+      include: { user: { select: { id: true, email: true, name: true, position: { select: { name: true } } } } },
       orderBy: { joinedAt: 'asc' },
     });
-    return memberships.map((m) => ({ ...m.user, joinedAt: m.joinedAt }));
+    return memberships.map((m) => ({
+      id: m.user.id,
+      email: m.user.email,
+      name: m.user.name,
+      positionName: m.user.position?.name ?? null,
+      joinedAt: m.joinedAt,
+    }));
   }
 
   async addMember(
@@ -178,5 +195,47 @@ export class TeamsService {
     await this.prisma.membership.delete({
       where: { userId_teamId: { userId, teamId } },
     });
+  }
+
+  async getMyTeams(
+    userId: number,
+    userRole: Role,
+  ): Promise<TeamWithMembersRecord[]> {
+    const teams = await this.prisma.team.findMany({
+      where: { deletedAt: null, memberships: { some: { userId } } },
+      include: {
+        memberships: {
+          where: { user: { role: { in: visibleRoles(userRole) } } },
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+                position: { select: { name: true } },
+              },
+            },
+          },
+          orderBy: { joinedAt: 'asc' },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return teams.map((t) => ({
+      id: t.id,
+      name: t.name,
+      description: t.description,
+      ownerId: t.ownerId,
+      createdAt: t.createdAt,
+      updatedAt: t.updatedAt,
+      members: t.memberships.map((m) => ({
+        id: m.user.id,
+        email: m.user.email,
+        name: m.user.name,
+        positionName: m.user.position?.name ?? null,
+        joinedAt: m.joinedAt,
+      })),
+    }));
   }
 }
