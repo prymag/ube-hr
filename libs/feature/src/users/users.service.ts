@@ -374,11 +374,15 @@ export class UsersService {
   }
 
   async incrementTokenVersion(id: number): Promise<number> {
-    const user = await this.prisma.user.update({
-      where: { id },
-      data: { refreshTokenVersion: { increment: 1 } },
-    });
-    return user.refreshTokenVersion;
+    try {
+      const user = await this.prisma.user.update({
+        where: { id, deletedAt: null },
+        data: { refreshTokenVersion: { increment: 1 } },
+      });
+      return user.refreshTokenVersion;
+    } catch {
+      throw new NotFoundException('User not found');
+    }
   }
 
   async updateProfilePicture(

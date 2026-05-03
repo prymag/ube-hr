@@ -15,6 +15,8 @@ const ACCRUAL_TYPES = [
   'BEREAVEMENT',
 ];
 
+const MANUAL_ACCRUAL_TYPES = new Set(['MATERNITY', 'PATERNITY', 'BEREAVEMENT']);
+
 export function AccrualConfigSection() {
   const { data: configs, isLoading } = useAccrualConfigs();
   const update = useUpdateAccrualConfig();
@@ -86,31 +88,39 @@ export function AccrualConfigSection() {
                 <td className="px-4 py-3 font-medium">
                   {LEAVE_TYPE_LABELS[type]}
                 </td>
-                <td className="px-4 py-3">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="h-8 w-32"
-                    value={getRate(type)}
-                    onChange={(e) =>
-                      setEditRates((prev) => ({
-                        ...prev,
-                        [type]: e.target.value,
-                      }))
-                    }
-                  />
-                </td>
-                <td className="px-4 py-3">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleSave(type)}
-                    disabled={update.isPending}
-                  >
-                    Save
-                  </Button>
-                </td>
+                {MANUAL_ACCRUAL_TYPES.has(type) ? (
+                  <td className="px-4 py-3 text-muted-foreground italic" colSpan={2}>
+                    Manual Assignment Only
+                  </td>
+                ) : (
+                  <>
+                    <td className="px-4 py-3">
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="h-8 w-32"
+                        value={getRate(type)}
+                        onChange={(e) =>
+                          setEditRates((prev) => ({
+                            ...prev,
+                            [type]: e.target.value,
+                          }))
+                        }
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSave(type)}
+                        disabled={update.isPending}
+                      >
+                        Save
+                      </Button>
+                    </td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
