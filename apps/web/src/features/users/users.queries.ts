@@ -7,6 +7,7 @@ import {
 import {
   getUsers,
   getUser,
+  getMyProfile,
   getUserTeams,
   createUser,
   updateUser,
@@ -22,6 +23,13 @@ export const userKeys = {
   detail: (id: number) => [...userKeys.all, 'detail', id] as const,
   teams: (id: number) => [...userKeys.all, 'teams', id] as const,
 };
+
+export function useMyProfile() {
+  return useQuery({
+    queryKey: ['users', 'me'] as const,
+    queryFn: getMyProfile,
+  });
+}
 
 export function useUsers(params?: UsersListParams) {
   return useQuery({

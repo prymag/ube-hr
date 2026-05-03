@@ -1,6 +1,7 @@
 export {
   getUsers,
   getUser,
+  getMyProfile,
   getUserTeams,
   createUser,
   updateUser,
@@ -19,9 +20,10 @@ export { OwnedTeamsCard } from './components/OwnedTeamsCard';
 export { SecurityUpdateCard } from './components/SecurityUpdateCard';
 export type { CreateUserFormValues } from './components/CreateUserForm';
 export type { EditUserFormValues } from './components/EditUserForm';
-export type { UserResponse, UserTeam } from '@ube-hr/shared';
+export type { UserResponse, UserTeam, MyProfileResponse } from '@ube-hr/shared';
 export {
   userKeys,
+  useMyProfile,
   useUsers,
   useAssignableUsers,
   useUser,

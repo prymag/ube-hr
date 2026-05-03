@@ -674,11 +674,19 @@ export class LeavesService {
     stage: ApprovalStage;
   }> {
     if (userRole === Role.USER) {
-      const managerIds = await this.getTeamOwnerManagers(userId);
+      const managerIds = await this.getTeamMemberManagers(userId);
       if (managerIds.length > 0) {
         return {
           status: LeaveStatus.PENDING_MANAGER,
           approverIds: managerIds,
+          stage: ApprovalStage.MANAGER,
+        };
+      }
+      const deptHeadId = await this.getDepartmentHead(userId);
+      if (deptHeadId !== null) {
+        return {
+          status: LeaveStatus.PENDING_MANAGER,
+          approverIds: [deptHeadId],
           stage: ApprovalStage.MANAGER,
         };
       }
@@ -716,24 +724,39 @@ export class LeavesService {
     };
   }
 
-  private async getTeamOwnerManagers(userId: number): Promise<number[]> {
+  private async getTeamMemberManagers(userId: number): Promise<number[]> {
     const memberships = await this.prisma.membership.findMany({
       where: { userId },
+      select: { teamId: true },
+    });
+    const teamIds = memberships.map((m) => m.teamId);
+    if (teamIds.length === 0) return [];
+
+    const managers = await this.prisma.membership.findMany({
+      where: {
+        teamId: { in: teamIds },
+        userId: { not: userId },
+        user: { role: Role.MANAGER, deletedAt: null },
+      },
+      select: { userId: true },
+    });
+    return [...new Set(managers.map((m) => m.userId))];
+  }
+
+  private async getDepartmentHead(userId: number): Promise<number | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
       select: {
-        team: {
+        department: {
           select: {
-            owner: { select: { id: true, role: true, deletedAt: true } },
+            head: { select: { id: true, deletedAt: true } },
           },
         },
       },
     });
-    const ids = new Set<number>();
-    for (const { team } of memberships) {
-      if (team.owner.role === Role.MANAGER && !team.owner.deletedAt) {
-        ids.add(team.owner.id);
-      }
-    }
-    return [...ids];
+    const head = user?.department?.head;
+    if (!head || head.deletedAt !== null || head.id === userId) return null;
+    return head.id;
   }
 
   private async getFellowManagers(userId: number): Promise<number[]> {

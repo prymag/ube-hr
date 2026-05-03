@@ -114,6 +114,11 @@ export interface PositionsListParams {
   pageSize?: number;
 }
 
+export interface MyProfileResponse extends UserResponse {
+  supervisorId: number | null;
+  supervisorName: string | null;
+}
+
 // --- Auth wire types ---
 
 export interface MeResponse {
