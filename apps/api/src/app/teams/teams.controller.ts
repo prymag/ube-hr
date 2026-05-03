@@ -20,13 +20,14 @@ import {
   RequirePermission,
   AuthenticatedRequest,
   type TeamMemberRecord,
+  type TeamWithMembersRecord,
 } from '@ube-hr/feature';
 import { PERMISSIONS } from '@ube-hr/shared';
 import { type TeamModel } from '@ube-hr/backend';
-import { type TeamResponse, type TeamMember, type PaginatedResponse } from '@ube-hr/shared';
+import { type TeamResponse, type TeamMember, type MyTeamResponse, type PaginatedResponse } from '@ube-hr/shared';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
-import { TeamResponseDto, TeamMemberDto } from './dto/team-response.dto';
+import { TeamResponseDto, TeamMemberDto, MyTeamResponseDto } from './dto/team-response.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 
 function toTeamResponse(team: TeamModel): TeamResponse {
@@ -41,7 +42,19 @@ function toTeamResponse(team: TeamModel): TeamResponse {
 }
 
 function toTeamMember(m: TeamMemberRecord): TeamMember {
-  return { id: m.id, email: m.email, name: m.name, joinedAt: m.joinedAt.toISOString() };
+  return { id: m.id, email: m.email, name: m.name, positionName: m.positionName, joinedAt: m.joinedAt.toISOString() };
+}
+
+function toMyTeamResponse(t: TeamWithMembersRecord): MyTeamResponse {
+  return {
+    id: t.id,
+    name: t.name,
+    description: t.description,
+    ownerId: t.ownerId,
+    createdAt: t.createdAt.toISOString(),
+    updatedAt: t.updatedAt.toISOString(),
+    members: t.members.map(toTeamMember),
+  };
 }
 
 @ApiTags('teams')
@@ -84,6 +97,14 @@ export class TeamsController {
       req.user!.role,
     );
     return { ...result, data: result.data.map(toTeamResponse) };
+  }
+
+  @Get('me')
+  @ApiOperation({ summary: 'Get teams the authenticated user is a member of' })
+  @ApiOkResponse({ type: [MyTeamResponseDto] })
+  async getMyTeams(@Req() req: AuthenticatedRequest): Promise<MyTeamResponse[]> {
+    const teams = await this.teamsService.getMyTeams(req.user!.id, req.user!.role);
+    return teams.map(toMyTeamResponse);
   }
 
   @Get(':id')

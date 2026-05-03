@@ -58,7 +58,12 @@ export interface TeamMember {
   id: number;
   email: string;
   name: string | null;
+  positionName: string | null;
   joinedAt: string;
+}
+
+export interface MyTeamResponse extends TeamResponse {
+  members: TeamMember[];
 }
 
 export interface TeamsListParams {

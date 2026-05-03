@@ -1,6 +1,6 @@
 ---
 name: close-prd
-description: Reconcile and close a PRD issue after all sub-issues are complete. Fetches the PRD issue, verifies sub-issues are closed, spot-checks the implementation against the original PRD intent, posts a reconciliation comment, and closes the issue. Use when user says "close prd #N", "reconcile prd #N", or "wrap up issue #N".
+description: Reconcile and close a PRD issue after all mentioned issues are complete. Fetches the PRD issue, verifies mentioned issues are closed, spot-checks the implementation against the original PRD intent, posts a reconciliation comment, and closes the issue. Use when user says "close prd #N", "reconcile prd #N", or "wrap up issue #N".
 ---
 
 # Skill: close-prd
@@ -20,21 +20,21 @@ Read the full issue body and all comments. Extract:
 - **Implementation Decisions** — the modules, API contracts, schema changes, and architectural decisions
 - **Testing Decisions** — what was expected to be tested
 - **Out of Scope** — what was explicitly excluded (do not flag these as gaps)
-- **Sub-issue references** — scan the body and all comments for `#N` issue links created by the `to-issues` skill
+- **Mentioned issue references** — scan the body and all comments for `#N` issue mentions
 
-### 2. Discover and verify sub-issues
+### 2. Discover and verify mentioned issues
 
-For each `#N` reference found in step 1:
+For each `#N` mention found in step 1:
 
 ```bash
 gh issue view <N>
 ```
 
-Collect the state (`open` / `closed`) and title of each sub-issue.
+Collect the state (`open` / `closed`) and title of each mentioned issue.
 
-**If any sub-issues are still open:**
+**If any mentioned issues are still open:**
 - List them clearly for the user with their titles and URLs
-- Ask: "The following sub-issues are still open. Do you want to proceed with closing the PRD anyway?"
+- Ask: "The following mentioned issues are still open. Do you want to proceed with closing the PRD anyway?"
 - Wait for explicit confirmation before continuing
 - If the user says no, stop here and remind them to finish those issues first
 
@@ -72,9 +72,9 @@ Use this comment template:
 ```
 ## Reconciliation Summary
 
-All sub-issues have been completed and the implementation has been reviewed against the original PRD.
+All mentioned issues have been completed and the implementation has been reviewed against the original PRD.
 
-### Sub-issues
+### Mentioned Issues
 
 | Issue | Title | Status |
 |-------|-------|--------|
@@ -97,14 +97,14 @@ All sub-issues have been completed and the implementation has been reviewed agai
 
 ### Verification
 
-Sub-issues closed: N/N
+Mentioned issues closed: N/N
 User stories met: N/N (N partial, N not met)
 ```
 
 ### 6. Close the PRD issue
 
 ```bash
-gh issue close <number> --comment "Closing — all sub-issues complete and reconciliation posted above."
+gh issue close <number> --comment "Closing — all mentioned issues complete and reconciliation posted above."
 ```
 
 Do NOT close the issue before posting the reconciliation comment in step 5.

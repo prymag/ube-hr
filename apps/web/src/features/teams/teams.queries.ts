@@ -8,12 +8,14 @@ import {
   getTeamMembers,
   addTeamMember,
   removeTeamMember,
+  getMyTeams,
 } from './teams.api';
 import type { TeamsListParams } from '@ube-hr/shared';
 
 export const teamKeys = {
   all: ['teams'] as const,
   lists: () => [...teamKeys.all, 'list'] as const,
+  mine: () => [...teamKeys.all, 'mine'] as const,
   detail: (id: number) => [...teamKeys.all, 'detail', id] as const,
   members: (id: number) => [...teamKeys.all, 'members', id] as const,
 };
@@ -22,6 +24,13 @@ export function useTeams(params?: TeamsListParams) {
   return useQuery({
     queryKey: [...teamKeys.lists(), params],
     queryFn: () => getTeams(params),
+  });
+}
+
+export function useMyTeams() {
+  return useQuery({
+    queryKey: teamKeys.mine(),
+    queryFn: getMyTeams,
   });
 }
 

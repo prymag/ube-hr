@@ -30,6 +30,14 @@ export class TeamMemberDto {
   @ApiProperty({ example: 'Jane Doe', nullable: true })
   name!: string | null;
 
+  @ApiPropertyOptional({ example: 'Software Engineer', nullable: true })
+  positionName!: string | null;
+
   @ApiProperty()
   joinedAt!: Date;
+}
+
+export class MyTeamResponseDto extends TeamResponseDto {
+  @ApiProperty({ type: [TeamMemberDto] })
+  members!: TeamMemberDto[];
 }

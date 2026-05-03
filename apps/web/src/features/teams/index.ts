@@ -7,13 +7,15 @@ export {
   getTeamMembers,
   addTeamMember,
   removeTeamMember,
+  getMyTeams,
 } from './teams.api';
-export type { TeamResponse, TeamMember } from '@ube-hr/shared';
+export type { TeamResponse, TeamMember, MyTeamResponse } from '@ube-hr/shared';
 export {
   teamKeys,
   useTeams,
   useTeam,
   useTeamMembers,
+  useMyTeams,
   useCreateTeam,
   useUpdateTeam,
   useDeleteTeam,
@@ -29,3 +31,4 @@ export { EditTeamForm } from './components/EditTeamForm';
 export type { EditTeamFormValues } from './components/EditTeamForm';
 export { DeleteTeamDialog } from './components/DeleteTeamDialog';
 export { TeamMembersCard } from './components/TeamMembersCard';
+export { MyTeamsWidget } from './components/MyTeamsWidget';
