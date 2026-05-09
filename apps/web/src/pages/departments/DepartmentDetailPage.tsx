@@ -26,14 +26,16 @@ export function DepartmentDetailPage() {
     description: '',
     headId: '',
   });
+  const [formReady, setFormReady] = useState(false);
 
   useEffect(() => {
     if (dept) {
       setForm({
         name: dept.name,
         description: dept.description ?? '',
-        headId: dept.headId ? String(dept.headId) : '',
+        headId: dept.headId != null ? String(dept.headId) : '',
       });
+      setFormReady(true);
     }
   }, [dept]);
 
@@ -42,7 +44,7 @@ export function DepartmentDetailPage() {
         ?.data?.message ?? 'Failed to update department.')
     : null;
 
-  if (deptQuery.isLoading || usersQuery.isLoading)
+  if (deptQuery.isLoading || usersQuery.isLoading || !formReady)
     return <div className="text-sm text-muted-foreground">Loading…</div>;
   if (deptQuery.isError || !dept)
     return (

@@ -27,14 +27,16 @@ export function PositionDetailPage() {
     description: '',
     reportsToId: '',
   });
+  const [formReady, setFormReady] = useState(false);
 
   useEffect(() => {
     if (pos) {
       setForm({
         name: pos.name,
         description: pos.description ?? '',
-        reportsToId: pos.reportsToId ? String(pos.reportsToId) : '',
+        reportsToId: pos.reportsToId != null ? String(pos.reportsToId) : '',
       });
+      setFormReady(true);
     }
   }, [pos]);
 
@@ -43,7 +45,7 @@ export function PositionDetailPage() {
         ?.message ?? 'Failed to update position.')
     : null;
 
-  if (posQuery.isLoading || positionsQuery.isLoading)
+  if (posQuery.isLoading || positionsQuery.isLoading || !formReady)
     return <div className="text-sm text-muted-foreground">Loading…</div>;
   if (posQuery.isError || !pos)
     return <div className="text-sm text-destructive">Position not found.</div>;

@@ -9,46 +9,70 @@ interface NavItem {
   to: string;
   label: string;
   permission?: string;
+  end?: boolean;
 }
 
-const navItems: NavItem[] = [
-  { to: '/dashboard', label: 'Dashboard' },
-  { to: '/users', label: 'Users', permission: PERMISSIONS.USERS_READ },
-  { to: '/teams', label: 'Teams', permission: PERMISSIONS.TEAMS_READ },
+interface NavGroup {
+  label?: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
   {
-    to: '/departments',
-    label: 'Departments',
-    permission: PERMISSIONS.DEPARTMENTS_READ,
+    items: [{ to: '/dashboard', label: 'Dashboard' }],
   },
   {
-    to: '/positions',
-    label: 'Positions',
-    permission: PERMISSIONS.POSITIONS_READ,
+    label: 'Organization',
+    items: [
+      { to: '/users', label: 'Users', permission: PERMISSIONS.USERS_READ },
+      { to: '/teams', label: 'Teams', permission: PERMISSIONS.TEAMS_READ },
+      {
+        to: '/departments',
+        label: 'Departments',
+        permission: PERMISSIONS.DEPARTMENTS_READ,
+      },
+      {
+        to: '/positions',
+        label: 'Positions',
+        permission: PERMISSIONS.POSITIONS_READ,
+      },
+      {
+        to: '/org-chart',
+        label: 'Org Chart',
+        permission: PERMISSIONS.POSITIONS_READ,
+      },
+    ],
   },
   {
-    to: '/org-chart',
-    label: 'Org Chart',
-    permission: PERMISSIONS.POSITIONS_READ,
+    label: 'Leave',
+    items: [
+      {
+        to: '/leaves',
+        label: 'My Leaves',
+        permission: PERMISSIONS.LEAVES_READ,
+        end: true,
+      },
+      {
+        to: '/leaves/approvals',
+        label: 'Approval Queue',
+        permission: PERMISSIONS.LEAVES_APPROVE,
+      },
+    ],
   },
   {
-    to: '/leaves',
-    label: 'My Leaves',
-    permission: PERMISSIONS.LEAVES_READ,
-  },
-  {
-    to: '/leaves/approvals',
-    label: 'Approval Queue',
-    permission: PERMISSIONS.LEAVES_APPROVE,
-  },
-  {
-    to: '/admin/holidays',
-    label: 'Holidays',
-    permission: PERMISSIONS.HOLIDAYS_MANAGE,
-  },
-  {
-    to: '/admin/leave-balance',
-    label: 'Leave Balances',
-    permission: PERMISSIONS.LEAVES_BALANCE_MANAGE,
+    label: 'Admin',
+    items: [
+      {
+        to: '/admin/holidays',
+        label: 'Holidays',
+        permission: PERMISSIONS.HOLIDAYS_MANAGE,
+      },
+      {
+        to: '/admin/leave-balance',
+        label: 'Leave Balances',
+        permission: PERMISSIONS.LEAVES_BALANCE_MANAGE,
+      },
+    ],
   },
 ];
 
@@ -57,10 +81,15 @@ export function AuthLayout() {
   const navigate = useNavigate();
   const { data: me } = useMe();
 
-  const visibleNavItems = navItems.filter(
-    ({ permission }) =>
-      !permission || (me?.permissions?.includes(permission) ?? false),
-  );
+  const visibleGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        ({ permission }) =>
+          !permission || (me?.permissions?.includes(permission) ?? false),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
 
   async function handleLogout() {
     await api.post('/api/auth/logout');
@@ -86,21 +115,33 @@ export function AuthLayout() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {visibleNavItems.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                }`
-              }
-            >
-              {label}
-            </NavLink>
+        <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
+          {visibleGroups.map((group, i) => (
+            <div key={i}>
+              {group.label && (
+                <p className="px-3 mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
+                  {group.label}
+                </p>
+              )}
+              <div className="space-y-0.5">
+                {group.items.map(({ to, label, end }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    end={end}
+                    className={({ isActive }) =>
+                      `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      }`
+                    }
+                  >
+                    {label}
+                  </NavLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
 
