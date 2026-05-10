@@ -1,13 +1,19 @@
-import { useAuth } from '../store/AuthContext';
-import { MyTeamsWidget } from '../features/teams';
 import { useMyProfile } from '../features/users';
-
-const SHOW_MY_TEAMS_ROLES = new Set(['USER', 'MANAGER', 'ADMIN']);
+import { useMe } from '../features/authentication';
+import { LeaveBalanceSummary, RecentLeaves, PendingApprovalsWidget } from '../features/leaves';
+import { UpcomingHolidays } from '../features/holidays';
+import { TeamSummaryWidget } from '../features/teams';
+import { OrgStatsCards } from '../features/stats';
+import { PERMISSIONS } from '@ube-hr/shared';
 
 export function DashboardPage() {
-  const { user } = useAuth();
-  const showMyTeams = user?.role && SHOW_MY_TEAMS_ROLES.has(user.role);
   const { data: profile } = useMyProfile();
+  const { data: me } = useMe();
+
+  const perms = me?.permissions ?? [];
+  const canReadUsers = perms.includes(PERMISSIONS.USERS_READ);
+  const canReadLeaves = perms.includes(PERMISSIONS.LEAVES_READ);
+  const canApproveLeaves = perms.includes(PERMISSIONS.LEAVES_APPROVE);
 
   const hasDepartment = !!profile?.departmentName;
   const hasSupervisor = !!profile?.supervisorName;
@@ -36,7 +42,16 @@ export function DashboardPage() {
         </div>
       )}
 
-      {showMyTeams && <MyTeamsWidget />}
+      {canReadUsers && <OrgStatsCards />}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <UpcomingHolidays />
+        {canApproveLeaves && <PendingApprovalsWidget />}
+        {canReadLeaves && <LeaveBalanceSummary />}
+        {canReadLeaves && <RecentLeaves />}
+      </div>
+
+      <TeamSummaryWidget />
     </div>
   );
 }

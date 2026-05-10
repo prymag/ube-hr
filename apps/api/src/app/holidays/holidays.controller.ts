@@ -68,7 +68,6 @@ export class HolidaysController {
   }
 
   @Get()
-  @RequirePermission(PERMISSIONS.HOLIDAYS_MANAGE)
   @ApiOperation({ summary: 'List public holidays' })
   @ApiQuery({ name: 'year', required: false })
   @ApiQuery({ name: 'sortField', required: false })

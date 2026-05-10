@@ -17,6 +17,7 @@ import { HolidaysController } from './app/holidays/holidays.controller';
 import { LeavesController } from './app/leaves/leaves.controller';
 import { LeaveBalanceController } from './app/leave-balance/leave-balance.controller';
 import { LeaveAccrualsController } from './app/leave-accruals/leave-accruals.controller';
+import { StatsController } from './app/stats/stats.controller';
 import {
   AppConfigModule,
   PrismaModule,
@@ -37,6 +38,7 @@ import {
   LeavesModule,
   LeaveBalanceModule,
   LeaveAccrualModule,
+  StatsModule,
 } from '@ube-hr/feature';
 
 @Module({
@@ -58,6 +60,7 @@ import {
     LeavesModule,
     LeaveBalanceModule,
     LeaveAccrualModule,
+    StatsModule,
   ],
   controllers: [
     AppController,
@@ -71,6 +74,7 @@ import {
     LeavesController,
     LeaveBalanceController,
     LeaveAccrualsController,
+    StatsController,
   ],
   providers: [AppService],
 })

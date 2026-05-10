@@ -275,7 +275,7 @@ describe('UsersService', () => {
 
       expect(version).toBe(3);
       expect(prisma.user.update).toHaveBeenCalledWith({
-        where: { id: 1 },
+        where: { id: 1, deletedAt: null },
         data: { refreshTokenVersion: { increment: 1 } },
       });
     });
