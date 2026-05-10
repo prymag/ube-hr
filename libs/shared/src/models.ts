@@ -290,3 +290,10 @@ export interface AccrueBalancePayload {
   year: number;
   month: number;
 }
+
+export interface StatsResponse {
+  totalUsers: number;
+  totalTeams: number;
+  totalDepartments: number;
+  totalPendingLeaves: number;
+}

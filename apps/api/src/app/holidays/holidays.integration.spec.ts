@@ -90,6 +90,22 @@ describe('Holidays (integration)', () => {
   // ── GET /api/holidays ──────────────────────────────────────────────────────
 
   describe('GET /api/holidays', () => {
+    it('returns 401 without a token', async () => {
+      await request.get('/api/holidays').expect(401);
+    });
+
+    it('returns 200 for any authenticated user regardless of role', async () => {
+      const { token } = await seedAndLogin(app, request, {
+        email: 'user@test.com',
+        role: Role.USER,
+      });
+
+      await request
+        .get('/api/holidays')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+    });
+
     it('returns a paginated list of holidays', async () => {
       await request
         .post('/api/holidays')

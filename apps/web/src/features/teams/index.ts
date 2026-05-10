@@ -32,3 +32,4 @@ export type { EditTeamFormValues } from './components/EditTeamForm';
 export { DeleteTeamDialog } from './components/DeleteTeamDialog';
 export { TeamMembersCard } from './components/TeamMembersCard';
 export { MyTeamsWidget } from './components/MyTeamsWidget';
+export { TeamSummaryWidget } from './components/TeamSummaryWidget';

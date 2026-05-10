@@ -18,3 +18,5 @@ export * from './leave-balance/leave-balance.service';
 export * from './leave-accrual/leave-accrual.module';
 export * from './leave-accrual/leave-accrual.service';
 export * from './leave-accrual/leave-accrual-cron.service';
+export * from './stats/stats.module';
+export * from './stats/stats.service';
