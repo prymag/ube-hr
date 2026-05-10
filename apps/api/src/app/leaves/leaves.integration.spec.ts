@@ -5,6 +5,70 @@ import { createTestApp } from '../../../test/helpers/app';
 import { truncateAll, seedDefaultPermissions } from '../../../test/helpers/db';
 import { seedAndLogin, seedUser } from '../../../test/helpers/seed';
 
+describe('SUPER_ADMIN leave workflow restrictions (integration)', () => {
+  let app: INestApplication;
+  let request: ReturnType<typeof supertest>;
+  let superAdminToken: string;
+  let prisma: PrismaService;
+
+  beforeAll(async () => {
+    app = await createTestApp();
+    request = supertest(app.getHttpServer());
+    prisma = app.get(PrismaService);
+  });
+
+  afterAll(() => app.close());
+
+  beforeEach(async () => {
+    await truncateAll(app);
+    await seedDefaultPermissions(app);
+    const result = await seedAndLogin(app, request, {
+      email: 'superadmin@test.com',
+      role: Role.SUPER_ADMIN,
+    });
+    superAdminToken = result.token;
+  });
+
+  it('returns 403 on POST /api/leaves (cannot file a leave request)', async () => {
+    await request
+      .post('/api/leaves')
+      .set('Authorization', `Bearer ${superAdminToken}`)
+      .send({
+        type: 'ANNUAL',
+        startDate: '2025-06-01',
+        endDate: '2025-06-01',
+      })
+      .expect(403);
+  });
+
+  it('returns 403 on PATCH /api/leaves/:id/approve (cannot approve leaves)', async () => {
+    const filer = await seedUser(app, { email: 'filer@test.com', role: Role.USER });
+    const leave = await prisma.leaveRequest.create({
+      data: {
+        userId: filer.id,
+        leaveType: 'ANNUAL',
+        status: 'PENDING_MANAGER',
+        startDate: new Date('2025-07-01'),
+        endDate: new Date('2025-07-01'),
+        isHalfDay: false,
+        durationDays: 1,
+      },
+    });
+
+    await request
+      .patch(`/api/leaves/${leave.id}/approve`)
+      .set('Authorization', `Bearer ${superAdminToken}`)
+      .expect(403);
+  });
+
+  it('returns 200 on GET /api/leaves (read access is preserved)', async () => {
+    await request
+      .get('/api/leaves')
+      .set('Authorization', `Bearer ${superAdminToken}`)
+      .expect(200);
+  });
+});
+
 describe('GET /api/leaves/approvals/history (integration)', () => {
   let app: INestApplication;
   let request: ReturnType<typeof supertest>;
